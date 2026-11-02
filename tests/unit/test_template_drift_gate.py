@@ -98,6 +98,7 @@ def _checkout(
         f'case "$*" in\n*"--list-copies"*"--roster true"*) cat <<\'X\'\n{str_on}\nX\n;;\n'
         f"*) cat <<'X'\n{str_off}\nX\n;;\nesac\n",
         encoding="utf-8",
+        newline="\n",
     )
     list_paths = [path_tmp / str_f for str_f in list_files]
     list(map(lambda path_f: path_f.parent.mkdir(parents=True, exist_ok=True), list_paths))
@@ -139,7 +140,9 @@ def _project(path_tmp: Path, str_stamp: str) -> Path:
     """
     path_project = path_tmp / "project"
     path_project.mkdir()
-    (path_project / gate._PROVENANCE_FILENAME).write_text(str_stamp, encoding="utf-8")
+    (path_project / gate._PROVENANCE_FILENAME).write_text(
+        str_stamp, encoding="utf-8", newline="\n"
+    )
     return path_project
 
 
@@ -314,7 +317,7 @@ def test_a_failing_dry_run_is_skipped_not_reported_clean(
     """A lib that exits non-zero must not read as 'no required paths, no drift'."""
     path_lib = tmp_path / "bx" / gate._SCAFFOLD_LIB_RELPATH
     path_lib.parent.mkdir(parents=True)
-    path_lib.write_text("exit 3\n", encoding="utf-8")
+    path_lib.write_text("exit 3\n", encoding="utf-8", newline="\n")
     path_project = _project(tmp_path, "tier: mvc-service-native-db\n")
 
     gate.main(["--root", str(path_project), "--blueprintx-root", str(tmp_path / "bx")])
@@ -387,7 +390,7 @@ def test_a_missing_git_executable_falls_back_to_the_directory_walk(
     """No ``git`` on PATH is treated like a failed git command, not a crash."""
     path_dir = tmp_path / "tpl"
     path_dir.mkdir()
-    (path_dir / "a.txt").write_text("x", encoding="utf-8")
+    (path_dir / "a.txt").write_text("x", encoding="utf-8", newline="\n")
 
     monkeypatch.setattr(subprocess, "run", _no_git)
 
@@ -410,7 +413,9 @@ def test_lib_minimal_reads_its_own_scaffold_entry_not_the_shared_lib(
     path_entry = path_root / gate._TIER_LIST_SCRIPTS["lib-minimal"]
     path_entry.parent.mkdir(parents=True, exist_ok=True)
     path_entry.write_text(
-        f"# --list-copies\nprintf 'COPY\\tfile\\t{_COMMON}/a.txt\\ta.txt\\n'\n", encoding="utf-8"
+        f"# --list-copies\nprintf 'COPY\\tfile\\t{_COMMON}/a.txt\\ta.txt\\n'\n",
+        encoding="utf-8",
+        newline="\n",
     )
     path_project = _project(tmp_path, "tier: lib-minimal\n")
 
@@ -435,7 +440,7 @@ def _versioned_checkout(path_tmp: Path) -> tuple[Path, str]:
     path_root = _checkout(
         path_tmp / "bx", [_copy(f"{_COMMON}/a.txt", "a.txt")], list_files=(f"{_COMMON}/a.txt",)
     )
-    (path_root / _COMMON / "a.txt").write_text("base\n", encoding="utf-8")
+    (path_root / _COMMON / "a.txt").write_text("base\n", encoding="utf-8", newline="\n")
     _git(path_root, "init", "-q")
     _git(path_root, "add", "-A")
     _git(
@@ -480,10 +485,10 @@ def _drift_output(
             Everything the reporter printed.
     """
     path_root, str_sha = _versioned_checkout(path_tmp)
-    (path_root / _COMMON / "a.txt").write_text(str_theirs, encoding="utf-8")
+    (path_root / _COMMON / "a.txt").write_text(str_theirs, encoding="utf-8", newline="\n")
     str_commit_line = f"blueprintx_commit: {str_sha}\n" if bool_stamp_commit else ""
     path_project = _project(path_tmp, f"tier: mvc-service-native-db\n{str_commit_line}")
-    (path_project / "a.txt").write_text(str_ours, encoding="utf-8")
+    (path_project / "a.txt").write_text(str_ours, encoding="utf-8", newline="\n")
     capsys.readouterr()
     gate.main(["--root", str(path_project), "--blueprintx-root", str(path_root)])
     return capsys.readouterr().out
@@ -541,7 +546,13 @@ def _write_files(path_root: Path, dict_files: dict[str, str]) -> None:
     """
     list_paths = [path_root / str_rel for str_rel in dict_files]
     list(map(lambda path_f: path_f.parent.mkdir(parents=True, exist_ok=True), list_paths))
-    list(map(Path.write_text, list_paths, dict_files.values()))
+    list(
+        map(
+            lambda path_f, str_text: path_f.write_text(str_text, encoding="utf-8", newline="\n"),
+            list_paths,
+            dict_files.values(),
+        )
+    )
 
 
 def _commit_all(path_root: Path, str_message: str) -> str:
@@ -727,7 +738,7 @@ def test_a_lib_that_predates_list_copies_is_never_executed(tmp_path: Path) -> No
     """An entry script without the flag would run its interactive main, so it is not run."""
     path_lib = tmp_path / gate._SCAFFOLD_LIB_RELPATH
     path_lib.parent.mkdir(parents=True)
-    path_lib.write_text(f"touch {tmp_path}/ran\necho COPY\n", encoding="utf-8")
+    path_lib.write_text(f"touch {tmp_path}/ran\necho COPY\n", encoding="utf-8", newline="\n")
 
     gate.required_sources(tmp_path, "mvc-service-native-db")
 
@@ -765,7 +776,7 @@ def test_a_skipped_removed_check_is_not_summed_up_as_a_clean_run(
     _write_files(path_root / _COMMON, _KEPT)
     _checkout(path_root, _copy_lines(_KEPT))
     path_lib = path_root / gate._SCAFFOLD_LIB_RELPATH
-    path_lib.write_text("exit 0\n", encoding="utf-8")
+    path_lib.write_text("exit 0\n", encoding="utf-8", newline="\n")
     _git(path_root, "init", "-q")
     str_sha = _commit_all(path_root, "base predates the flag")
     _checkout(path_root, _copy_lines(_KEPT))
