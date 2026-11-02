@@ -146,6 +146,63 @@ class LaminaConversao(LaminaBlock):
     dia_resg: ShortField
 
 
+def _check_fixed_fee(block: LaminaTaxaAdministracao) -> None:
+    """Require TX_ADM alone for a fixed fee.
+
+    Parameters
+    ----------
+    block : LaminaTaxaAdministracao
+        The block being validated.
+
+    Raises
+    ------
+    ValueError
+        If TX_ADM is absent or TX_MIN / TX_MAX is set.
+    """
+    if block.tx_adm is None or block.tx_min is not None or block.tx_max is not None:
+        raise ValueError("a fixed fee (F) takes tx_adm only")
+
+
+def _check_variable_fee_fields(block: LaminaTaxaAdministracao) -> None:
+    """Require TX_MIN with TX_MAX, and no TX_ADM, for a variable fee.
+
+    Parameters
+    ----------
+    block : LaminaTaxaAdministracao
+        The block being validated.
+
+    Raises
+    ------
+    ValueError
+        If the variable-fee fields are not exactly TX_MIN and TX_MAX.
+    """
+    if block.tx_adm is not None or block.tx_min is None or block.tx_max is None:
+        raise ValueError("a variable fee (V) takes tx_min and tx_max, not tx_adm")
+
+
+def _check_variable_fee_order(block: LaminaTaxaAdministracao) -> None:
+    """Require TX_MIN not to exceed TX_MAX.
+
+    Parameters
+    ----------
+    block : LaminaTaxaAdministracao
+        The block being validated.
+
+    Raises
+    ------
+    ValueError
+        If the minimum exceeds the maximum.
+    """
+    if block.tx_min > block.tx_max:
+        raise ValueError("tx_min must not exceed tx_max")
+
+
+_FEE_CHECKS = {
+    "F": (_check_fixed_fee,),
+    "V": (_check_variable_fee_fields, _check_variable_fee_order),
+}
+
+
 class LaminaTaxaAdministracao(LaminaBlock):
     """INFOR_TX_ADM — management fee: fixed (``F``) or variable (``V``)."""
 
@@ -169,14 +226,8 @@ class LaminaTaxaAdministracao(LaminaBlock):
         ValueError
                 If the fee fields do not match ``tipo_tx_adm`` or the minimum exceeds the maximum.
         """
-        if self.tipo_tx_adm == "F":
-            if self.tx_adm is None or self.tx_min is not None or self.tx_max is not None:
-                raise ValueError("a fixed fee (F) takes tx_adm only")
-            return self
-        if self.tx_adm is not None or self.tx_min is None or self.tx_max is None:
-            raise ValueError("a variable fee (V) takes tx_min and tx_max, not tx_adm")
-        if self.tx_min > self.tx_max:
-            raise ValueError("tx_min must not exceed tx_max")
+        for fn_check in _FEE_CHECKS[self.tipo_tx_adm]:
+            fn_check(self)
         return self
 
 
@@ -370,6 +421,235 @@ class LaminaTabSimulDespesas(LaminaBlock):
     retor_brut5: SignedMoneyField
 
 
+def _annual_rows(inform: LaminaInform) -> list:
+    """List the annual return rows, empty when the table is absent.
+
+    Parameters
+    ----------
+    inform : LaminaInform
+        The block being read.
+
+    Returns
+    -------
+    list
+        The ``tab_rent_anual`` rows.
+    """
+    table = inform.lista_tab_rent_anual
+    return table.tab_rent_anual if table else []
+
+
+def _monthly_rows(inform: LaminaInform) -> list:
+    """List the monthly return rows, empty when the table is absent.
+
+    Parameters
+    ----------
+    inform : LaminaInform
+        The block being read.
+
+    Returns
+    -------
+    list
+        The ``tab_rent_mensal`` rows.
+    """
+    table = inform.lista_tab_rent_mensal
+    return table.tab_rent_mensal if table else []
+
+
+def _annual_years(inform: LaminaInform) -> list:
+    """List the years reported in the annual return table.
+
+    Parameters
+    ----------
+    inform : LaminaInform
+        The block being read.
+
+    Returns
+    -------
+    list
+        One ``ano_rent`` per row.
+    """
+    return [row.ano_rent for row in _annual_rows(inform)]
+
+
+def _monthly_months(inform: LaminaInform) -> list:
+    """List the months reported in the monthly return table.
+
+    Parameters
+    ----------
+    inform : LaminaInform
+        The block being read.
+
+    Returns
+    -------
+    list
+        One ``mes`` per row.
+    """
+    return [row.mes for row in _monthly_rows(inform)]
+
+
+def _before_existence_years(inform: LaminaInform) -> set:
+    """Collect the years declared as "before the fund existed".
+
+    Parameters
+    ----------
+    inform : LaminaInform
+        The block being read.
+
+    Returns
+    -------
+    set
+        The ``antes_inic2`` years, empty when absent.
+    """
+    info = inform.infor_tab_rent_anual
+    return set(info.antes_inic2.ano) if info and info.antes_inic2 else set()
+
+
+def _annual_index_cells(inform: LaminaInform) -> list:
+    """List every index cell of the annual return table.
+
+    Parameters
+    ----------
+    inform : LaminaInform
+        The block being read.
+
+    Returns
+    -------
+    list
+        The ``var_ind_ref`` and ``rent_perc_ind_ref`` cells.
+    """
+    return [c for r in _annual_rows(inform) for c in (r.var_ind_ref, r.rent_perc_ind_ref)]
+
+
+def _monthly_index_cells(inform: LaminaInform) -> list:
+    """List every index cell of the monthly return table.
+
+    Parameters
+    ----------
+    inform : LaminaInform
+        The block being read.
+
+    Returns
+    -------
+    list
+        The ``var_mens_ind_ref`` and ``rent_mens_perc_ind_ref`` cells.
+    """
+    return [
+        c for r in _monthly_rows(inform) for c in (r.var_mens_ind_ref, r.rent_mens_perc_ind_ref)
+    ]
+
+
+def _has_index_reference(inform: LaminaInform) -> bool:
+    """Tell whether ``ind_refer`` is declared.
+
+    Parameters
+    ----------
+    inform : LaminaInform
+        The block being read.
+
+    Returns
+    -------
+    bool
+        True when a reference index is present.
+    """
+    info = inform.infor_tab_rent_anual
+    return info is not None and info.ind_refer is not None
+
+
+def _any_index_cell_filled(inform: LaminaInform) -> bool:
+    """Tell whether any index column carries a value.
+
+    Parameters
+    ----------
+    inform : LaminaInform
+        The block being read.
+
+    Returns
+    -------
+    bool
+        True when at least one index cell is set.
+    """
+    cells = _annual_index_cells(inform) + _monthly_index_cells(inform)
+    return any(cell is not None for cell in cells)
+
+
+def _check_unique_years(inform: LaminaInform) -> None:
+    """Reject a repeated year in the annual return table.
+
+    Parameters
+    ----------
+    inform : LaminaInform
+        The block being validated.
+
+    Raises
+    ------
+    ValueError
+        If a year repeats.
+    """
+    years = _annual_years(inform)
+    if len(set(years)) != len(years):
+        raise ValueError("ano_rent must not repeat a year")
+
+
+def _check_unique_months(inform: LaminaInform) -> None:
+    """Reject a repeated month in the monthly return table.
+
+    Parameters
+    ----------
+    inform : LaminaInform
+        The block being validated.
+
+    Raises
+    ------
+    ValueError
+        If a month repeats.
+    """
+    months = _monthly_months(inform)
+    if len(set(months)) != len(months):
+        raise ValueError("mes must not repeat a month")
+
+
+def _check_year_overlap(inform: LaminaInform) -> None:
+    """Reject a year both reported and listed as before the fund existed.
+
+    Parameters
+    ----------
+    inform : LaminaInform
+        The block being validated.
+
+    Raises
+    ------
+    ValueError
+        If the two year sets overlap.
+    """
+    if _before_existence_years(inform) & set(_annual_years(inform)):
+        raise ValueError("a year cannot be both in antes_inic2 and in tab_rent_anual")
+
+
+def _check_index_columns(inform: LaminaInform) -> None:
+    """Require a reference index when an index column is filled.
+
+    Parameters
+    ----------
+    inform : LaminaInform
+        The block being validated.
+
+    Raises
+    ------
+    ValueError
+        If an index cell is set while ``ind_refer`` is absent.
+    """
+    if not _has_index_reference(inform) and _any_index_cell_filled(inform):
+        raise ValueError("index columns need infor_tab_rent_anual.ind_refer")
+
+
+_RETURN_TABLE_CHECKS = (
+    _check_unique_years,
+    _check_unique_months,
+    _check_year_overlap,
+    _check_index_columns,
+)
+
+
 class LaminaInform(LaminaBlock):
     """INFORM — the fact sheet of one fund class or subclass."""
 
@@ -455,25 +735,8 @@ class LaminaInform(LaminaBlock):
                 If a year or month repeats, the year sets overlap, or an index column is filled
                 while ``ind_refer`` is absent.
         """
-        annual = self.lista_tab_rent_anual.tab_rent_anual if self.lista_tab_rent_anual else []
-        monthly = self.lista_tab_rent_mensal.tab_rent_mensal if self.lista_tab_rent_mensal else []
-        years = [row.ano_rent for row in annual]
-        if len(set(years)) != len(years):
-            raise ValueError("ano_rent must not repeat a year")
-        months = [row.mes for row in monthly]
-        if len(set(months)) != len(months):
-            raise ValueError("mes must not repeat a month")
-        info = self.infor_tab_rent_anual
-        before_existence = set(info.antes_inic2.ano) if info and info.antes_inic2 else set()
-        if before_existence & set(years):
-            raise ValueError("a year cannot be both in antes_inic2 and in tab_rent_anual")
-        index_cells = [
-            *(c for r in annual for c in (r.var_ind_ref, r.rent_perc_ind_ref)),
-            *(c for r in monthly for c in (r.var_mens_ind_ref, r.rent_mens_perc_ind_ref)),
-        ]
-        has_index = info is not None and info.ind_refer is not None
-        if not has_index and any(cell is not None for cell in index_cells):
-            raise ValueError("index columns need infor_tab_rent_anual.ind_refer")
+        for fn_check in _RETURN_TABLE_CHECKS:
+            fn_check(self)
         return self
 
 
