@@ -10,15 +10,12 @@ from xml.etree import ElementTree as ET  # noqa: S405  # builds XML, never parse
 from pydantic import BaseModel
 
 from layouts_cvm._internal.config.ports.submission_writer import SubmissionWriter
-from layouts_cvm._internal.utils.atomic_write import atomic_write_bytes
 from layouts_cvm._internal.utils.typing import type_checker
+from layouts_cvm._internal.utils.xml_writer import deliver, render_xml
 from layouts_cvm.schemas.inf_fundo_157 import InfFundo157Document
 
 
 _NAMESPACE = "urn:inffdo157"
-_ENCODING = "windows-1252"
-_DECLARATION = f'<?xml version="1.0" encoding="{_ENCODING}"?>\n'
-_INDENT = "    "
 
 
 @type_checker
@@ -80,14 +77,5 @@ class InfFundo157(SubmissionWriter[InfFundo157Document]):
         cotistas = ET.SubElement(root, "LISTA_COTSTS")
         for cotista in doc.cotistas:
             _block(cotistas, "COTST", cotista)
-        ET.indent(root, space=_INDENT)
-        xml_str = _DECLARATION + ET.tostring(root, encoding="unicode") + "\n"
-        try:
-            payload = xml_str.encode(_ENCODING)
-            ET.fromstring(payload)  # noqa: S314  # well-formedness self-check of our own output
-        except (UnicodeEncodeError, ET.ParseError) as exc:
-            raise ValueError(f"document cannot be serialised as {_ENCODING} XML: {exc}") from exc
-        if output_path is None:
-            return xml_str
-        atomic_write_bytes(output_path, payload)
-        return None
+        xml_str, payload = render_xml(root)
+        return deliver(xml_str, payload, output_path)
