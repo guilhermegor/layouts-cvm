@@ -5,7 +5,9 @@ the *sending* half of the standard; parsing CVM files back into models lives in 
 ``ingestion`` section. Pure logic plus file I/O at the edges — no network.
 """
 
+from collections.abc import Callable
 from decimal import Decimal
+from typing import Any
 from xml.sax import saxutils  # noqa: S406
 
 from layouts_cvm._internal.config.ports.submission_writer import SubmissionWriter
@@ -95,66 +97,128 @@ class PerfilMensal(SubmissionWriter[PerfilMensalDocument]):
         lines.append("</DOC_ARQ>")
         return "\n".join(lines)
 
-    def _build_row_lines(self, row: PerfilMensalRow) -> list[str]:
+    def _build_row_lines(self, row: PerfilMensalRow, ind: str = "        ") -> list[str]:
         """Build the XML lines for one ROW_PERFIL block.
 
         Parameters
         ----------
         row : PerfilMensalRow
                 Validated row model.
+        ind : str
+                Base indentation string, by default eight spaces.
 
         Returns
         -------
         list[str]
                 Ordered XML lines for this row.
         """
-        ind = "        "
-        lines: list[str] = [
-            f"{ind}<ROW_PERFIL>",
-            f"{ind}    <CNPJ_FDO>{row.cnpj_fdo}</CNPJ_FDO>",
-        ]
-        lines.extend(self._build_nr_client_lines(row.nr_client, ind))
-        lines.extend(self._build_distr_patrim_lines(row.distr_patrim, ind))
-        lines.extend(self._build_risk_scalar_lines(row, ind))
-        lines.extend(self._build_usd_flow_lines(row, ind))
-        if row.variacao_perc_val_cota is not None:
-            lines.extend(self._build_variacao_vpc_lines(row.variacao_perc_val_cota, ind))
-        lines.extend(self._build_sensitivity_lines(row, ind))
-        if row.variacao_diar_perc_patrim_fdo_var_n_outros is not None:
-            lines.extend(
-                self._build_var_outros_lines(row.variacao_diar_perc_patrim_fdo_var_n_outros, ind)
+        return (
+            [f"{ind}<ROW_PERFIL>", f"{ind}    <CNPJ_FDO>{row.cnpj_fdo}</CNPJ_FDO>"]
+            + self._build_nr_client_lines(row.nr_client, ind)
+            + self._build_distr_patrim_lines(row.distr_patrim, ind)
+            + self._build_risk_scalar_lines(row, ind)
+            + self._build_usd_flow_lines(row, ind)
+            + self._build_optional_block(
+                row.variacao_perc_val_cota, self._build_variacao_vpc_lines, ind
             )
-        if row.valor_noc_tot_contrat_deriv_mant_fdo is not None:
-            lines.extend(
-                self._build_nominal_risk_lines(row.valor_noc_tot_contrat_deriv_mant_fdo, ind)
+            + self._build_sensitivity_lines(row, ind)
+            + self._build_optional_block(
+                row.variacao_diar_perc_patrim_fdo_var_n_outros, self._build_var_outros_lines, ind
             )
-        lines.extend(self._build_otc_lines(row.lista_oper_curs_merc_balcao, ind))
-        lines.append(
-            f"{ind}    <TOT_ATIVOS_P_RELAC>"
-            f"{self._fmt_decimal(row.tot_ativos_p_relac, 1)}"
-            f"</TOT_ATIVOS_P_RELAC>"
+            + self._build_optional_block(
+                row.valor_noc_tot_contrat_deriv_mant_fdo, self._build_nominal_risk_lines, ind
+            )
+            + self._build_otc_lines(row.lista_oper_curs_merc_balcao, ind)
+            + self._build_tag_lines(
+                "TOT_ATIVOS_P_RELAC", row.tot_ativos_p_relac, self._dec(1), ind
+            )
+            + self._build_issuers_lines(row.lista_emissores_tit_cred_priv, ind)
+            + self._build_tag_lines(
+                "TOT_ATIVOS_CRED_PRIV", row.tot_ativos_cred_priv, self._dec(1), ind
+            )
+            + self._build_performance_fee_lines(row, ind)
+            + self._build_tag_lines("MONTANTE_DISTRIB", row.montante_distrib, self._dec(2), ind)
+            + self._build_tag_lines("INF_COMPL_PERFIL", row.inf_compl_perfil, self._esc(500), ind)
+            + [f"{ind}</ROW_PERFIL>"]
         )
-        lines.extend(self._build_issuers_lines(row.lista_emissores_tit_cred_priv, ind))
-        lines.append(
-            f"{ind}    <TOT_ATIVOS_CRED_PRIV>"
-            f"{self._fmt_decimal(row.tot_ativos_cred_priv, 1)}"
-            f"</TOT_ATIVOS_CRED_PRIV>"
-        )
-        lines.extend(self._build_performance_fee_lines(row, ind))
-        if row.montante_distrib is not None:
-            lines.append(
-                f"{ind}    <MONTANTE_DISTRIB>"
-                f"{self._fmt_decimal(row.montante_distrib, 2)}"
-                f"</MONTANTE_DISTRIB>"
-            )
-        if row.inf_compl_perfil is not None:
-            lines.append(
-                f"{ind}    <INF_COMPL_PERFIL>"
-                f"{saxutils.escape(row.inf_compl_perfil[:500])}"
-                f"</INF_COMPL_PERFIL>"
-            )
-        lines.append(f"{ind}</ROW_PERFIL>")
-        return lines
+
+    @staticmethod
+    def _build_optional_block(
+        block: object | None, fn_builder: Callable[[Any, str], list[str]], ind: str
+    ) -> list[str]:
+        """Build a nested block's lines, or nothing when the block is absent.
+
+        Parameters
+        ----------
+        block : Optional[object]
+                Block model, or None if absent.
+        fn_builder : Callable[[Any, str], list[str]]
+                Builder invoked with the block and the indentation.
+        ind : str
+                Base indentation string.
+
+        Returns
+        -------
+        list[str]
+                XML lines, empty if block is None.
+        """
+        return [] if block is None else fn_builder(block, ind)
+
+    @staticmethod
+    def _build_tag_lines(
+        tag: str, value: object | None, fn_fmt: Callable[[Any], str], ind: str
+    ) -> list[str]:
+        """Build one ``<TAG>value</TAG>`` line, or nothing when value is None.
+
+        Parameters
+        ----------
+        tag : str
+                XML tag name.
+        value : Optional[object]
+                Raw value, or None if absent.
+        fn_fmt : Callable[[Any], str]
+                Formatter turning the value into element text.
+        ind : str
+                Base indentation string.
+
+        Returns
+        -------
+        list[str]
+                A single XML line, empty if value is None.
+        """
+        return [] if value is None else [f"{ind}    <{tag}>{fn_fmt(value)}</{tag}>"]
+
+    @staticmethod
+    def _dec(places: int) -> Callable[[Decimal], str]:
+        """Return a formatter rendering a Decimal with the given places.
+
+        Parameters
+        ----------
+        places : int
+                Number of decimal places.
+
+        Returns
+        -------
+        Callable[[Decimal], str]
+                Formatter using the CVM comma separator.
+        """
+        return lambda value: PerfilMensal._fmt_decimal(value, places)
+
+    @staticmethod
+    def _esc(max_len: int) -> Callable[[str], str]:
+        """Return a formatter truncating to max_len then XML-escaping.
+
+        Parameters
+        ----------
+        max_len : int
+                Maximum number of characters kept.
+
+        Returns
+        -------
+        Callable[[str], str]
+                Truncating, escaping formatter.
+        """
+        return lambda value: saxutils.escape(value[:max_len])
 
     def _build_nr_client_lines(self, c: ClientCount, ind: str) -> list[str]:
         """Build XML lines for the NR_CLIENT block.
@@ -254,30 +318,15 @@ class PerfilMensal(SubmissionWriter[PerfilMensalDocument]):
         list[str]
                 XML lines for text and scalar risk fields.
         """
-        lines: list[str] = []
-        for tag, val, max_len in [
-            ("RESM_TEOR_VT_PROFRD", row.resm_teor_vt_profrd, 4000),
-            ("JUST_SUM_VT_PROFRD", row.just_sum_vt_profrd, 4000),
-        ]:
-            if val is not None:
-                lines.append(f"{ind}    <{tag}>{saxutils.escape(val[:max_len])}</{tag}>")
-        if row.var_perc_pl is not None:
-            lines.append(
-                f"{ind}    <VAR_PERC_PL>{self._fmt_decimal(row.var_perc_pl, 4)}</VAR_PERC_PL>"
-            )
-        if row.mod_var_utiliz is not None:
-            lines.append(f"{ind}    <MOD_VAR_UTILIZ>{row.mod_var_utiliz}</MOD_VAR_UTILIZ>")
-        if row.praz_med_cart_tit is not None:
-            lines.append(
-                f"{ind}    <PRAZ_MED_CART_TIT>"
-                f"{self._fmt_decimal(row.praz_med_cart_tit, 4)}"
-                f"</PRAZ_MED_CART_TIT>"
-            )
-        if row.res_delib is not None:
-            lines.append(
-                f"{ind}    <RES_DELIB>{saxutils.escape(row.res_delib[:4000])}</RES_DELIB>"
-            )
-        return lines
+        esc4000 = self._esc(4000)
+        return (
+            self._build_tag_lines("RESM_TEOR_VT_PROFRD", row.resm_teor_vt_profrd, esc4000, ind)
+            + self._build_tag_lines("JUST_SUM_VT_PROFRD", row.just_sum_vt_profrd, esc4000, ind)
+            + self._build_tag_lines("VAR_PERC_PL", row.var_perc_pl, self._dec(4), ind)
+            + self._build_tag_lines("MOD_VAR_UTILIZ", row.mod_var_utiliz, str, ind)
+            + self._build_tag_lines("PRAZ_MED_CART_TIT", row.praz_med_cart_tit, self._dec(4), ind)
+            + self._build_tag_lines("RES_DELIB", row.res_delib, esc4000, ind)
+        )
 
     def _build_usd_flow_lines(self, row: PerfilMensalRow, ind: str) -> list[str]:
         """Build XML lines for the mandatory USD resource flow fields.
@@ -460,24 +509,52 @@ class PerfilMensal(SubmissionWriter[PerfilMensalDocument]):
         list[str]
                 XML lines, empty if lista_otc is falsy.
         """
-        if not lista_otc:
-            return []
-        lines: list[str] = [f"{ind}    <LISTA_OPER_CURS_MERC_BALCAO>"]
-        for otc in lista_otc:
-            lines += [
-                f"{ind}        <OPER_CURS_MERC_BALCAO>",
-                f"{ind}            <TP_PESSOA>{otc.tp_pessoa}</TP_PESSOA>",
-                f"{ind}            <NR_PF_PJ_COMITENTE>"
-                f"{otc.nr_pf_pj_comitente}"
-                f"</NR_PF_PJ_COMITENTE>",
-                f"{ind}            <PARTE_RELACIONADA>{otc.parte_relacionada}</PARTE_RELACIONADA>",
-                f"{ind}            <VALOR_PARTE>"
-                f"{self._fmt_decimal(otc.valor_parte, 1)}"
-                f"</VALOR_PARTE>",
-                f"{ind}        </OPER_CURS_MERC_BALCAO>",
-            ]
-        lines.append(f"{ind}    </LISTA_OPER_CURS_MERC_BALCAO>")
-        return lines
+        children = [ln for otc in lista_otc or [] for ln in self._build_otc_item_lines(otc, ind)]
+        return self._wrap_list_block("LISTA_OPER_CURS_MERC_BALCAO", children, ind)
+
+    def _build_otc_item_lines(self, otc: object, ind: str) -> list[str]:
+        """Build XML lines for one OPER_CURS_MERC_BALCAO element.
+
+        Parameters
+        ----------
+        otc : object
+                OTC counterparty model.
+        ind : str
+                Base indentation string.
+
+        Returns
+        -------
+        list[str]
+                XML lines for the counterparty.
+        """
+        return [
+            f"{ind}        <OPER_CURS_MERC_BALCAO>",
+            f"{ind}            <TP_PESSOA>{otc.tp_pessoa}</TP_PESSOA>",
+            f"{ind}            <NR_PF_PJ_COMITENTE>{otc.nr_pf_pj_comitente}</NR_PF_PJ_COMITENTE>",
+            f"{ind}            <PARTE_RELACIONADA>{otc.parte_relacionada}</PARTE_RELACIONADA>",
+            f"{ind}            <VALOR_PARTE>{self._fmt_decimal(otc.valor_parte, 1)}</VALOR_PARTE>",
+            f"{ind}        </OPER_CURS_MERC_BALCAO>",
+        ]
+
+    @staticmethod
+    def _wrap_list_block(tag: str, children: list[str], ind: str) -> list[str]:
+        """Wrap child lines in a list element, or return nothing when empty.
+
+        Parameters
+        ----------
+        tag : str
+                XML tag name of the list element.
+        children : list[str]
+                Already-built child lines.
+        ind : str
+                Base indentation string.
+
+        Returns
+        -------
+        list[str]
+                Opening tag, children and closing tag; empty if no children.
+        """
+        return [f"{ind}    <{tag}>", *children, f"{ind}    </{tag}>"] if children else []
 
     def _build_issuers_lines(self, lista_issuers: list | None, ind: str) -> list[str]:
         """Build XML lines for the optional LISTA_EMISSORES_TIT_CRED_PRIV block.
@@ -494,22 +571,34 @@ class PerfilMensal(SubmissionWriter[PerfilMensalDocument]):
         list[str]
                 XML lines, empty if lista_issuers is falsy.
         """
-        if not lista_issuers:
-            return []
-        lines: list[str] = [f"{ind}    <LISTA_EMISSORES_TIT_CRED_PRIV>"]
-        for iss in lista_issuers:
-            lines += [
-                f"{ind}        <EMISSORES_TIT_CRED_PRIV>",
-                f"{ind}            <TP_PESSOA_EMISSOR>{iss.tp_pessoa_emissor}</TP_PESSOA_EMISSOR>",
-                f"{ind}            <NR_PF_PJ_EMISSOR>{iss.nr_pf_pj_emissor}</NR_PF_PJ_EMISSOR>",
-                f"{ind}            <PARTE_RELACIONADA>{iss.parte_relacionada}</PARTE_RELACIONADA>",
-                f"{ind}            <VALOR_PARTE>"
-                f"{self._fmt_decimal(iss.valor_parte, 1)}"
-                f"</VALOR_PARTE>",
-                f"{ind}        </EMISSORES_TIT_CRED_PRIV>",
-            ]
-        lines.append(f"{ind}    </LISTA_EMISSORES_TIT_CRED_PRIV>")
-        return lines
+        children = [
+            ln for iss in lista_issuers or [] for ln in self._build_issuer_item_lines(iss, ind)
+        ]
+        return self._wrap_list_block("LISTA_EMISSORES_TIT_CRED_PRIV", children, ind)
+
+    def _build_issuer_item_lines(self, iss: object, ind: str) -> list[str]:
+        """Build XML lines for one EMISSORES_TIT_CRED_PRIV element.
+
+        Parameters
+        ----------
+        iss : object
+                Private credit issuer model.
+        ind : str
+                Base indentation string.
+
+        Returns
+        -------
+        list[str]
+                XML lines for the issuer.
+        """
+        return [
+            f"{ind}        <EMISSORES_TIT_CRED_PRIV>",
+            f"{ind}            <TP_PESSOA_EMISSOR>{iss.tp_pessoa_emissor}</TP_PESSOA_EMISSOR>",
+            f"{ind}            <NR_PF_PJ_EMISSOR>{iss.nr_pf_pj_emissor}</NR_PF_PJ_EMISSOR>",
+            f"{ind}            <PARTE_RELACIONADA>{iss.parte_relacionada}</PARTE_RELACIONADA>",
+            f"{ind}            <VALOR_PARTE>{self._fmt_decimal(iss.valor_parte, 1)}</VALOR_PARTE>",
+            f"{ind}        </EMISSORES_TIT_CRED_PRIV>",
+        ]
 
     def _build_performance_fee_lines(self, row: PerfilMensalRow, ind: str) -> list[str]:
         """Build XML lines for the optional performance-fee blocks.
@@ -526,24 +615,35 @@ class PerfilMensal(SubmissionWriter[PerfilMensalDocument]):
         list[str]
                 XML lines for VED_REGUL and RESP_VED_REGUL blocks.
         """
-        lines: list[str] = []
-        if row.ved_regul_cobr_taxa_perform is not None:
-            lines.append(
-                f"{ind}    <VED_REGUL_COBR_TAXA_PERFORM>"
-                f"{row.ved_regul_cobr_taxa_perform}"
-                f"</VED_REGUL_COBR_TAXA_PERFORM>"
-            )
-        if row.resp_ved_regul_cobr_taxa_perform is not None:
-            pfd = row.resp_ved_regul_cobr_taxa_perform
-            lines += [
-                f"{ind}    <RESP_VED_REGUL_COBR_TAXA_PERFORM>",
-                f"{ind}        <DATA_COTA_FUNDO>{pfd.data_cota_fundo}</DATA_COTA_FUNDO>",
-                f"{ind}        <VAL_COTA_FUNDO>"
-                f"{self._fmt_decimal(pfd.val_cota_fundo, 5)}"
-                f"</VAL_COTA_FUNDO>",
-                f"{ind}    </RESP_VED_REGUL_COBR_TAXA_PERFORM>",
-            ]
-        return lines
+        return self._build_tag_lines(
+            "VED_REGUL_COBR_TAXA_PERFORM", row.ved_regul_cobr_taxa_perform, str, ind
+        ) + self._build_optional_block(
+            row.resp_ved_regul_cobr_taxa_perform, self._build_resp_ved_regul_lines, ind
+        )
+
+    def _build_resp_ved_regul_lines(self, pfd: object, ind: str) -> list[str]:
+        """Build XML lines for the RESP_VED_REGUL_COBR_TAXA_PERFORM block.
+
+        Parameters
+        ----------
+        pfd : object
+                Performance-fee responsible model.
+        ind : str
+                Base indentation string.
+
+        Returns
+        -------
+        list[str]
+                XML lines for the block.
+        """
+        return [
+            f"{ind}    <RESP_VED_REGUL_COBR_TAXA_PERFORM>",
+            f"{ind}        <DATA_COTA_FUNDO>{pfd.data_cota_fundo}</DATA_COTA_FUNDO>",
+            f"{ind}        <VAL_COTA_FUNDO>"
+            f"{self._fmt_decimal(pfd.val_cota_fundo, 5)}"
+            f"</VAL_COTA_FUNDO>",
+            f"{ind}    </RESP_VED_REGUL_COBR_TAXA_PERFORM>",
+        ]
 
     @staticmethod
     def _fmt_decimal(value: Decimal, places: int) -> str:
