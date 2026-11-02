@@ -75,6 +75,82 @@ def _reject_float(value: object) -> object:
 
 
 @type_checker
+def _require_nonblank(value: str) -> None:
+    """Refuse empty or whitespace-only text.
+
+    Parameters
+    ----------
+    value : str
+        Candidate text.
+
+    Raises
+    ------
+    ValueError
+        If blank.
+    """
+    if not value.strip():
+        raise ValueError("text must not be empty or blank")
+
+
+@type_checker
+def _require_single_line(value: str) -> None:
+    """Refuse a tab or line break.
+
+    Parameters
+    ----------
+    value : str
+        Candidate text.
+
+    Raises
+    ------
+    ValueError
+        If a tab or line break is present.
+    """
+    if _LINE_BREAK_RE.search(value):
+        raise ValueError("text must not hold a tab or line break")
+
+
+@type_checker
+def _require_windows_1252(value: str) -> None:
+    """Refuse a character the file's declared encoding cannot carry.
+
+    Parameters
+    ----------
+    value : str
+        Candidate text.
+
+    Raises
+    ------
+    ValueError
+        If not encodable in windows-1252.
+    """
+    try:
+        value.encode("windows-1252")
+    except UnicodeEncodeError as exc:
+        raise ValueError(
+            f"character {value[exc.start]!r} is not encodable in windows-1252"
+        ) from exc
+
+
+@type_checker
+def _require_xml_legal(value: str) -> None:
+    """Refuse a control character XML 1.0 forbids.
+
+    Parameters
+    ----------
+    value : str
+        Candidate text.
+
+    Raises
+    ------
+    ValueError
+        If a forbidden control character is present.
+    """
+    if _XML_ILLEGAL_RE.search(value):
+        raise ValueError("text holds a control character XML forbids")
+
+
+@type_checker
 def _check_text(value: str) -> str:
     """Require text the file can carry: non-blank, single-line, windows-1252, legal XML characters.
 
@@ -94,18 +170,10 @@ def _check_text(value: str) -> str:
             If empty, not encodable in windows-1252 (the file's declared encoding), or holding a
             character XML 1.0 forbids.
     """
-    if not value.strip():
-        raise ValueError("text must not be empty or blank")
-    if _LINE_BREAK_RE.search(value):
-        raise ValueError("text must not hold a tab or line break")
-    try:
-        value.encode("windows-1252")
-    except UnicodeEncodeError as exc:
-        raise ValueError(
-            f"character {value[exc.start]!r} is not encodable in windows-1252"
-        ) from exc
-    if _XML_ILLEGAL_RE.search(value):
-        raise ValueError("text holds a control character XML forbids")
+    _require_nonblank(value)
+    _require_single_line(value)
+    _require_windows_1252(value)
+    _require_xml_legal(value)
     return value
 
 
@@ -278,6 +346,44 @@ BLOCK_APLIC_TYPES: dict[str, frozenset[int]] = {
 
 
 @type_checker
+def _require_br_format(value: str) -> None:
+    """Refuse text that does not follow DD/MM/AAAA.
+
+    Parameters
+    ----------
+    value : str
+        Candidate date.
+
+    Raises
+    ------
+    ValueError
+        If the format is wrong.
+    """
+    if not _DATE_BR_RE.fullmatch(value):
+        raise ValueError("date must follow DD/MM/AAAA format.")
+
+
+@type_checker
+def _require_real_date(value: str) -> None:
+    """Refuse a well-formed date that is not on the calendar.
+
+    Parameters
+    ----------
+    value : str
+        Candidate date.
+
+    Raises
+    ------
+    ValueError
+        If the date does not exist.
+    """
+    try:
+        datetime.strptime(value, "%d/%m/%Y")  # noqa: DTZ007  (calendar check only)
+    except ValueError as exc:
+        raise ValueError(f"{value} is not a real calendar date.") from exc
+
+
+@type_checker
 def _check_br_date(value: str) -> str:
     """Require a real calendar date in the DD/MM/AAAA format.
 
@@ -296,12 +402,8 @@ def _check_br_date(value: str) -> str:
     ValueError
             If the format is wrong or the date does not exist.
     """
-    if not _DATE_BR_RE.fullmatch(value):
-        raise ValueError("date must follow DD/MM/AAAA format.")
-    try:
-        datetime.strptime(value, "%d/%m/%Y")  # noqa: DTZ007  (calendar check only)
-    except ValueError as exc:
-        raise ValueError(f"{value} is not a real calendar date.") from exc
+    _require_br_format(value)
+    _require_real_date(value)
     return value
 
 
@@ -341,6 +443,46 @@ class CdaHeader(BaseModel):
         return v
 
 
+@type_checker
+def _require_not_empty(model: BaseModel) -> None:
+    """Refuse a block with every field unset.
+
+    Parameters
+    ----------
+    model : BaseModel
+        The NEGOC model.
+
+    Raises
+    ------
+    ValueError
+        If no field is set.
+    """
+    if all(getattr(model, name) is None for name in type(model).model_fields):
+        raise ValueError("negoc must carry at least one field; omit the block instead")
+
+
+@type_checker
+def _require_together(model: BaseModel, name_a: str, name_b: str) -> None:
+    """Require two fields to be both set or both unset.
+
+    Parameters
+    ----------
+    model : BaseModel
+        The model holding the pair.
+    name_a : str
+        First field name.
+    name_b : str
+        Second field name.
+
+    Raises
+    ------
+    ValueError
+        If only one of the pair is set.
+    """
+    if (getattr(model, name_a) is None) != (getattr(model, name_b) is None):
+        raise ValueError(f"{name_a} and {name_b} must be filled together")
+
+
 class CdaNegoc(BaseModel):
     """NEGOC — month's trades. Quantity and value of a side must come together."""
 
@@ -364,12 +506,9 @@ class CdaNegoc(BaseModel):
         ValueError
                 If only one of the pair is filled, or the block is empty.
         """
-        if all(getattr(self, name) is None for name in type(self).model_fields):
-            raise ValueError("negoc must carry at least one field; omit the block instead")
-        if (self.qtde_vendas_negoc is None) != (self.vl_vendas_negoc is None):
-            raise ValueError("qtde_vendas_negoc and vl_vendas_negoc must be filled together")
-        if (self.qtde_aquis_negoc is None) != (self.vl_aquis_negoc is None):
-            raise ValueError("qtde_aquis_negoc and vl_aquis_negoc must be filled together")
+        _require_not_empty(self)
+        _require_together(self, "qtde_vendas_negoc", "vl_vendas_negoc")
+        _require_together(self, "qtde_aquis_negoc", "vl_aquis_negoc")
         return self
 
 
@@ -386,6 +525,132 @@ class CdaAtivoExt(BaseModel):
     desc_at_ext: Annotated[Text, Field(max_length=50)]
     qtde_at_ext: int
     valor_at_ext: ForeignValue
+
+
+@type_checker
+def _empr_required(code: int, value: object) -> None:
+    """Require ``empr_ligada`` (Table A flag ``S``).
+
+    Parameters
+    ----------
+    code : int
+        Application type, for the message.
+    value : object
+        The ``empr_ligada`` value.
+
+    Raises
+    ------
+    ValueError
+        If omitted.
+    """
+    if value is None:
+        raise ValueError(f"empr_ligada is required for COD_TP_APLIC {code}")
+
+
+@type_checker
+def _empr_forbidden(code: int, value: object) -> None:
+    """Forbid ``empr_ligada`` (Table A flag ``NA``).
+
+    Parameters
+    ----------
+    code : int
+        Application type, for the message.
+    value : object
+        The ``empr_ligada`` value.
+
+    Raises
+    ------
+    ValueError
+        If filled.
+    """
+    if value is not None:
+        raise ValueError(f"empr_ligada is not applicable for COD_TP_APLIC {code}")
+
+
+@type_checker
+def _empr_optional(code: int, value: object) -> None:
+    """Accept any ``empr_ligada`` (flags ``N`` and ``OP``).
+
+    Parameters
+    ----------
+    code : int
+        Unused.
+    value : object
+        Unused.
+    """
+
+
+@type_checker
+def _flag_required(code: int, what: str, filled: bool) -> None:
+    """Require a column (Table A flag ``S``).
+
+    Parameters
+    ----------
+    code : int
+        Application type, for the message.
+    what : str
+        Column name, for the message.
+    filled : bool
+        Whether the quantity is present.
+
+    Raises
+    ------
+    ValueError
+        If omitted.
+    """
+    if not filled:
+        raise ValueError(f"{what} is required for COD_TP_APLIC {code}")
+
+
+@type_checker
+def _flag_forbidden(code: int, what: str, filled: bool) -> None:
+    """Forbid a column (Table A flag ``N``).
+
+    Parameters
+    ----------
+    code : int
+        Application type, for the message.
+    what : str
+        Column name, for the message.
+    filled : bool
+        Whether the quantity is present.
+
+    Raises
+    ------
+    ValueError
+        If filled.
+    """
+    if filled:
+        raise ValueError(f"{what} must not be filled for COD_TP_APLIC {code}")
+
+
+@type_checker
+def _flag_optional(code: int, what: str, filled: bool) -> None:
+    """Accept any quantity (flag ``OP``).
+
+    Parameters
+    ----------
+    code : int
+        Unused.
+    what : str
+        Unused.
+    filled : bool
+        Unused.
+    """
+
+
+_EMPR_CHECKS = {
+    "S": _empr_required,
+    "NA": _empr_forbidden,
+    "N": _empr_optional,
+    "OP": _empr_optional,
+}
+_FLAG_CHECKS = {
+    "S": _flag_required,
+    "N": _flag_forbidden,
+    "OP": _flag_optional,
+    "NA": _flag_optional,
+}
 
 
 class CdaAplic(BaseModel):
@@ -416,10 +681,7 @@ class CdaAplic(BaseModel):
                 If a field is filled/omitted against the matrix.
         """
         empr, vendas, aquis, qtd = _TABLE_A[code]
-        if empr == "S" and self.empr_ligada is None:
-            raise ValueError(f"empr_ligada is required for COD_TP_APLIC {code}")
-        if empr == "NA" and self.empr_ligada is not None:
-            raise ValueError(f"empr_ligada is not applicable for COD_TP_APLIC {code}")
+        _EMPR_CHECKS[empr](code, self.empr_ligada)
         neg = self.negoc
         self._rule(code, "vendas", vendas, neg.qtde_vendas_negoc if neg else None)
         self._rule(code, "aquisicoes", aquis, neg.qtde_aquis_negoc if neg else None)
@@ -445,11 +707,145 @@ class CdaAplic(BaseModel):
         ValueError
                 On a violation.
         """
-        filled = qty is not None
-        if flag == "S" and not filled:
-            raise ValueError(f"{what} is required for COD_TP_APLIC {code}")
-        if flag == "N" and filled:
-            raise ValueError(f"{what} must not be filled for COD_TP_APLIC {code}")
+        _FLAG_CHECKS[flag](code, what, qty is not None)
+
+
+@type_checker
+def _code_implicit(block: str, aplic: CdaAplic, implicit: int | None) -> int:
+    """Take the block's implied type, refusing an explicit tag.
+
+    Parameters
+    ----------
+    block : str
+        Block tag.
+    aplic : CdaAplic
+        The application.
+    implicit : Optional[int]
+        Application type implied by the block.
+
+    Returns
+    -------
+    int
+        The result.
+
+    Raises
+    ------
+    ValueError
+        If the application carries a ``cod_tp_aplic`` the block forbids.
+    """
+    if aplic.cod_tp_aplic is not None:
+        raise ValueError(f"{block} has no COD_TP_APLIC tag")
+    return implicit
+
+
+@type_checker
+def _code_explicit(block: str, aplic: CdaAplic, implicit: int | None) -> int:
+    """Take the application's own type, requiring it.
+
+    Parameters
+    ----------
+    block : str
+        Block tag.
+    aplic : CdaAplic
+        The application.
+    implicit : Optional[int]
+        Application type implied by the block.
+
+    Returns
+    -------
+    int
+        The result.
+
+    Raises
+    ------
+    ValueError
+        If ``cod_tp_aplic`` is omitted.
+    """
+    if aplic.cod_tp_aplic is None:
+        raise ValueError(f"cod_tp_aplic is required in {block}")
+    return aplic.cod_tp_aplic
+
+
+@type_checker
+def _resolve_code(block: str, aplic: CdaAplic, implicit: int | None) -> int:
+    """Resolve the effective application type of an APLIC.
+
+    Parameters
+    ----------
+    block : str
+        Block tag.
+    aplic : CdaAplic
+        The application.
+    implicit : Optional[int]
+        Application type implied by the block.
+
+    Returns
+    -------
+    int
+        The result.
+    """
+    fn_resolve = _code_implicit if implicit is not None else _code_explicit
+    return fn_resolve(block, aplic, implicit)
+
+
+@type_checker
+def _require_allowed_type(block: str, code: int) -> None:
+    """Require the type to be accepted by the block.
+
+    Parameters
+    ----------
+    block : str
+        Block tag.
+    code : int
+        Effective application type.
+
+    Raises
+    ------
+    ValueError
+        If the block does not accept the type.
+    """
+    if code not in BLOCK_APLIC_TYPES[block]:
+        raise ValueError(f"COD_TP_APLIC {code} is not allowed in {block}")
+
+
+@type_checker
+def _require_ativo_ext_scope(block: str, aplic: CdaAplic) -> None:
+    """Allow ``ativo_ext`` only inside INV_EXT.
+
+    Parameters
+    ----------
+    block : str
+        Block tag.
+    aplic : CdaAplic
+        The application.
+
+    Raises
+    ------
+    ValueError
+        If ``ativo_ext`` is set elsewhere.
+    """
+    if aplic.ativo_ext is not None and block != "INV_EXT":
+        raise ValueError(f"ativo_ext is only valid in INV_EXT, not {block}")
+
+
+@type_checker
+def _require_table_b(code: int, tp_ativ: int | None) -> None:
+    """Apply the Table B application-type x asset-type relation.
+
+    Parameters
+    ----------
+    code : int
+        Effective application type.
+    tp_ativ : Optional[int]
+        Asset type of the enclosing block, when it has one.
+
+    Raises
+    ------
+    ValueError
+        If the asset type is not valid for the application type.
+    """
+    if tp_ativ is not None and tp_ativ not in _TABLE_B[code]:
+        raise ValueError(f"COD_TP_ATIV {tp_ativ} is not valid for COD_TP_APLIC {code}")
 
 
 @type_checker
@@ -472,21 +868,11 @@ def _check_aplic(block: str, aplic: CdaAplic, implicit: int | None, tp_ativ: int
     ValueError
             On any rule violation.
     """
-    if implicit is not None:
-        if aplic.cod_tp_aplic is not None:
-            raise ValueError(f"{block} has no COD_TP_APLIC tag")
-        code = implicit
-    else:
-        if aplic.cod_tp_aplic is None:
-            raise ValueError(f"cod_tp_aplic is required in {block}")
-        code = aplic.cod_tp_aplic
-    if code not in BLOCK_APLIC_TYPES[block]:
-        raise ValueError(f"COD_TP_APLIC {code} is not allowed in {block}")
-    if aplic.ativo_ext is not None and block != "INV_EXT":
-        raise ValueError(f"ativo_ext is only valid in INV_EXT, not {block}")
+    code = _resolve_code(block, aplic, implicit)
+    _require_allowed_type(block, code)
+    _require_ativo_ext_scope(block, aplic)
     aplic.check_table_a(code)
-    if tp_ativ is not None and tp_ativ not in _TABLE_B[code]:
-        raise ValueError(f"COD_TP_ATIV {tp_ativ} is not valid for COD_TP_APLIC {code}")
+    _require_table_b(code, tp_ativ)
 
 
 class CdaSwapPosFim(BaseModel):
@@ -588,6 +974,49 @@ class CdaRiskRating(BaseModel):
 
 
 @type_checker
+def _check_post_fixed(index: object, taxa: object) -> None:
+    """Post-fixed needs the index block and no pre-fixed rate.
+
+    Parameters
+    ----------
+    index : object
+        The TIT_POS_FIX_INDEX block (or ``None``).
+    taxa : object
+        TIT_PRE_FIX_TAXA_CONTR (or ``None``).
+
+    Raises
+    ------
+    ValueError
+        On inconsistency.
+    """
+    if index is None or taxa is not None:
+        raise ValueError("post-fixed security needs tit_pos_fix_index and no pre-fixed rate")
+
+
+@type_checker
+def _check_pre_fixed(index: object, taxa: object) -> None:
+    """Pre-fixed needs the contracted rate and no index block.
+
+    Parameters
+    ----------
+    index : object
+        The TIT_POS_FIX_INDEX block (or ``None``).
+    taxa : object
+        TIT_PRE_FIX_TAXA_CONTR (or ``None``).
+
+    Raises
+    ------
+    ValueError
+        On inconsistency.
+    """
+    if index is not None or taxa is None:
+        raise ValueError("pre-fixed security needs tit_pre_fix_taxa_contr and no index block")
+
+
+_FIXING_CHECKS = {True: _check_post_fixed, False: _check_pre_fixed}
+
+
+@type_checker
 def _check_fixing(pos: bool, index: object, taxa: object) -> None:
     """Post-fixed needs the index block; pre-fixed needs the contracted rate.
 
@@ -605,10 +1034,7 @@ def _check_fixing(pos: bool, index: object, taxa: object) -> None:
     ValueError
             On inconsistency.
     """
-    if pos and (index is None or taxa is not None):
-        raise ValueError("post-fixed security needs tit_pos_fix_index and no pre-fixed rate")
-    if not pos and (index is not None or taxa is None):
-        raise ValueError("pre-fixed security needs tit_pre_fix_taxa_contr and no index block")
+    _FIXING_CHECKS[pos](index, taxa)
 
 
 @type_checker
@@ -651,6 +1077,43 @@ class CdaTitPub(BaseModel):
         return self
 
 
+@type_checker
+def _require_one_identifier(cnpj_fdo: str | None, cod_subclasse: str | None) -> None:
+    """Require exactly one of the class CNPJ and the subclass code.
+
+    Parameters
+    ----------
+    cnpj_fdo : Optional[str]
+        CNPJ of the class.
+    cod_subclasse : Optional[str]
+        Subclass code.
+
+    Raises
+    ------
+    ValueError
+        If both or neither is set.
+    """
+    if (cnpj_fdo is None) == (cod_subclasse is None):
+        raise ValueError("provide exactly one of cnpj_fdo or cod_subclasse")
+
+
+@type_checker
+def _normalise_cnpj(cnpj_fdo: str | None) -> str | None:
+    """Validate a CNPJ when present.
+
+    Parameters
+    ----------
+    cnpj_fdo : Optional[str]
+        CNPJ in any shape, or ``None``.
+
+    Returns
+    -------
+    str | None
+        The result.
+    """
+    return None if cnpj_fdo is None else validated_cnpj(cnpj_fdo)
+
+
 class CdaCotas(BaseModel):
     """COTAS — fund shares (type 197); CNPJ of the class xor subclass code."""
 
@@ -672,10 +1135,8 @@ class CdaCotas(BaseModel):
         ValueError
                 If both or neither identifier is set.
         """
-        if (self.cnpj_fdo is None) == (self.cod_subclasse is None):
-            raise ValueError("provide exactly one of cnpj_fdo or cod_subclasse")
-        if self.cnpj_fdo is not None:
-            self.cnpj_fdo = validated_cnpj(self.cnpj_fdo)
+        _require_one_identifier(self.cnpj_fdo, self.cod_subclasse)
+        self.cnpj_fdo = _normalise_cnpj(self.cnpj_fdo)
         _check_aplic("COTAS", self.aplic, 197, None)
         return self
 
