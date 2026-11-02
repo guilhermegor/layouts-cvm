@@ -39,6 +39,7 @@ from layouts_cvm.perfil_mensal import (
     PerfilMensal,
 )
 from layouts_cvm.perfil_mensal_original import PerfilMensalOriginal
+from layouts_cvm.perfil_mensal_v3 import PerfilMensalV3
 from layouts_cvm.schemas.cadastro_ativos import (
     CadastroAtivosDocument,
     CadastroAtivosHeader,
@@ -227,6 +228,12 @@ from layouts_cvm.schemas.perfil_mensal_original import (
     PerfilMensalOriginalRow,
     PerfilMensalOriginalTradingDays,
 )
+from layouts_cvm.schemas.perfil_mensal_v3 import (
+    PerfilMensalV3Document,
+    PerfilMensalV3Header,
+    PerfilMensalV3PatrimonyDistribution,
+    PerfilMensalV3Row,
+)
 
 
 try:
@@ -377,6 +384,11 @@ __all__ = [
     "PerfilMensalOriginalRow",
     "PerfilMensalOriginalTradingDays",
     "PerfilMensalRow",
+    "PerfilMensalV3",
+    "PerfilMensalV3Document",
+    "PerfilMensalV3Header",
+    "PerfilMensalV3PatrimonyDistribution",
+    "PerfilMensalV3Row",
     "PerformanceFeeDetails",
     "PortabilidadeHeader",
     "PortabilidadeInform",
