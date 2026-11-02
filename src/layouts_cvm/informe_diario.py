@@ -6,6 +6,8 @@ the *sending* half of the standard; parsing CVM files back into models lives in 
 """
 
 from decimal import Decimal
+from functools import partial
+from itertools import chain
 
 from layouts_cvm._internal.config.ports.submission_writer import SubmissionWriter
 from layouts_cvm._internal.utils.atomic_write import atomic_write_bytes
@@ -103,13 +105,52 @@ class InformeDiario(SubmissionWriter[InformeDiarioDocument]):
         """
         ind = "    "
         inner = f"{ind}    "
-        lines: list[str] = [f"{ind}<INFORM>"]
+        return [
+            f"{ind}<INFORM>",
+            self._build_id_line(inform, inner),
+            f"{inner}<DATA_PROX_PL>{inform.data_prox_pl}</DATA_PROX_PL>",
+            *self._build_value_lines(inform, inner),
+            f"{inner}<NR_COTST>{inform.nr_cotst}</NR_COTST>",
+            *self._build_cotst_lines(inform.lista_cotst_signif, ind),
+            f"{ind}</INFORM>",
+        ]
+
+    @staticmethod
+    def _build_id_line(inform: InformeDiarioInform, inner: str) -> str:
+        """Build the fund (CNPJ_FDO) or subclass (COD_SUBCLASSE) identifier line.
+
+        Parameters
+        ----------
+        inform : InformeDiarioInform
+                Validated fund-informe model.
+        inner : str
+                Indentation string for the INFORM children.
+
+        Returns
+        -------
+        str
+                The identifier XML line.
+        """
         if inform.cnpj_fdo is not None:
-            lines.append(f"{inner}<CNPJ_FDO>{inform.cnpj_fdo}</CNPJ_FDO>")
-        else:
-            lines.append(f"{inner}<COD_SUBCLASSE>{inform.cod_subclasse}</COD_SUBCLASSE>")
-        lines.append(f"{inner}<DATA_PROX_PL>{inform.data_prox_pl}</DATA_PROX_PL>")
-        for tag, value, places in [
+            return f"{inner}<CNPJ_FDO>{inform.cnpj_fdo}</CNPJ_FDO>"
+        return f"{inner}<COD_SUBCLASSE>{inform.cod_subclasse}</COD_SUBCLASSE>"
+
+    def _build_value_lines(self, inform: InformeDiarioInform, inner: str) -> list[str]:
+        """Build the decimal-valued XML lines of one INFORM block.
+
+        Parameters
+        ----------
+        inform : InformeDiarioInform
+                Validated fund-informe model.
+        inner : str
+                Indentation string for the INFORM children.
+
+        Returns
+        -------
+        list[str]
+                One XML line per decimal field, in schema order.
+        """
+        list_fields = [
             ("VL_TOTAL", inform.vl_total, 2),
             ("VL_QUOTA", inform.vl_quota, 12),
             ("PATRIM_LIQ", inform.patrim_liq, 2),
@@ -117,12 +158,11 @@ class InformeDiario(SubmissionWriter[InformeDiarioDocument]):
             ("RESG_DIA", inform.resg_dia, 2),
             ("VL_TOTAL_SAI", inform.vl_total_sai, 2),
             ("VL_TOTAL_ATV", inform.vl_total_atv, 2),
-        ]:
-            lines.append(f"{inner}<{tag}>{self._fmt_decimal(value, places)}</{tag}>")
-        lines.append(f"{inner}<NR_COTST>{inform.nr_cotst}</NR_COTST>")
-        lines.extend(self._build_cotst_lines(inform.lista_cotst_signif, ind))
-        lines.append(f"{ind}</INFORM>")
-        return lines
+        ]
+        return [
+            f"{inner}<{tag}>{self._fmt_decimal(value, places)}</{tag}>"
+            for tag, value, places in list_fields
+        ]
 
     def _build_cotst_lines(
         self, cotistas: list[SignificantShareholder] | None, ind: str
@@ -143,17 +183,34 @@ class InformeDiario(SubmissionWriter[InformeDiarioDocument]):
         """
         if not cotistas:
             return []
-        lines: list[str] = [f"{ind}    <LISTA_COTST_SIGNIF>"]
-        for cotista in cotistas:
-            lines += [
-                f"{ind}        <COTST_SIGNIF>",
-                f"{ind}            <TP_PESSOA>{cotista.tp_pessoa}</TP_PESSOA>",
-                f"{ind}            <CPF_CNPJ_COTST>{cotista.cpf_cnpj_cotst}</CPF_CNPJ_COTST>",
-                f"{ind}            <PR_COTST>{self._fmt_decimal(cotista.pr_cotst, 4)}</PR_COTST>",
-                f"{ind}        </COTST_SIGNIF>",
-            ]
-        lines.append(f"{ind}    </LISTA_COTST_SIGNIF>")
-        return lines
+        return [
+            f"{ind}    <LISTA_COTST_SIGNIF>",
+            *chain.from_iterable(map(partial(self._build_cotista_lines, ind=ind), cotistas)),
+            f"{ind}    </LISTA_COTST_SIGNIF>",
+        ]
+
+    def _build_cotista_lines(self, cotista: SignificantShareholder, ind: str) -> list[str]:
+        """Build XML lines for one COTST_SIGNIF entry.
+
+        Parameters
+        ----------
+        cotista : SignificantShareholder
+                One significant shareholder.
+        ind : str
+                Base indentation string.
+
+        Returns
+        -------
+        list[str]
+                XML lines of the entry.
+        """
+        return [
+            f"{ind}        <COTST_SIGNIF>",
+            f"{ind}            <TP_PESSOA>{cotista.tp_pessoa}</TP_PESSOA>",
+            f"{ind}            <CPF_CNPJ_COTST>{cotista.cpf_cnpj_cotst}</CPF_CNPJ_COTST>",
+            f"{ind}            <PR_COTST>{self._fmt_decimal(cotista.pr_cotst, 4)}</PR_COTST>",
+            f"{ind}        </COTST_SIGNIF>",
+        ]
 
     @staticmethod
     def _fmt_decimal(value: Decimal, places: int) -> str:
