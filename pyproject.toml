@@ -33,6 +33,7 @@ pandas = ">=2.1.0"
 numpy = ">=1.22"
 openpyxl = ">=3.1.0"
 defusedxml = ">=0.7"
+pydantic = ">=2.0"
 
 [tool.poetry.group.dev.dependencies]
 poethepoet = ">=0.35"
