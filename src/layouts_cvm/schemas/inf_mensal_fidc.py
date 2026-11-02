@@ -93,6 +93,27 @@ def _require_sum(label: str, total: Decimal, plus: list[Decimal], minus: list[De
 
 
 @type_checker
+def _is_cpf_cnpj_or_placeholder(value: str) -> bool:
+    """Tell whether a value is a valid CPF, a valid CNPJ or a no-document placeholder.
+
+    Parameters
+    ----------
+    value : str
+            The raw field value.
+
+    Returns
+    -------
+    bool
+            True when the value is acceptable.
+    """
+    return (
+        value in {_NO_CNPJ_PLACEHOLDER, _NO_CPF_PLACEHOLDER}
+        or is_valid_cnpj(value)
+        or is_valid_cpf(value)
+    )
+
+
+@type_checker
 def _cpf_or_cnpj(value: str) -> str:
     """Validate a CPF/CNPJ field, accepting the page's no-document placeholders.
 
@@ -112,14 +133,49 @@ def _cpf_or_cnpj(value: str) -> str:
     ValueError
             If the value is neither a valid CPF, a valid CNPJ nor a placeholder.
     """
-    if value in {_NO_CNPJ_PLACEHOLDER, _NO_CPF_PLACEHOLDER}:
-        return value
-    if is_valid_cnpj(value) or is_valid_cpf(value):
-        return value
-    raise ValueError(f"invalid CPF/CNPJ: {value!r}")
+    if not _is_cpf_cnpj_or_placeholder(value):
+        raise ValueError(f"invalid CPF/CNPJ: {value!r}")
+    return value
 
 
 CpfCnpj = Annotated[str, BeforeValidator(_cpf_or_cnpj)]
+
+
+@type_checker
+def _require_field_sums(
+    str_block: str,
+    str_items: str,
+    tuple_fields: tuple[str, ...],
+    cls_total: BaseModel,
+    list_parts: list[BaseModel],
+) -> None:
+    """Require, per field, that a block's value equals the sum of its parts.
+
+    Parameters
+    ----------
+    str_block : str
+            Block name used in the error label.
+    str_items : str
+            Page item numbers used in the error label.
+    tuple_fields : tuple[str, ...]
+            Attribute names to check on every block.
+    cls_total : BaseModel
+            The block holding the totals.
+    list_parts : list[BaseModel]
+            The blocks whose values must add up to the totals.
+
+    Raises
+    ------
+    ValueError
+            If any field total differs from the sum of the parts.
+    """
+    for str_field in tuple_fields:
+        _require_sum(
+            f"{str_block}.{str_field.upper()} ({str_items})",
+            getattr(cls_total, str_field),
+            [getattr(cls_part, str_field) for cls_part in list_parts],
+            [],
+        )
 
 
 class _FidcBlock(BaseModel):
@@ -882,37 +938,36 @@ class NegocDicredMes(_FidcBlock):
         NegocDicredMes
                 The validated block.
         """
-        for field in ("qt_dicred_aquis", "vl_dicred_aquis"):
-            _require_sum(
-                f"AQUISICOES.{field.upper()} (items 23/24)",
-                getattr(self.aquisicoes, field),
-                [
-                    getattr(self.negoc_dicred_mes_aquis, field),
-                    getattr(self.negoc_dicred_mes_sem_aquis, field),
-                ],
-                [],
+        for str_field in ("qt_dicred_aquis", "vl_dicred_aquis"):
+            _require_field_sums(
+                "AQUISICOES",
+                "items 23/24",
+                (str_field,),
+                self.aquisicoes,
+                [self.negoc_dicred_mes_aquis, self.negoc_dicred_mes_sem_aquis],
             )
-            _require_sum(
-                f"NEGOC_DICRED_MES_AQUIS.{field.upper()} (items 25/26)",
-                getattr(self.negoc_dicred_mes_aquis, field),
+            _require_field_sums(
+                "NEGOC_DICRED_MES_AQUIS",
+                "items 25/26",
+                (str_field,),
+                self.negoc_dicred_mes_aquis,
                 [
-                    getattr(self.negoc_dicred_mes_venc_adimpl, field),
-                    getattr(self.negoc_dicred_mes_venc_inad, field),
-                    getattr(self.negoc_dicred_mes_inad, field),
+                    self.negoc_dicred_mes_venc_adimpl,
+                    self.negoc_dicred_mes_venc_inad,
+                    self.negoc_dicred_mes_inad,
                 ],
-                [],
             )
-        for field in ("qt_dicred_alien", "vl_dicred_alien", "vl_dicred_alien_contab"):
-            _require_sum(
-                f"DICRED_MES_ALIEN.{field.upper()} (items 27-29)",
-                getattr(self.dicred_mes_alien, field),
-                [
-                    getattr(self.dicred_mes_alien_cedent, field),
-                    getattr(self.dicred_mes_alien_prest, field),
-                    getattr(self.dicred_mes_alien_tercr, field),
-                ],
-                [],
-            )
+        _require_field_sums(
+            "DICRED_MES_ALIEN",
+            "items 27-29",
+            ("qt_dicred_alien", "vl_dicred_alien", "vl_dicred_alien_contab"),
+            self.dicred_mes_alien,
+            [
+                self.dicred_mes_alien_cedent,
+                self.dicred_mes_alien_prest,
+                self.dicred_mes_alien_tercr,
+            ],
+        )
         return self
 
 
@@ -1226,6 +1281,31 @@ class Garantia(_FidcBlock):
     prc_drt_cred_gnt_vnc: Money
 
 
+@type_checker
+def _require_breakdown_sum(
+    str_label: str, total: int, cls_breakdown: CotistasPorTipo | None
+) -> None:
+    """Require an optional by-type breakdown to add up to its class total.
+
+    Parameters
+    ----------
+    str_label : str
+            Label used in the error message.
+    total : int
+            The class total.
+    cls_breakdown : CotistasPorTipo | None
+            The breakdown (exposing ``total()``), or None when absent.
+
+    Raises
+    ------
+    ValueError
+            If a breakdown is present and its total differs.
+    """
+    if cls_breakdown is None:
+        return
+    _require_sum(str_label, Decimal(total), [Decimal(cls_breakdown.total())], [])
+
+
 class OutrasInform(_FidcBlock):
     """OUTRAS_INFORM — Tabela X, other information."""
 
@@ -1259,8 +1339,7 @@ class OutrasInform(_FidcBlock):
                 "CLS_SUBORDINADA",
             ),
         ):
-            if breakdown is not None:
-                _require_sum(label, Decimal(total), [Decimal(breakdown.total())], [])
+            _require_breakdown_sum(label, total, breakdown)
         return self
 
 
