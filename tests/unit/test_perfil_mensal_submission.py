@@ -71,24 +71,57 @@ def _document(row: PerfilMensalRow) -> PerfilMensalDocument:
     return PerfilMensalDocument(header=header, rows=[row])
 
 
-def test_export_minimal_document_renders_expected_structure() -> None:
+def test_export_minimal_document_renders_expected_structure_1() -> None:
     """Emit the CVM document envelope, the row block, and the fund CNPJ."""
     xml = PerfilMensal().export(_document(_minimal_row()))
-
     assert xml is not None
+
+
+def test_export_minimal_document_renders_expected_structure_2() -> None:
+    """Emit the CVM document envelope, the row block, and the fund CNPJ."""
+    xml = PerfilMensal().export(_document(_minimal_row()))
     assert "<DOC_ARQ" in xml
+
+
+def test_export_minimal_document_renders_expected_structure_3() -> None:
+    """Emit the CVM document envelope, the row block, and the fund CNPJ."""
+    xml = PerfilMensal().export(_document(_minimal_row()))
     assert "<CAB_INFORM>" in xml
+
+
+def test_export_minimal_document_renders_expected_structure_4() -> None:
+    """Emit the CVM document envelope, the row block, and the fund CNPJ."""
+    xml = PerfilMensal().export(_document(_minimal_row()))
     assert "<ROW_PERFIL>" in xml
+
+
+def test_export_minimal_document_renders_expected_structure_5() -> None:
+    """Emit the CVM document envelope, the row block, and the fund CNPJ."""
+    xml = PerfilMensal().export(_document(_minimal_row()))
     assert f"<CNPJ_FDO>{VALID_CNPJ}</CNPJ_FDO>" in xml
+
+
+def test_export_minimal_document_renders_expected_structure_6() -> None:
+    """Emit the CVM document envelope, the row block, and the fund CNPJ."""
+    xml = PerfilMensal().export(_document(_minimal_row()))
     assert "<TOTAL_RECURS_BR>0,00</TOTAL_RECURS_BR>" in xml
 
 
-def test_export_truncates_excess_precision_round_down() -> None:
+def test_export_truncates_excess_precision_round_down_1() -> None:
     """A value with excess precision is truncated toward zero, never rounded up."""
     xml = PerfilMensal().export(_document(_minimal_row(total_recurs_br="10.999")))
-
     assert xml is not None
+
+
+def test_export_truncates_excess_precision_round_down_2() -> None:
+    """A value with excess precision is truncated toward zero, never rounded up."""
+    xml = PerfilMensal().export(_document(_minimal_row(total_recurs_br="10.999")))
     assert "<TOTAL_RECURS_BR>10,99</TOTAL_RECURS_BR>" in xml
+
+
+def test_export_truncates_excess_precision_round_down_3() -> None:
+    """A value with excess precision is truncated toward zero, never rounded up."""
+    xml = PerfilMensal().export(_document(_minimal_row(total_recurs_br="10.999")))
     assert "11,00" not in xml
 
 
@@ -132,25 +165,39 @@ def test_sensitivity_field_truncates_to_four_places_round_down(
 
 @pytest.mark.parametrize(("field", "tag"), SENSITIVITY_FIELDS)
 @pytest.mark.parametrize(
-    ("raw", "rendered"),
-    [("1.23456789", "1,2345"), ("-1.23456789", "-1,2345"), ("2", "2,0000")],
+    ("raw", "rendered"), [("1.23456789", "1,2345"), ("-1.23456789", "-1,2345"), ("2", "2,0000")]
 )
-def test_export_sensitivity_tag_renders_four_places(
+def test_export_sensitivity_tag_renders_four_places_1(
     field: str, tag: str, raw: str, rendered: str
 ) -> None:
     """Each Q13-15 XML tag carries exactly four decimal places."""
     xml = PerfilMensal().export(_document(_row_with_sensitivity(field, raw)))
-
     assert xml is not None
+
+
+@pytest.mark.parametrize(("field", "tag"), SENSITIVITY_FIELDS)
+@pytest.mark.parametrize(
+    ("raw", "rendered"), [("1.23456789", "1,2345"), ("-1.23456789", "-1,2345"), ("2", "2,0000")]
+)
+def test_export_sensitivity_tag_renders_four_places_2(
+    field: str, tag: str, raw: str, rendered: str
+) -> None:
+    """Each Q13-15 XML tag carries exactly four decimal places."""
+    xml = PerfilMensal().export(_document(_row_with_sensitivity(field, raw)))
     assert f"<{tag}>{rendered}</{tag}>" in xml
 
 
-def test_export_worst_case_stress_keeps_two_places() -> None:
+def test_export_worst_case_stress_keeps_two_places_1() -> None:
     """Q12 (worst-case stress) stays at two places; only Q13-15 moved to four."""
     row = _row_with_sensitivity("var_diar_perc_cota_fdo_pior_cen_estress", "1.23456")
     xml = PerfilMensal().export(_document(row))
-
     assert xml is not None
+
+
+def test_export_worst_case_stress_keeps_two_places_2() -> None:
+    """Q12 (worst-case stress) stays at two places; only Q13-15 moved to four."""
+    row = _row_with_sensitivity("var_diar_perc_cota_fdo_pior_cen_estress", "1.23456")
+    xml = PerfilMensal().export(_document(row))
     assert (
         "<VAR_DIAR_PERC_COTA_FDO_PIOR_CEN_ESTRESS>1,23</VAR_DIAR_PERC_COTA_FDO_PIOR_CEN_ESTRESS>"
         in xml
@@ -190,14 +237,20 @@ def test_val_percent_outros_truncates_to_four_places_round_down(
 
 
 @pytest.mark.parametrize(
-    ("raw", "rendered"),
-    [("1.23456789", "1,2345"), ("-1.23456789", "-1,2345"), ("2", "2,0000")],
+    ("raw", "rendered"), [("1.23456789", "1,2345"), ("-1.23456789", "-1,2345"), ("2", "2,0000")]
 )
-def test_export_val_percent_outros_renders_four_places(raw: str, rendered: str) -> None:
+def test_export_val_percent_outros_renders_four_places_1(raw: str, rendered: str) -> None:
     """The VAL_PERCENT_OUTROS XML tag carries exactly four decimal places."""
     xml = PerfilMensal().export(_document(_row_with_outros(raw)))
-
     assert xml is not None
+
+
+@pytest.mark.parametrize(
+    ("raw", "rendered"), [("1.23456789", "1,2345"), ("-1.23456789", "-1,2345"), ("2", "2,0000")]
+)
+def test_export_val_percent_outros_renders_four_places_2(raw: str, rendered: str) -> None:
+    """The VAL_PERCENT_OUTROS XML tag carries exactly four decimal places."""
+    xml = PerfilMensal().export(_document(_row_with_outros(raw)))
     assert f"<VAL_PERCENT_OUTROS>{rendered}</VAL_PERCENT_OUTROS>" in xml
 
 
@@ -283,22 +336,61 @@ def _full_row() -> PerfilMensalRow:
     )
 
 
-def test_export_full_row_renders_all_optional_blocks() -> None:
+def test_export_full_row_renders_all_optional_blocks_1() -> None:
     """A fully populated row emits every optional block with escaping and comma decimals."""
     xml = PerfilMensal().export(_document(_full_row()))
-
     assert xml is not None
+
+
+def test_export_full_row_renders_all_optional_blocks_2() -> None:
+    """A fully populated row emits every optional block with escaping and comma decimals."""
+    xml = PerfilMensal().export(_document(_full_row()))
     assert "<DISTR_PATRIM>" in xml
+
+
+def test_export_full_row_renders_all_optional_blocks_3() -> None:
+    """A fully populated row emits every optional block with escaping and comma decimals."""
+    xml = PerfilMensal().export(_document(_full_row()))
     assert "<VARIACAO_PERC_VAL_COTA>" in xml
+
+
+def test_export_full_row_renders_all_optional_blocks_4() -> None:
+    """A fully populated row emits every optional block with escaping and comma decimals."""
+    xml = PerfilMensal().export(_document(_full_row()))
     assert "<VALOR_NOC_TOT_CONTRAT_DERIV_MANT_FDO>" in xml
+
+
+def test_export_full_row_renders_all_optional_blocks_5() -> None:
+    """A fully populated row emits every optional block with escaping and comma decimals."""
+    xml = PerfilMensal().export(_document(_full_row()))
     assert "<LISTA_OPER_CURS_MERC_BALCAO>" in xml
+
+
+def test_export_full_row_renders_all_optional_blocks_6() -> None:
+    """A fully populated row emits every optional block with escaping and comma decimals."""
+    xml = PerfilMensal().export(_document(_full_row()))
     assert "<LISTA_EMISSORES_TIT_CRED_PRIV>" in xml
+
+
+def test_export_full_row_renders_all_optional_blocks_7() -> None:
+    """A fully populated row emits every optional block with escaping and comma decimals."""
+    xml = PerfilMensal().export(_document(_full_row()))
     assert "<RESP_VED_REGUL_COBR_TAXA_PERFORM>" in xml
+
+
+def test_export_full_row_renders_all_optional_blocks_8() -> None:
+    """A fully populated row emits every optional block with escaping and comma decimals."""
+    xml = PerfilMensal().export(_document(_full_row()))
     assert "<MONTANTE_DISTRIB>100,50</MONTANTE_DISTRIB>" in xml
+
+
+def test_export_full_row_renders_all_optional_blocks_9() -> None:
+    """A fully populated row emits every optional block with escaping and comma decimals."""
+    xml = PerfilMensal().export(_document(_full_row()))
     assert "voto resumido &lt;ok&gt;" in xml
 
 
-def test_export_writes_file_in_windows_1252(tmp_path: Path) -> None:
+def test_export_writes_file_in_windows_1252_1(tmp_path: Path) -> None:
     """With an output path, export returns None and writes a windows-1252 file.
 
     Parameters
@@ -308,8 +400,19 @@ def test_export_writes_file_in_windows_1252(tmp_path: Path) -> None:
     """
     out = tmp_path / "perfil_mensal.xml"
     result = PerfilMensal().export(_document(_minimal_row()), output_path=str(out))
-
     assert result is None
+
+
+def test_export_writes_file_in_windows_1252_2(tmp_path: Path) -> None:
+    """With an output path, export returns None and writes a windows-1252 file.
+
+    Parameters
+    ----------
+    tmp_path : pathlib.Path
+            Pytest-provided throwaway directory for the output file.
+    """
+    out = tmp_path / "perfil_mensal.xml"
+    PerfilMensal().export(_document(_minimal_row()), output_path=str(out))
     assert f"<CNPJ_FDO>{VALID_CNPJ}</CNPJ_FDO>" in out.read_text(encoding="windows-1252")
 
 

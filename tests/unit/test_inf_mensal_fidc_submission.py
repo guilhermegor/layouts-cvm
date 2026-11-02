@@ -79,14 +79,26 @@ def _xml(doc: InfMensalFidcDocument) -> str:
     return out
 
 
-def test_export_minimal_document_has_root_namespace_and_header_in_spec_order() -> None:
+def test_export_minimal_document_has_root_namespace_and_header_in_spec_order_1() -> None:
     """The envelope and CAB_INFORM follow the template of the page."""
     xml = _xml(_doc())
     assert xml.startswith(
         '<?xml version="1.0" encoding="windows-1252"?>\n<DOC_ARQ xmlns="urn:fidc">'
     )
+    re.findall("<(\\w+)>", xml.split("</CAB_INFORM>")[0])
+
+
+def test_export_minimal_document_has_root_namespace_and_header_in_spec_order_2() -> None:
+    """The envelope and CAB_INFORM follow the template of the page."""
+    xml = _xml(_doc())
     assert xml.endswith("</DOC_ARQ>")
-    header_tags = re.findall(r"<(\w+)>", xml.split("</CAB_INFORM>")[0])
+    re.findall("<(\\w+)>", xml.split("</CAB_INFORM>")[0])
+
+
+def test_export_minimal_document_has_root_namespace_and_header_in_spec_order_3() -> None:
+    """The envelope and CAB_INFORM follow the template of the page."""
+    xml = _xml(_doc())
+    header_tags = re.findall("<(\\w+)>", xml.split("</CAB_INFORM>")[0])
     assert header_tags == [
         "CAB_INFORM",
         "DT_COMPT",
@@ -96,7 +108,19 @@ def test_export_minimal_document_has_root_namespace_and_header_in_spec_order() -
         "FDO_EXCL",
         "COTST_VINCUL",
     ]
+
+
+def test_export_minimal_document_has_root_namespace_and_header_in_spec_order_4() -> None:
+    """The envelope and CAB_INFORM follow the template of the page."""
+    xml = _xml(_doc())
+    re.findall("<(\\w+)>", xml.split("</CAB_INFORM>")[0])
     assert "<DT_COMPT>10/2020</DT_COMPT>" in xml
+
+
+def test_export_minimal_document_has_root_namespace_and_header_in_spec_order_5() -> None:
+    """The envelope and CAB_INFORM follow the template of the page."""
+    xml = _xml(_doc())
+    re.findall("<(\\w+)>", xml.split("</CAB_INFORM>")[0])
     assert "PR_ENTRE_RESGATE" not in xml
 
 
@@ -108,15 +132,25 @@ def test_export_lista_inform_children_follow_template_order() -> None:
     assert top == SPEC_LISTA_INFORM_ORDER
 
 
-def test_export_mandatory_empty_blocks_are_emitted_as_empty_tags() -> None:
+def test_export_mandatory_empty_blocks_are_emitted_as_empty_tags_1() -> None:
     """Tabela X items 3 and 7: NUM_COTISTAS_DESC and DESEMP are mandatory but may be empty."""
     xml = _xml(_doc())
     assert "<NUM_COTISTAS_DESC></NUM_COTISTAS_DESC>" in xml
+
+
+def test_export_mandatory_empty_blocks_are_emitted_as_empty_tags_2() -> None:
+    """Tabela X items 3 and 7: NUM_COTISTAS_DESC and DESEMP are mandatory but may be empty."""
+    xml = _xml(_doc())
     assert "<DESEMP></DESEMP>" in xml
+
+
+def test_export_mandatory_empty_blocks_are_emitted_as_empty_tags_3() -> None:
+    """Tabela X items 3 and 7: NUM_COTISTAS_DESC and DESEMP are mandatory but may be empty."""
+    xml = _xml(_doc())
     assert "<LISTA_CEDENT>" not in xml
 
 
-def test_export_decimals_use_comma_and_spec_scales() -> None:
+def test_export_decimals_use_comma_and_spec_scales_1() -> None:
     """2 casas for money, up to 8 for quota unit values/quantities; excess is truncated."""
 
     def mutate(data: dict[str, Any]) -> None:
@@ -132,13 +166,81 @@ def test_export_decimals_use_comma_and_spec_scales() -> None:
 
     xml = _xml(_doc(mutate))
     assert "<QT_COTAS>1234,12345678</QT_COTAS>" in xml
+
+
+def test_export_decimals_use_comma_and_spec_scales_2() -> None:
+    """2 casas for money, up to 8 for quota unit values/quantities; excess is truncated."""
+
+    def mutate(data: dict[str, Any]) -> None:
+        outras = data["lista_inform"]["outras_inform"]
+        outras["desc_serie_classe"]["desc_serie_classe_senior"][0] = {
+            "qt_cotas": "1234.123456789",
+            "vl_cotas": "1.5",
+        }
+        outras["capta_resga_amorti"]["capt_mes"]["classe_senior"][0] = {
+            "qt_cotas": "2.123456789",
+            "vl_cotas": "10.999",
+        }
+
+    xml = _xml(_doc(mutate))
     assert "<VL_COTAS>1,50000000</VL_COTAS>" in xml
+
+
+def test_export_decimals_use_comma_and_spec_scales_3() -> None:
+    """2 casas for money, up to 8 for quota unit values/quantities; excess is truncated."""
+
+    def mutate(data: dict[str, Any]) -> None:
+        outras = data["lista_inform"]["outras_inform"]
+        outras["desc_serie_classe"]["desc_serie_classe_senior"][0] = {
+            "qt_cotas": "1234.123456789",
+            "vl_cotas": "1.5",
+        }
+        outras["capta_resga_amorti"]["capt_mes"]["classe_senior"][0] = {
+            "qt_cotas": "2.123456789",
+            "vl_cotas": "10.999",
+        }
+
+    xml = _xml(_doc(mutate))
     assert "<QT_COTAS>2,12345678</QT_COTAS>" in xml
+
+
+def test_export_decimals_use_comma_and_spec_scales_4() -> None:
+    """2 casas for money, up to 8 for quota unit values/quantities; excess is truncated."""
+
+    def mutate(data: dict[str, Any]) -> None:
+        outras = data["lista_inform"]["outras_inform"]
+        outras["desc_serie_classe"]["desc_serie_classe_senior"][0] = {
+            "qt_cotas": "1234.123456789",
+            "vl_cotas": "1.5",
+        }
+        outras["capta_resga_amorti"]["capt_mes"]["classe_senior"][0] = {
+            "qt_cotas": "2.123456789",
+            "vl_cotas": "10.999",
+        }
+
+    xml = _xml(_doc(mutate))
     assert "<VL_COTAS>10,99</VL_COTAS>" in xml
+
+
+def test_export_decimals_use_comma_and_spec_scales_5() -> None:
+    """2 casas for money, up to 8 for quota unit values/quantities; excess is truncated."""
+
+    def mutate(data: dict[str, Any]) -> None:
+        outras = data["lista_inform"]["outras_inform"]
+        outras["desc_serie_classe"]["desc_serie_classe_senior"][0] = {
+            "qt_cotas": "1234.123456789",
+            "vl_cotas": "1.5",
+        }
+        outras["capta_resga_amorti"]["capt_mes"]["classe_senior"][0] = {
+            "qt_cotas": "2.123456789",
+            "vl_cotas": "10.999",
+        }
+
+    xml = _xml(_doc(mutate))
     assert "<VL_DISPONIB>0,00</VL_DISPONIB>" in xml
 
 
-def test_export_repeats_series_and_aliased_tags() -> None:
+def test_export_repeats_series_and_aliased_tags_1() -> None:
     """One CLASSE_SENIOR per series, and block-prefixed tags keep their page names."""
 
     def mutate(data: dict[str, Any]) -> None:
@@ -148,11 +250,33 @@ def test_export_repeats_series_and_aliased_tags() -> None:
 
     xml = _xml(_doc(mutate))
     assert xml.count("<VL_CLASSE>") == 2
+
+
+def test_export_repeats_series_and_aliased_tags_2() -> None:
+    """One CLASSE_SENIOR per series, and block-prefixed tags keep their page names."""
+
+    def mutate(data: dict[str, Any]) -> None:
+        num = data["lista_inform"]["outras_inform"]["num_cotistas"]
+        num.update(qt_total_cotistas=5, qt_total_cotistas_senior=5)
+        num["classe_senior"] = [{"vl_classe": 2}, {"vl_classe": 3}]
+
+    xml = _xml(_doc(mutate))
     assert "<TAXA_NEGOC_DICRED_MES_AQUIS_DESC_COMPRA>" in xml
+
+
+def test_export_repeats_series_and_aliased_tags_3() -> None:
+    """One CLASSE_SENIOR per series, and block-prefixed tags keep their page names."""
+
+    def mutate(data: dict[str, Any]) -> None:
+        num = data["lista_inform"]["outras_inform"]["num_cotistas"]
+        num.update(qt_total_cotistas=5, qt_total_cotistas_senior=5)
+        num["classe_senior"] = [{"vl_classe": 2}, {"vl_classe": 3}]
+
+    xml = _xml(_doc(mutate))
     assert "<TAXA_NEGOC_DICRED_MES_ATIV_RF_JUROS_VENDA>" in xml
 
 
-def test_export_open_fund_emits_redemption_terms_and_liquidity() -> None:
+def test_export_open_fund_emits_redemption_terms_and_liquidity_1() -> None:
     """Open funds carry the four PR_/TP_ tags and at least one LIQUIDEZ field."""
 
     def mutate(data: dict[str, Any]) -> None:
@@ -167,15 +291,69 @@ def test_export_open_fund_emits_redemption_terms_and_liquidity() -> None:
 
     xml = _xml(_doc(mutate))
     assert "<PR_ENTRE_RESGATE>30</PR_ENTRE_RESGATE>" in xml
+
+
+def test_export_open_fund_emits_redemption_terms_and_liquidity_2() -> None:
+    """Open funds carry the four PR_/TP_ tags and at least one LIQUIDEZ field."""
+
+    def mutate(data: dict[str, Any]) -> None:
+        data["cab_inform"].update(
+            tp_condominio="ABERTO",
+            pr_entre_resgate=30,
+            tp_dias_resgate="2",
+            pr_entre_conver=2,
+            tp_dias_conver="1",
+        )
+        data["lista_inform"]["outras_inform"]["liquidez"] = {"vl_ativ_liqdez": "1.00"}
+
+    xml = _xml(_doc(mutate))
     assert "<TP_DIAS_CONVER>1</TP_DIAS_CONVER>" in xml
+
+
+def test_export_open_fund_emits_redemption_terms_and_liquidity_3() -> None:
+    """Open funds carry the four PR_/TP_ tags and at least one LIQUIDEZ field."""
+
+    def mutate(data: dict[str, Any]) -> None:
+        data["cab_inform"].update(
+            tp_condominio="ABERTO",
+            pr_entre_resgate=30,
+            tp_dias_resgate="2",
+            pr_entre_conver=2,
+            tp_dias_conver="1",
+        )
+        data["lista_inform"]["outras_inform"]["liquidez"] = {"vl_ativ_liqdez": "1.00"}
+
+    xml = _xml(_doc(mutate))
     assert "<VL_ATIV_LIQDEZ>1,00</VL_ATIV_LIQDEZ>" in xml
+
+
+def test_export_open_fund_emits_redemption_terms_and_liquidity_4() -> None:
+    """Open funds carry the four PR_/TP_ tags and at least one LIQUIDEZ field."""
+
+    def mutate(data: dict[str, Any]) -> None:
+        data["cab_inform"].update(
+            tp_condominio="ABERTO",
+            pr_entre_resgate=30,
+            tp_dias_resgate="2",
+            pr_entre_conver=2,
+            tp_dias_conver="1",
+        )
+        data["lista_inform"]["outras_inform"]["liquidez"] = {"vl_ativ_liqdez": "1.00"}
+
+    xml = _xml(_doc(mutate))
     assert "VL_ATIV_LIQDEZ_30" not in xml
 
 
-def test_export_to_file_writes_windows_1252_and_returns_none(tmp_path: Path) -> None:
+def test_export_to_file_writes_windows_1252_and_returns_none_1(tmp_path: Path) -> None:
     """With an output path the file is written and nothing is returned."""
     target = tmp_path / "fidc.xml"
     assert InfMensalFidc().export(_doc(), str(target)) is None
+
+
+def test_export_to_file_writes_windows_1252_and_returns_none_2(tmp_path: Path) -> None:
+    """With an output path the file is written and nothing is returned."""
+    target = tmp_path / "fidc.xml"
+    InfMensalFidc().export(_doc(), str(target))
     assert target.read_bytes().decode("windows-1252").startswith("<?xml")
 
 

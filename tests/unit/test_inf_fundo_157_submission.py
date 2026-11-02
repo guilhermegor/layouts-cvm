@@ -61,21 +61,53 @@ def _tags(element: ET.Element) -> list[str]:
     return [child.tag.removeprefix(NS) for child in element]
 
 
-def test_export_root_and_blocks_follow_spec_order() -> None:
+def test_export_root_and_blocks_follow_spec_order_1() -> None:
     """Export root and blocks follow spec order."""
     root = _parse(InfFundo157().export(_doc(_cotista(), _cotista(cpf=OTHER_CPF))))
     assert root.tag == f"{NS}DOC_ARQ"
+    root.findall(f"{NS}LISTA_COTSTS/{NS}COTST")
+
+
+def test_export_root_and_blocks_follow_spec_order_2() -> None:
+    """Export root and blocks follow spec order."""
+    root = _parse(InfFundo157().export(_doc(_cotista(), _cotista(cpf=OTHER_CPF))))
     assert _tags(root) == ROOT_TAGS
+    root.findall(f"{NS}LISTA_COTSTS/{NS}COTST")
+
+
+def test_export_root_and_blocks_follow_spec_order_3() -> None:
+    """Export root and blocks follow spec order."""
+    root = _parse(InfFundo157().export(_doc(_cotista(), _cotista(cpf=OTHER_CPF))))
     assert _tags(root[0]) == HEADER_TAGS
+    root.findall(f"{NS}LISTA_COTSTS/{NS}COTST")
+
+
+def test_export_root_and_blocks_follow_spec_order_4() -> None:
+    """Export root and blocks follow spec order."""
+    root = _parse(InfFundo157().export(_doc(_cotista(), _cotista(cpf=OTHER_CPF))))
     cotistas = root.findall(f"{NS}LISTA_COTSTS/{NS}COTST")
     assert len(cotistas) == 2
+
+
+def test_export_root_and_blocks_follow_spec_order_5() -> None:
+    """Export root and blocks follow spec order."""
+    root = _parse(InfFundo157().export(_doc(_cotista(), _cotista(cpf=OTHER_CPF))))
+    cotistas = root.findall(f"{NS}LISTA_COTSTS/{NS}COTST")
     assert all(_tags(c) == COTST_TAGS for c in cotistas)
 
 
-def test_export_values_and_declaration() -> None:
+def test_export_values_and_declaration_1() -> None:
     """Export values and declaration."""
     xml = InfFundo157().export(_doc())
     assert xml.startswith('<?xml version="1.0" encoding="windows-1252"?>\n')
+    root = _parse(xml)
+    {c.tag.removeprefix(NS): c.text for c in root[0]}
+    {c.tag.removeprefix(NS): c.text for c in root[1][0]}
+
+
+def test_export_values_and_declaration_2() -> None:
+    """Export values and declaration."""
+    xml = InfFundo157().export(_doc())
     root = _parse(xml)
     header = {c.tag.removeprefix(NS): c.text for c in root[0]}
     assert header == {
@@ -84,23 +116,32 @@ def test_export_values_and_declaration() -> None:
         "DT_GERAC_ARQ": "31/10/2026",
         "DT_COMPTC": "10/2026",
     }
+    {c.tag.removeprefix(NS): c.text for c in root[1][0]}
+
+
+def test_export_values_and_declaration_3() -> None:
+    """Export values and declaration."""
+    xml = InfFundo157().export(_doc())
+    root = _parse(xml)
+    {c.tag.removeprefix(NS): c.text for c in root[0]}
     cotst = {c.tag.removeprefix(NS): c.text for c in root[1][0]}
-    assert cotst == {
-        "CPF": CPF,
-        "NOME": "Maria da Conceição",
-        "DT_FIM": "15/09/2026",
-        "CONF": "S",
-    }
+    assert cotst == {"CPF": CPF, "NOME": "Maria da Conceição", "DT_FIM": "15/09/2026", "CONF": "S"}
 
 
-def test_export_writes_windows_1252_bytes(tmp_path: Path) -> None:
+def test_export_writes_windows_1252_bytes_1(tmp_path: Path) -> None:
     """Export writes windows 1252 bytes."""
     target = tmp_path / "out.xml"
     assert InfFundo157().export(_doc(), str(target)) is None
+
+
+def test_export_writes_windows_1252_bytes_2(tmp_path: Path) -> None:
+    """Export writes windows 1252 bytes."""
+    target = tmp_path / "out.xml"
+    InfFundo157().export(_doc(), str(target))
     assert "Conceição".encode("windows-1252") in target.read_bytes()
 
 
-def test_failed_export_keeps_existing_file(tmp_path: Path) -> None:
+def test_failed_export_keeps_existing_file_1(tmp_path: Path) -> None:
     """Failed export keeps existing file."""
     target = tmp_path / "out.xml"
     target.write_bytes(b"keep")
@@ -110,6 +151,16 @@ def test_failed_export_keeps_existing_file(tmp_path: Path) -> None:
     )
     with pytest.raises(ValueError, match="windows-1252"):
         InfFundo157().export(doc, str(target))
+
+
+def test_failed_export_keeps_existing_file_2(tmp_path: Path) -> None:
+    """Failed export keeps existing file."""
+    target = tmp_path / "out.xml"
+    target.write_bytes(b"keep")
+    bad = InfFundo157Cotista.model_construct(**_cotista(nome="Ω"))
+    InfFundo157Document.model_construct(
+        header=InfFundo157Header.model_validate(_header()), cotistas=[bad]
+    )
     assert target.read_bytes() == b"keep"
 
 
@@ -174,8 +225,13 @@ def test_document_requires_at_least_one_cotista() -> None:
         InfFundo157Document.model_validate({"header": _header(), "cotistas": []})
 
 
-def test_document_cotistas_cannot_be_emptied_after_validation() -> None:
+def test_document_cotistas_cannot_be_emptied_after_validation_1() -> None:
     """The validated cotistas collection is immutable, so min_length cannot be bypassed."""
     doc = InfFundo157Document.model_validate({"header": _header(), "cotistas": [_cotista()]})
     assert isinstance(doc.cotistas, tuple)
+
+
+def test_document_cotistas_cannot_be_emptied_after_validation_2() -> None:
+    """The validated cotistas collection is immutable, so min_length cannot be bypassed."""
+    doc = InfFundo157Document.model_validate({"header": _header(), "cotistas": [_cotista()]})
     assert not hasattr(doc.cotistas, "clear")

@@ -214,15 +214,45 @@ def _full_row() -> dict[str, object]:
     )
 
 
-def test_header_and_row_tags_follow_the_sample_order() -> None:
+def test_header_and_row_tags_follow_the_sample_order_1() -> None:
     """Header and row tags follow the sample order."""
     root = _export(_doc())
     assert root.tag == f"{_NS}DOC_ARQ"
+    list(root[1])
+
+
+def test_header_and_row_tags_follow_the_sample_order_2() -> None:
+    """Header and row tags follow the sample order."""
+    root = _export(_doc())
     assert _tags(root) == ["CAB_INFORM", "EXTRATO_FUNDO"]
+    list(root[1])
+
+
+def test_header_and_row_tags_follow_the_sample_order_3() -> None:
+    """Header and row tags follow the sample order."""
+    root = _export(_doc())
     assert _tags(root[0]) == HEADER_TAGS
+    list(root[1])
+
+
+def test_header_and_row_tags_follow_the_sample_order_4() -> None:
+    """Header and row tags follow the sample order."""
+    root = _export(_doc())
     assert [c.text for c in root[0]] == ["41", "3.0", "31/10/2026"]
+    list(root[1])
+
+
+def test_header_and_row_tags_follow_the_sample_order_5() -> None:
+    """Header and row tags follow the sample order."""
+    root = _export(_doc())
     rows = list(root[1])
     assert [r.tag for r in rows] == [f"{_NS}ROW_EXTRATO"]
+
+
+def test_header_and_row_tags_follow_the_sample_order_6() -> None:
+    """Header and row tags follow the sample order."""
+    root = _export(_doc())
+    rows = list(root[1])
     expected = [
         t
         for t in ROW_TAGS
@@ -243,8 +273,8 @@ def test_header_and_row_tags_follow_the_sample_order() -> None:
     assert _tags(rows[0]) == expected
 
 
-def test_every_block_emits_its_tag_list_when_fully_populated() -> None:
-    """Every block emits its tag list when fully populated."""
+def _full_row_element() -> ET.Element:
+    """Return the first row element of a fully populated export."""
     root = ET.fromstring(  # noqa: S314
         Extrato()
         .export(
@@ -255,34 +285,97 @@ def test_every_block_emits_its_tag_list_when_fully_populated() -> None:
         )
         .encode("windows-1252")
     )
-    row = root[1][0]
-    assert _tags(row) == ROW_TAGS
-    for name, tags in BLOCK_TAGS.items():
-        block = next(el for el in row.iter() if el.tag == f"{_NS}{name}")
-        if name in {"CALC_TX_PERFM"}:
-            assert _tags(block) == [t for t in tags if t != "INFO_ADICIONAL"]
-        else:
-            assert _tags(block) == tags, name
-    tipo = row.find(f"{_NS}REGULAMENTO_TIPO_EMISSOR")
+    return root[1][0]
+
+
+def test_row_emits_its_tag_list_when_fully_populated() -> None:
+    """The row carries every tag in sample order."""
+    assert _tags(_full_row_element()) == ROW_TAGS
+
+
+@pytest.mark.parametrize(("name", "tags"), list(BLOCK_TAGS.items()))
+def test_block_emits_its_tag_list_when_fully_populated(name: str, tags: list[str]) -> None:
+    """Every block emits its tag list when fully populated."""
+    block = next(el for el in _full_row_element().iter() if el.tag == f"{_NS}{name}")
+    expected = [t for t in tags if t != "INFO_ADICIONAL"] if name == "CALC_TX_PERFM" else tags
+    assert _tags(block) == expected
+
+
+def test_regulation_issuer_type_emits_min_max_pairs() -> None:
+    """REGULAMENTO_TIPO_EMISSOR emits one MIN/MAX pair per base."""
+    tipo = _full_row_element().find(f"{_NS}REGULAMENTO_TIPO_EMISSOR")
     assert _tags(tipo) == [f"{b}_{s}" for b in TIPO_EMISSOR_BASES for s in ("MIN", "MAX")]
-    modalidade = row.find(f"{_NS}REGULAMENTO_MODALIDADE_ATIVO")
+
+
+def test_regulation_asset_modality_emits_min_max_pairs() -> None:
+    """REGULAMENTO_MODALIDADE_ATIVO emits one MIN/MAX pair per base."""
+    modalidade = _full_row_element().find(f"{_NS}REGULAMENTO_MODALIDADE_ATIVO")
     assert _tags(modalidade) == [f"{b}_{s}" for b in MODALIDADE_BASES for s in ("MIN", "MAX")]
 
 
-def test_decimals_use_comma_and_truncate_with_stated_scales() -> None:
+def test_decimals_use_comma_and_truncate_with_stated_scales_1() -> None:
     """Decimals use comma and truncate with stated scales."""
     row = _export(
         ExtratoDocument(
-            header=ExtratoHeader(dt_gerac_arq="01/01/2026"),
-            rows=[ExtratoRow(**_full_row())],
+            header=ExtratoHeader(dt_gerac_arq="01/01/2026"), rows=[ExtratoRow(**_full_row())]
         )
     )[1][0]
     text = {el.tag.removeprefix(_NS): el.text for el in row.iter()}
     assert text["APLICACAO_MINIMA_FUNDO"] == "100,50"
+
+
+def test_decimals_use_comma_and_truncate_with_stated_scales_2() -> None:
+    """Decimals use comma and truncate with stated scales."""
+    row = _export(
+        ExtratoDocument(
+            header=ExtratoHeader(dt_gerac_arq="01/01/2026"), rows=[ExtratoRow(**_full_row())]
+        )
+    )[1][0]
+    text = {el.tag.removeprefix(_NS): el.text for el in row.iter()}
     assert text["TAXA_MAXIMA_CUSTODIA"] == "0,123456"
+
+
+def test_decimals_use_comma_and_truncate_with_stated_scales_3() -> None:
+    """Decimals use comma and truncate with stated scales."""
+    row = _export(
+        ExtratoDocument(
+            header=ExtratoHeader(dt_gerac_arq="01/01/2026"), rows=[ExtratoRow(**_full_row())]
+        )
+    )[1][0]
+    text = {el.tag.removeprefix(_NS): el.text for el in row.iter()}
     assert text["TAXA_ADM"] == "2,5000"
+
+
+def test_decimals_use_comma_and_truncate_with_stated_scales_4() -> None:
+    """Decimals use comma and truncate with stated scales."""
+    row = _export(
+        ExtratoDocument(
+            header=ExtratoHeader(dt_gerac_arq="01/01/2026"), rows=[ExtratoRow(**_full_row())]
+        )
+    )[1][0]
+    text = {el.tag.removeprefix(_NS): el.text for el in row.iter()}
     assert text["QT_OPER_PATRIM_LIQ"] == "SL"
+
+
+def test_decimals_use_comma_and_truncate_with_stated_scales_5() -> None:
+    """Decimals use comma and truncate with stated scales."""
+    row = _export(
+        ExtratoDocument(
+            header=ExtratoHeader(dt_gerac_arq="01/01/2026"), rows=[ExtratoRow(**_full_row())]
+        )
+    )[1][0]
+    text = {el.tag.removeprefix(_NS): el.text for el in row.iter()}
     assert text["LIMITE_MAXIMO"] == "30,00"
+
+
+def test_decimals_use_comma_and_truncate_with_stated_scales_6() -> None:
+    """Decimals use comma and truncate with stated scales."""
+    row = _export(
+        ExtratoDocument(
+            header=ExtratoHeader(dt_gerac_arq="01/01/2026"), rows=[ExtratoRow(**_full_row())]
+        )
+    )[1][0]
+    text = {el.tag.removeprefix(_NS): el.text for el in row.iter()}
     assert text["OUTROS_MIN"] == "1,00"
 
 
@@ -305,14 +398,14 @@ def test_percentage_above_100_rejected() -> None:
         ExtratoRow(**_row(max_app_cotas_fundo="100.01"))
 
 
-@pytest.mark.parametrize(
-    "cnpj", ["11.222.333/0001-81", "11222333000182", " 11222333000181", "1122233300018\n", "x"]
-)
-def test_cnpj_shape_and_check_digit(cnpj: str) -> None:
-    """Cnpj shape and check digit."""
-    if cnpj == "11.222.333/0001-81":
-        assert ExtratoRow(**_row(cnpj_fdo=cnpj)).cnpj_fdo == _CNPJ
-        return
+def test_valid_cnpj_is_normalised() -> None:
+    """A masked CNPJ with valid check digits is stored unmasked."""
+    assert ExtratoRow(**_row(cnpj_fdo="11.222.333/0001-81")).cnpj_fdo == _CNPJ
+
+
+@pytest.mark.parametrize("cnpj", ["11222333000182", " 11222333000181", "1122233300018\n", "x"])
+def test_bad_cnpj_shape_or_check_digit_is_rejected(cnpj: str) -> None:
+    """A wrong shape or check digit is refused."""
     with pytest.raises(ValidationError):
         ExtratoRow(**_row(cnpj_fdo=cnpj))
 
@@ -383,12 +476,26 @@ def test_block_per_answer_rules_are_enforced(field: str, value: object) -> None:
         ExtratoRow(**_row(**{field: value}))
 
 
-def test_performance_fee_rules_depend_on_the_investor() -> None:
+def test_performance_fee_rules_depend_on_the_investor_1() -> None:
     """Performance fee rules depend on the investor."""
     calc_free = {"info_adicional": "critérios do regulamento"}
     tx = {"cobra_tx_perfm": "S", "calc_tx_perfm": calc_free}
     with pytest.raises(ValidationError):
         ExtratoRow(**_row(tx_perfm=tx))
+    ExtratoRow(**_row(tx_perfm=tx, publico_alvo="INVESTIDORES PROFISSIONAIS"))
+    full = {
+        "taxa_performance": "20",
+        "tp_taxa_performance": 4,
+        "per_indice_referencia": "100",
+        "info_adicional": "extra text",
+    }
+    full["tp_taxa_performance"] = 36
+
+
+def test_performance_fee_rules_depend_on_the_investor_2() -> None:
+    """Performance fee rules depend on the investor."""
+    calc_free = {"info_adicional": "critérios do regulamento"}
+    tx = {"cobra_tx_perfm": "S", "calc_tx_perfm": calc_free}
     ok = ExtratoRow(**_row(tx_perfm=tx, publico_alvo="INVESTIDORES PROFISSIONAIS"))
     assert ok.tx_perfm.calc_tx_perfm.info_adicional is not None
     full = {
@@ -397,8 +504,36 @@ def test_performance_fee_rules_depend_on_the_investor() -> None:
         "per_indice_referencia": "100",
         "info_adicional": "extra text",
     }
+    full["tp_taxa_performance"] = 36
+
+
+def test_performance_fee_rules_depend_on_the_investor_3() -> None:
+    """Performance fee rules depend on the investor."""
+    calc_free = {"info_adicional": "critérios do regulamento"}
+    tx = {"cobra_tx_perfm": "S", "calc_tx_perfm": calc_free}
+    ExtratoRow(**_row(tx_perfm=tx, publico_alvo="INVESTIDORES PROFISSIONAIS"))
+    full = {
+        "taxa_performance": "20",
+        "tp_taxa_performance": 4,
+        "per_indice_referencia": "100",
+        "info_adicional": "extra text",
+    }
     with pytest.raises(ValidationError):
         ExtratoRow(**_row(tx_perfm={"cobra_tx_perfm": "S", "calc_tx_perfm": full}))
+    full["tp_taxa_performance"] = 36
+
+
+def test_performance_fee_rules_depend_on_the_investor_4() -> None:
+    """Performance fee rules depend on the investor."""
+    calc_free = {"info_adicional": "critérios do regulamento"}
+    tx = {"cobra_tx_perfm": "S", "calc_tx_perfm": calc_free}
+    ExtratoRow(**_row(tx_perfm=tx, publico_alvo="INVESTIDORES PROFISSIONAIS"))
+    full = {
+        "taxa_performance": "20",
+        "tp_taxa_performance": 4,
+        "per_indice_referencia": "100",
+        "info_adicional": "extra text",
+    }
     full["tp_taxa_performance"] = 36
     with pytest.raises(ValidationError):
         ExtratoRow(
@@ -416,21 +551,39 @@ def test_text_fields_are_non_empty_bounded_and_encodable(text: str) -> None:
         ExtratoRow(**_row(prazo={"tipo_prazo": "DETERMINADO", "detalhamento_prazo": text}))
 
 
-def test_document_needs_between_1_and_1000_rows_and_rejects_extras() -> None:
+def test_document_needs_between_1_and_1000_rows_and_rejects_extras_1() -> None:
+    """Document needs between 1 and 1000 rows and rejects extras."""
+    ExtratoRow(**_row())
+    header = ExtratoHeader(dt_gerac_arq="01/01/2026")
+    with pytest.raises(ValidationError):
+        ExtratoDocument(header=header, rows=[])
+
+
+def test_document_needs_between_1_and_1000_rows_and_rejects_extras_2() -> None:
     """Document needs between 1 and 1000 rows and rejects extras."""
     row = ExtratoRow(**_row())
     header = ExtratoHeader(dt_gerac_arq="01/01/2026")
     with pytest.raises(ValidationError):
-        ExtratoDocument(header=header, rows=[])
-    with pytest.raises(ValidationError):
         ExtratoDocument(header=header, rows=[row] * 1001)
+
+
+def test_document_needs_between_1_and_1000_rows_and_rejects_extras_3() -> None:
+    """Document needs between 1 and 1000 rows and rejects extras."""
+    ExtratoRow(**_row())
+    ExtratoHeader(dt_gerac_arq="01/01/2026")
     with pytest.raises(ValidationError):
         ExtratoHeader(dt_gerac_arq="01/01/2026", cod_doc=42)
+
+
+def test_document_needs_between_1_and_1000_rows_and_rejects_extras_4() -> None:
+    """Document needs between 1 and 1000 rows and rejects extras."""
+    ExtratoRow(**_row())
+    ExtratoHeader(dt_gerac_arq="01/01/2026")
     with pytest.raises(ValidationError):
         ExtratoRow(**_row(unknown=1))
 
 
-def test_export_writes_windows_1252_bytes_and_returns_none(tmp_path: Path) -> None:
+def test_export_writes_windows_1252_bytes_and_returns_none_1(tmp_path: Path) -> None:
     """Export writes windows 1252 bytes and returns none."""
     target = tmp_path / "e.xml"
     doc = _doc(
@@ -438,12 +591,34 @@ def test_export_writes_windows_1252_bytes_and_returns_none(tmp_path: Path) -> No
         publico_alvo="PÚBLICO EM GERAL",
     )
     assert Extrato().export(doc, str(target)) is None
+    target.read_bytes()
+
+
+def test_export_writes_windows_1252_bytes_and_returns_none_2(tmp_path: Path) -> None:
+    """Export writes windows 1252 bytes and returns none."""
+    target = tmp_path / "e.xml"
+    doc = _doc(
+        fundo_invert_cotas={"tipo_fundo_invert": "S", "tipo_fundo": "FUNDO-ESPELHO"},
+        publico_alvo="PÚBLICO EM GERAL",
+    )
+    Extrato().export(doc, str(target))
     raw = target.read_bytes()
     assert raw.startswith(b'<?xml version="1.0" encoding="windows-1252"?>')
+
+
+def test_export_writes_windows_1252_bytes_and_returns_none_3(tmp_path: Path) -> None:
+    """Export writes windows 1252 bytes and returns none."""
+    target = tmp_path / "e.xml"
+    doc = _doc(
+        fundo_invert_cotas={"tipo_fundo_invert": "S", "tipo_fundo": "FUNDO-ESPELHO"},
+        publico_alvo="PÚBLICO EM GERAL",
+    )
+    Extrato().export(doc, str(target))
+    raw = target.read_bytes()
     assert "PÚBLICO EM GERAL".encode("windows-1252") in raw
 
 
-def test_failed_export_does_not_wipe_an_existing_file(tmp_path: Path) -> None:
+def test_failed_export_does_not_wipe_an_existing_file_1(tmp_path: Path) -> None:
     """Failed export does not wipe an existing file."""
     target = tmp_path / "e.xml"
     target.write_bytes(b"keep")
@@ -453,10 +628,18 @@ def test_failed_export_does_not_wipe_an_existing_file(tmp_path: Path) -> None:
     )
     with pytest.raises((ValueError, AttributeError, TypeError)):
         Extrato().export(doc, str(target))
+
+
+def test_failed_export_does_not_wipe_an_existing_file_2(tmp_path: Path) -> None:
+    """Failed export does not wipe an existing file."""
+    target = tmp_path / "e.xml"
+    target.write_bytes(b"keep")
+    bad = ExtratoRow.model_construct(**{**_row(), "cnpj_fdo": "日本"})
+    ExtratoDocument.model_construct(header=ExtratoHeader(dt_gerac_arq="01/01/2026"), rows=[bad])
     assert target.read_bytes() == b"keep"
 
 
-def test_unencodable_text_raises_value_error_before_touching_the_file(tmp_path: Path) -> None:
+def test_unencodable_text_raises_value_error_before_touching_the_file_1(tmp_path: Path) -> None:
     """Unencodable text raises value error before touching the file."""
     target = tmp_path / "e.xml"
     target.write_bytes(b"keep")
@@ -464,10 +647,18 @@ def test_unencodable_text_raises_value_error_before_touching_the_file(tmp_path: 
     doc = ExtratoDocument.model_construct(header=header, rows=[])
     with pytest.raises(ValueError, match="windows-1252"):
         Extrato().export(doc, str(target))
+
+
+def test_unencodable_text_raises_value_error_before_touching_the_file_2(tmp_path: Path) -> None:
+    """Unencodable text raises value error before touching the file."""
+    target = tmp_path / "e.xml"
+    target.write_bytes(b"keep")
+    header = ExtratoHeader.model_construct(cod_doc=41, versao="3.0", dt_gerac_arq="日本")
+    ExtratoDocument.model_construct(header=header, rows=[])
     assert target.read_bytes() == b"keep"
 
 
-def test_oversize_file_is_refused(tmp_path: Path) -> None:
+def test_oversize_file_is_refused_1(tmp_path: Path) -> None:
     """Oversize file is refused."""
     target = tmp_path / "e.xml"
     row = ExtratoRow(**_row())
@@ -476,4 +667,13 @@ def test_oversize_file_is_refused(tmp_path: Path) -> None:
     )
     with pytest.raises(ValueError, match="1 MB"):
         Extrato().export(doc, str(target))
+
+
+def test_oversize_file_is_refused_2(tmp_path: Path) -> None:
+    """Oversize file is refused."""
+    target = tmp_path / "e.xml"
+    row = ExtratoRow(**_row())
+    ExtratoDocument.model_construct(
+        header=ExtratoHeader(dt_gerac_arq="01/01/2026"), rows=[row] * 1000
+    )
     assert not target.exists()

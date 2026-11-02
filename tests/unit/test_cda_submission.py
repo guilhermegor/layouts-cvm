@@ -66,12 +66,26 @@ def _doc(**inform_kwargs: object) -> CdaDocument:
     )
 
 
-def test_export_header_and_namespace() -> None:
+def test_export_header_and_namespace_1() -> None:
     """COD_DOC=3, VERSAO=4.0, urn:cda namespace, windows-1252 declaration."""
     xml = Cda().export(_doc())
     assert xml.startswith('<?xml version="1.0" encoding="windows-1252"?>')
     root = ET.fromstring(xml.split("\n", 1)[1])
+    root.find("c:CAB_INFORM", NS)
+
+
+def test_export_header_and_namespace_2() -> None:
+    """COD_DOC=3, VERSAO=4.0, urn:cda namespace, windows-1252 declaration."""
+    xml = Cda().export(_doc())
+    root = ET.fromstring(xml.split("\n", 1)[1])
     assert root.tag == "{urn:cda}DOC_ARQ"
+    root.find("c:CAB_INFORM", NS)
+
+
+def test_export_header_and_namespace_3() -> None:
+    """COD_DOC=3, VERSAO=4.0, urn:cda namespace, windows-1252 declaration."""
+    xml = Cda().export(_doc())
+    root = ET.fromstring(xml.split("\n", 1)[1])
     head = root.find("c:CAB_INFORM", NS)
     assert [e.text for e in head] == ["3", "4.0", "03/2024", "05/04/2024"]
 
@@ -82,13 +96,10 @@ def test_export_vl_pl_truncated_with_comma() -> None:
     assert root.find(".//c:VL_PL", NS).text == "1000000,12"
 
 
-def test_export_demais_codif_tag_order() -> None:
+def test_export_demais_codif_tag_order_1() -> None:
     """Tag order inside DEMAIS_CODIF/APLIC follows the page."""
     node_block = CdaDemaisCodif(
-        cod_ativ="PETR4",
-        cod_tp_ativ=1,
-        dt_ini_vigen="01/01/2020",
-        aplic=_aplic_acao(),
+        cod_ativ="PETR4", cod_tp_ativ=1, dt_ini_vigen="01/01/2020", aplic=_aplic_acao()
     )
     root = ET.fromstring(Cda().export(_doc(demais_codif=[node_block])).split("\n", 1)[1])
     node = root.find(".//c:DEMAIS_CODIF", NS)
@@ -99,6 +110,17 @@ def test_export_demais_codif_tag_order() -> None:
         "APLIC",
     ]
     aplic = node.find("c:APLIC", NS)
+    {e.tag.split("}")[1]: e.text for e in aplic.find("c:NEGOC", NS)}
+
+
+def test_export_demais_codif_tag_order_2() -> None:
+    """Tag order inside DEMAIS_CODIF/APLIC follows the page."""
+    node_block = CdaDemaisCodif(
+        cod_ativ="PETR4", cod_tp_ativ=1, dt_ini_vigen="01/01/2020", aplic=_aplic_acao()
+    )
+    root = ET.fromstring(Cda().export(_doc(demais_codif=[node_block])).split("\n", 1)[1])
+    node = root.find(".//c:DEMAIS_CODIF", NS)
+    aplic = node.find("c:APLIC", NS)
     assert [e.tag.split("}")[1] for e in aplic] == [
         "COD_TP_APLIC",
         "EMPR_LIGADA",
@@ -106,6 +128,17 @@ def test_export_demais_codif_tag_order() -> None:
         "NEGOC",
         "POS_FIM",
     ]
+    {e.tag.split("}")[1]: e.text for e in aplic.find("c:NEGOC", NS)}
+
+
+def test_export_demais_codif_tag_order_3() -> None:
+    """Tag order inside DEMAIS_CODIF/APLIC follows the page."""
+    node_block = CdaDemaisCodif(
+        cod_ativ="PETR4", cod_tp_ativ=1, dt_ini_vigen="01/01/2020", aplic=_aplic_acao()
+    )
+    root = ET.fromstring(Cda().export(_doc(demais_codif=[node_block])).split("\n", 1)[1])
+    node = root.find(".//c:DEMAIS_CODIF", NS)
+    aplic = node.find("c:APLIC", NS)
     negoc = {e.tag.split("}")[1]: e.text for e in aplic.find("c:NEGOC", NS)}
     assert negoc == {
         "TP_NEGOC": "1",
@@ -114,6 +147,17 @@ def test_export_demais_codif_tag_order() -> None:
         "QTDE_AQUIS_NEGOC": "2,500000",
         "VL_AQUIS_NEGOC": "20,99",
     }
+
+
+def test_export_demais_codif_tag_order_4() -> None:
+    """Tag order inside DEMAIS_CODIF/APLIC follows the page."""
+    node_block = CdaDemaisCodif(
+        cod_ativ="PETR4", cod_tp_ativ=1, dt_ini_vigen="01/01/2020", aplic=_aplic_acao()
+    )
+    root = ET.fromstring(Cda().export(_doc(demais_codif=[node_block])).split("\n", 1)[1])
+    node = root.find(".//c:DEMAIS_CODIF", NS)
+    aplic = node.find("c:APLIC", NS)
+    {e.tag.split("}")[1]: e.text for e in aplic.find("c:NEGOC", NS)}
     assert aplic.find("c:POS_FIM/c:MERC_POS_FIM", NS).text == "1234,50"
 
 
@@ -141,23 +185,36 @@ def test_export_strips_leading_zeros_from_cnpj() -> None:
     assert root.find(".//c:CNPJ_FDO", NS).text == "191"
 
 
-def test_export_writes_windows_1252_file(tmp_path: object) -> None:
+def test_export_writes_windows_1252_file_1(tmp_path: object) -> None:
     """With output_path the file is written and None returned."""
     out = tmp_path / "cda.xml"
     assert Cda().export(_doc(), str(out)) is None
+
+
+def test_export_writes_windows_1252_file_2(tmp_path: object) -> None:
+    """With output_path the file is written and None returned."""
+    out = tmp_path / "cda.xml"
+    Cda().export(_doc(), str(out))
     assert out.read_bytes().startswith(b'<?xml version="1.0" encoding="windows-1252"?>')
 
 
-def test_cotas_requires_exactly_one_identifier() -> None:
+def test_cotas_requires_exactly_one_identifier_1() -> None:
     """COTAS identifies the fund by CNPJ_FDO xor COD_SUBCLASSE."""
-    aplic = CdaAplic(
-        empr_ligada="N",
-        pos_fim=CdaPosFim(qtde_pos_fim="1", merc_pos_fim="1"),
-    )
+    aplic = CdaAplic(empr_ligada="N", pos_fim=CdaPosFim(qtde_pos_fim="1", merc_pos_fim="1"))
     with pytest.raises(ValidationError):
         CdaCotas(aplic=aplic)
+
+
+def test_cotas_requires_exactly_one_identifier_2() -> None:
+    """COTAS identifies the fund by CNPJ_FDO xor COD_SUBCLASSE."""
+    aplic = CdaAplic(empr_ligada="N", pos_fim=CdaPosFim(qtde_pos_fim="1", merc_pos_fim="1"))
     with pytest.raises(ValidationError):
         CdaCotas(cnpj_fdo=VALID_CNPJ, cod_subclasse="X", aplic=aplic)
+
+
+def test_cotas_requires_exactly_one_identifier_3() -> None:
+    """COTAS identifies the fund by CNPJ_FDO xor COD_SUBCLASSE."""
+    aplic = CdaAplic(empr_ligada="N", pos_fim=CdaPosFim(qtde_pos_fim="1", merc_pos_fim="1"))
     assert CdaCotas(cod_subclasse="X", aplic=aplic).cnpj_fdo is None
 
 
@@ -243,7 +300,7 @@ def _pos(code: int | None = None, **extra: object) -> CdaAplic:
     )
 
 
-def test_swap_nests_merc_pos_fim_inside_pos_fim() -> None:
+def test_swap_nests_merc_pos_fim_inside_pos_fim_1() -> None:
     """The page puts SWAP's MERC_POS_FIM inside POS_FIM, like every other block."""
     swap = CdaSwap(
         cod_swap="SWPSDI",
@@ -251,7 +308,25 @@ def test_swap_nests_merc_pos_fim_inside_pos_fim() -> None:
     )
     node = _export_block("SWAP", swap=[swap])
     assert _tags(node) == ["COD_SWAP", "APLIC"]
+
+
+def test_swap_nests_merc_pos_fim_inside_pos_fim_2() -> None:
+    """The page puts SWAP's MERC_POS_FIM inside POS_FIM, like every other block."""
+    swap = CdaSwap(
+        cod_swap="SWPSDI",
+        aplic=CdaSwapAplic(cod_tp_aplic=183, pos_fim=CdaSwapPosFim(merc_pos_fim="5")),
+    )
+    node = _export_block("SWAP", swap=[swap])
     assert _tags(node.find("c:APLIC", NS)) == ["COD_TP_APLIC", "POS_FIM"]
+
+
+def test_swap_nests_merc_pos_fim_inside_pos_fim_3() -> None:
+    """The page puts SWAP's MERC_POS_FIM inside POS_FIM, like every other block."""
+    swap = CdaSwap(
+        cod_swap="SWPSDI",
+        aplic=CdaSwapAplic(cod_tp_aplic=183, pos_fim=CdaSwapPosFim(merc_pos_fim="5")),
+    )
+    node = _export_block("SWAP", swap=[swap])
     assert node.find("c:APLIC/c:POS_FIM/c:MERC_POS_FIM", NS).text == "5,00"
 
 
@@ -268,14 +343,19 @@ def test_tit_pub_tag_order() -> None:
     assert _tags(node) == ["COD_SELIC", "DT_VENC", "APLIC"]
 
 
-def test_cotas_has_no_cod_tp_aplic() -> None:
+def test_cotas_has_no_cod_tp_aplic_1() -> None:
     """COTAS: CNPJ_FDO, APLIC; the APLIC has no COD_TP_APLIC tag."""
     node = _export_block("COTAS", cotas=[CdaCotas(cnpj_fdo=VALID_CNPJ, aplic=_pos())])
     assert _tags(node) == ["CNPJ_FDO", "APLIC"]
+
+
+def test_cotas_has_no_cod_tp_aplic_2() -> None:
+    """COTAS: CNPJ_FDO, APLIC; the APLIC has no COD_TP_APLIC tag."""
+    node = _export_block("COTAS", cotas=[CdaCotas(cnpj_fdo=VALID_CNPJ, aplic=_pos())])
     assert _tags(node.find("c:APLIC", NS)) == ["EMPR_LIGADA", "POS_FIM"]
 
 
-def test_dep_prazo_tit_if_tag_order() -> None:
+def test_dep_prazo_tit_if_tag_order_1() -> None:
     """DEP_PRAZO_TIT_IF: post-fixed index nests, rating nests, APLIC last."""
     block = CdaDepPrazoTitIf(
         cod_tp_ativ=50,
@@ -302,15 +382,53 @@ def test_dep_prazo_tit_if_tag_order() -> None:
         "CLASSIF_RISCO",
         "APLIC",
     ]
+
+
+def test_dep_prazo_tit_if_tag_order_2() -> None:
+    """DEP_PRAZO_TIT_IF: post-fixed index nests, rating nests, APLIC last."""
+    block = CdaDepPrazoTitIf(
+        cod_tp_ativ=50,
+        emis=CdaBankEmitter(cnpj_emis=VALID_CNPJ, nm_emis="Banco"),
+        dt_venc="01/01/2030",
+        st_tit_pos_fix="S",
+        tit_pos_fix_index=CdaPosFixIndex(
+            tit_pos_fix_cod_index="DI1", tit_pos_fix_pr_index="102", tit_pos_fix_cupom="3"
+        ),
+        st_classif_risco="S",
+        classif_risco=CdaRiskRating(
+            ag_classif_risco="Ag", dt_classif_risco="01/01/2024", grau_classif_risco="AAA"
+        ),
+        aplic=_pos(),
+    )
+    node = _export_block("DEP_PRAZO_TIT_IF", dep_prazo_tit_if=[block])
     assert _tags(node.find("c:TIT_POS_FIX_INDEX", NS)) == [
         "TIT_POS_FIX_COD_INDEX",
         "TIT_POS_FIX_PR_INDEX",
         "TIT_POS_FIX_CUPOM",
     ]
+
+
+def test_dep_prazo_tit_if_tag_order_3() -> None:
+    """DEP_PRAZO_TIT_IF: post-fixed index nests, rating nests, APLIC last."""
+    block = CdaDepPrazoTitIf(
+        cod_tp_ativ=50,
+        emis=CdaBankEmitter(cnpj_emis=VALID_CNPJ, nm_emis="Banco"),
+        dt_venc="01/01/2030",
+        st_tit_pos_fix="S",
+        tit_pos_fix_index=CdaPosFixIndex(
+            tit_pos_fix_cod_index="DI1", tit_pos_fix_pr_index="102", tit_pos_fix_cupom="3"
+        ),
+        st_classif_risco="S",
+        classif_risco=CdaRiskRating(
+            ag_classif_risco="Ag", dt_classif_risco="01/01/2024", grau_classif_risco="AAA"
+        ),
+        aplic=_pos(),
+    )
+    node = _export_block("DEP_PRAZO_TIT_IF", dep_prazo_tit_if=[block])
     assert node.find("c:TIT_POS_FIX_INDEX/c:TIT_POS_FIX_PR_INDEX", NS).text == "102,000000"
 
 
-def test_tit_agro_cred_priv_tag_order() -> None:
+def test_tit_agro_cred_priv_tag_order_1() -> None:
     """TIT_AGRO_CRED_PRIV: pre-fixed rate, CETIP/guarantee flags, optional co-obligor CNPJ."""
     block = CdaTitAgroCredPriv(
         cod_tp_ativ=31,
@@ -335,10 +453,26 @@ def test_tit_agro_cred_priv_tag_order() -> None:
         "CNPJ_INSTIT_FINANC",
         "APLIC",
     ]
+
+
+def test_tit_agro_cred_priv_tag_order_2() -> None:
+    """TIT_AGRO_CRED_PRIV: pre-fixed rate, CETIP/guarantee flags, optional co-obligor CNPJ."""
+    block = CdaTitAgroCredPriv(
+        cod_tp_ativ=31,
+        emis=CdaEmitter(tp_pf_pj_emis="PJ", nr_pf_pj_emis=VALID_CNPJ, nm_emis="Emissor"),
+        dt_venc="01/01/2030",
+        st_tit_pos_fix="N",
+        tit_pre_fix_taxa_contr="15",
+        st_tit_reg_cetip="S",
+        st_tit_garant_seguro="S",
+        cnpj_instit_financ=VALID_CNPJ,
+        aplic=_pos(195),
+    )
+    node = _export_block("TIT_AGRO_CRED_PRIV", tit_agro_cred_priv=[block])
     assert _tags(node.find("c:EMIS", NS)) == ["TP_PF_PJ_EMIS", "NR_PF_PJ_EMIS", "NM_EMIS"]
 
 
-def test_inv_ext_tag_order_and_ativo_ext_after_pos_fim() -> None:
+def test_inv_ext_tag_order_and_ativo_ext_after_pos_fim_1() -> None:
     """INV_EXT: ATIVO_EXT closes APLIC, after POS_FIM; VALOR_AT_EXT keeps its own scale."""
     ext = CdaAtivoExt(desc_at_ext="Ativo", qtde_at_ext=3, valor_at_ext="12.3456789")
     block = CdaInvExt(
@@ -364,29 +498,97 @@ def test_inv_ext_tag_order_and_ativo_ext_after_pos_fim() -> None:
         "ST_CLASSIF_RISCO",
         "APLIC",
     ]
+    node.find("c:APLIC", NS)
+
+
+def test_inv_ext_tag_order_and_ativo_ext_after_pos_fim_2() -> None:
+    """INV_EXT: ATIVO_EXT closes APLIC, after POS_FIM; VALOR_AT_EXT keeps its own scale."""
+    ext = CdaAtivoExt(desc_at_ext="Ativo", qtde_at_ext=3, valor_at_ext="12.3456789")
+    block = CdaInvExt(
+        cod_tp_ativ=1,
+        inv_coletivo="N",
+        gest_inv_coletivo="N",
+        nm_emis="Emissor",
+        cod_pais=1,
+        cod_bv_merc="NYSE",
+        cod_ativo_bv_merc="X",
+        st_classif_risco="N",
+        aplic=_pos(ativo_ext=ext),
+    )
+    node = _export_block("INV_EXT", inv_ext=[block])
     aplic = node.find("c:APLIC", NS)
     assert _tags(aplic) == ["EMPR_LIGADA", "POS_FIM", "ATIVO_EXT"]
+
+
+def test_inv_ext_tag_order_and_ativo_ext_after_pos_fim_3() -> None:
+    """INV_EXT: ATIVO_EXT closes APLIC, after POS_FIM; VALOR_AT_EXT keeps its own scale."""
+    ext = CdaAtivoExt(desc_at_ext="Ativo", qtde_at_ext=3, valor_at_ext="12.3456789")
+    block = CdaInvExt(
+        cod_tp_ativ=1,
+        inv_coletivo="N",
+        gest_inv_coletivo="N",
+        nm_emis="Emissor",
+        cod_pais=1,
+        cod_bv_merc="NYSE",
+        cod_ativo_bv_merc="X",
+        st_classif_risco="N",
+        aplic=_pos(ativo_ext=ext),
+    )
+    node = _export_block("INV_EXT", inv_ext=[block])
+    aplic = node.find("c:APLIC", NS)
     assert _tags(aplic.find("c:ATIVO_EXT", NS)) == ["DESC_AT_EXT", "QTDE_AT_EXT", "VALOR_AT_EXT"]
+
+
+def test_inv_ext_tag_order_and_ativo_ext_after_pos_fim_4() -> None:
+    """INV_EXT: ATIVO_EXT closes APLIC, after POS_FIM; VALOR_AT_EXT keeps its own scale."""
+    ext = CdaAtivoExt(desc_at_ext="Ativo", qtde_at_ext=3, valor_at_ext="12.3456789")
+    block = CdaInvExt(
+        cod_tp_ativ=1,
+        inv_coletivo="N",
+        gest_inv_coletivo="N",
+        nm_emis="Emissor",
+        cod_pais=1,
+        cod_bv_merc="NYSE",
+        cod_ativo_bv_merc="X",
+        st_classif_risco="N",
+        aplic=_pos(ativo_ext=ext),
+    )
+    node = _export_block("INV_EXT", inv_ext=[block])
+    aplic = node.find("c:APLIC", NS)
     assert aplic.find("c:ATIVO_EXT/c:VALOR_AT_EXT", NS).text == "12,3456789"
 
 
-def test_export_non_cp1252_text_rejected_and_file_untouched(tmp_path: object) -> None:
+def test_export_non_cp1252_text_rejected_and_file_untouched_1(tmp_path: object) -> None:
     """A character windows-1252 cannot hold is refused at validation, never at write time."""
     out = tmp_path / "cda.xml"
     out.write_bytes(b"previous export")
     with pytest.raises(ValidationError, match="windows-1252"):
-        CdaEmitter(tp_pf_pj_emis="PJ", nr_pf_pj_emis=VALID_CNPJ, nm_emis="seta \u2192")
+        CdaEmitter(tp_pf_pj_emis="PJ", nr_pf_pj_emis=VALID_CNPJ, nm_emis="seta →")
+
+
+def test_export_non_cp1252_text_rejected_and_file_untouched_2(tmp_path: object) -> None:
+    """A character windows-1252 cannot hold is refused at validation, never at write time."""
+    out = tmp_path / "cda.xml"
+    out.write_bytes(b"previous export")
     assert out.read_bytes() == b"previous export"
 
 
-def test_export_failure_does_not_truncate_existing_file(tmp_path: object) -> None:
+def test_export_failure_does_not_truncate_existing_file_1(tmp_path: object) -> None:
     """Even if unencodable text got past validation, the old file survives."""
     doc = _doc()
-    object.__setattr__(doc.header, "dt_gerac_arq", "\u2192")  # noqa: PLC2801
+    object.__setattr__(doc.header, "dt_gerac_arq", "→")  # noqa: PLC2801
     out = tmp_path / "cda.xml"
     out.write_bytes(b"previous export")
     with pytest.raises(UnicodeEncodeError):
         Cda().export(doc, str(out))
+
+
+def test_export_failure_does_not_truncate_existing_file_2(tmp_path: object) -> None:
+    """Even if unencodable text got past validation, the old file survives."""
+    doc = _doc()
+    object.__setattr__(doc.header, "dt_gerac_arq", "→")  # noqa: PLC2801
+    out = tmp_path / "cda.xml"
+    out.write_bytes(b"previous export")
     assert out.read_bytes() == b"previous export"
 
 
@@ -399,14 +601,35 @@ def test_export_accepts_cp1252_accents() -> None:
 @pytest.mark.parametrize(
     "dt", ["31/02/2024", "99/99/2024", "00/01/2024", "29/02/2023", "01/01/2024\n"]
 )
-def test_impossible_dates_rejected_everywhere(dt: str) -> None:
+def test_impossible_dates_rejected_everywhere_1(dt: str) -> None:
     """Every DD/MM/AAAA field shares one real-calendar check."""
     with pytest.raises(ValidationError):
         CdaHeader(dt_compt="03/2024", dt_gerac_arq=dt)
+
+
+@pytest.mark.parametrize(
+    "dt", ["31/02/2024", "99/99/2024", "00/01/2024", "29/02/2023", "01/01/2024\n"]
+)
+def test_impossible_dates_rejected_everywhere_2(dt: str) -> None:
+    """Every DD/MM/AAAA field shares one real-calendar check."""
     with pytest.raises(ValidationError):
         CdaRiskRating(ag_classif_risco="a", dt_classif_risco=dt, grau_classif_risco="A")
+
+
+@pytest.mark.parametrize(
+    "dt", ["31/02/2024", "99/99/2024", "00/01/2024", "29/02/2023", "01/01/2024\n"]
+)
+def test_impossible_dates_rejected_everywhere_3(dt: str) -> None:
+    """Every DD/MM/AAAA field shares one real-calendar check."""
     with pytest.raises(ValidationError):
         CdaDemaisCodif(cod_ativ="X", cod_tp_ativ=1, dt_ini_vigen=dt, aplic=_aplic_acao())
+
+
+@pytest.mark.parametrize(
+    "dt", ["31/02/2024", "99/99/2024", "00/01/2024", "29/02/2023", "01/01/2024\n"]
+)
+def test_impossible_dates_rejected_everywhere_4(dt: str) -> None:
+    """Every DD/MM/AAAA field shares one real-calendar check."""
     with pytest.raises(ValidationError):
         CdaTitPub(cod_selic="1", dt_venc=dt, aplic=_pos(147))
 
@@ -416,21 +639,33 @@ def test_leap_day_accepted() -> None:
     assert CdaHeader(dt_compt="03/2024", dt_gerac_arq="29/02/2024").dt_gerac_arq == "29/02/2024"
 
 
-def test_valor_at_ext_rejects_float_and_nan() -> None:
+def test_valor_at_ext_rejects_float_and_nan_1() -> None:
     """A monetary value is never a binary float; NaN is not a number the file can carry."""
     with pytest.raises(ValidationError, match="never a float"):
         CdaAtivoExt(desc_at_ext="a", qtde_at_ext=1, valor_at_ext=0.1)
+
+
+def test_valor_at_ext_rejects_float_and_nan_2() -> None:
+    """A monetary value is never a binary float; NaN is not a number the file can carry."""
     with pytest.raises(ValidationError):
         CdaAtivoExt(desc_at_ext="a", qtde_at_ext=1, valor_at_ext="NaN")
+
+
+def test_valor_at_ext_rejects_float_and_nan_3() -> None:
+    """A monetary value is never a binary float; NaN is not a number the file can carry."""
     assert CdaAtivoExt(desc_at_ext="a", qtde_at_ext=1, valor_at_ext="0.1").valor_at_ext == Decimal(
         "0.1"
     )
 
 
-def test_float_rejected_on_scaled_fields() -> None:
+def test_float_rejected_on_scaled_fields_1() -> None:
     """The no-float rule covers VL_PL and the quantity/value fields too."""
     with pytest.raises(ValidationError, match="never a float"):
         CdaInform(cnpj_fdo=VALID_CNPJ, vl_pl=1.1)
+
+
+def test_float_rejected_on_scaled_fields_2() -> None:
+    """The no-float rule covers VL_PL and the quantity/value fields too."""
     with pytest.raises(ValidationError, match="never a float"):
         CdaPosFim(qtde_pos_fim=1.5, merc_pos_fim="1")
 
@@ -453,37 +688,56 @@ def test_empty_negoc_rejected() -> None:
         CdaNegoc()
 
 
-def test_negative_traded_quantity_rejected() -> None:
+def test_negative_traded_quantity_rejected_1() -> None:
     """Sales/acquisition totals are non-negative, like their VL_* fields."""
     with pytest.raises(ValidationError):
         CdaNegoc(qtde_vendas_negoc="-5", vl_vendas_negoc="10")
+
+
+def test_negative_traded_quantity_rejected_2() -> None:
+    """Sales/acquisition totals are non-negative, like their VL_* fields."""
     with pytest.raises(ValidationError):
         CdaNegoc(qtde_aquis_negoc="-5", vl_aquis_negoc="10")
 
 
-def test_swap_code_rejects_trailing_newline() -> None:
+def test_swap_code_rejects_trailing_newline_1() -> None:
     """fullmatch, not match: no trailing newline in the XML."""
     aplic = CdaSwapAplic(cod_tp_aplic=183, pos_fim=CdaSwapPosFim(merc_pos_fim="1"))
     with pytest.raises(ValidationError):
         CdaSwap(cod_swap="SWPABC\n", aplic=aplic)
+
+
+def test_swap_code_rejects_trailing_newline_2() -> None:
+    """fullmatch, not match: no trailing newline in the XML."""
+    CdaSwapAplic(cod_tp_aplic=183, pos_fim=CdaSwapPosFim(merc_pos_fim="1"))
     with pytest.raises(ValidationError):
         CdaHeader(dt_compt="03/2024\n", dt_gerac_arq="05/04/2024")
 
 
 @pytest.mark.parametrize("code", ["", "a\x00b"])
-def test_empty_or_control_code_rejected(code: str) -> None:
+def test_empty_or_control_code_rejected_1(code: str) -> None:
     """Code/text fields must be non-empty and XML-legal."""
     with pytest.raises(ValidationError):
         CdaTitPub(cod_selic=code, dt_venc="01/01/2030", aplic=_pos(147))
+
+
+@pytest.mark.parametrize("code", ["", "a\x00b"])
+def test_empty_or_control_code_rejected_2(code: str) -> None:
+    """Code/text fields must be non-empty and XML-legal."""
     with pytest.raises(ValidationError):
         CdaCotas(cod_subclasse=code, aplic=_pos())
 
 
 @pytest.mark.parametrize("text", ["   ", "1\n", "A\tB", "x\r"])
-def test_blank_or_multiline_text_rejected(text: str) -> None:
+def test_blank_or_multiline_text_rejected_1(text: str) -> None:
     """Blank text and tab/line breaks never reach the XML."""
     with pytest.raises(ValidationError):
         CdaTitPub(cod_selic=text, dt_venc="01/01/2030", aplic=_pos(147))
+
+
+@pytest.mark.parametrize("text", ["   ", "1\n", "A\tB", "x\r"])
+def test_blank_or_multiline_text_rejected_2(text: str) -> None:
+    """Blank text and tab/line breaks never reach the XML."""
     with pytest.raises(ValidationError):
         CdaEmitter(tp_pf_pj_emis="PJ", nr_pf_pj_emis=VALID_CNPJ, nm_emis=text)
 

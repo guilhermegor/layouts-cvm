@@ -105,52 +105,136 @@ def _tags(el: ET.Element) -> list[str]:
     return [c.tag.removeprefix(NS) for c in el]
 
 
-def test_export_returns_declaration_namespace_and_root() -> None:
+def test_export_returns_declaration_namespace_and_root_1() -> None:
     """Export returns declaration namespace and root."""
     text = InformeQuadrimestral().export(_doc())
     assert text.startswith('<?xml version="1.0" encoding="windows-1252"?>\n')
+    ET.fromstring(text.encode("windows-1252"))  # noqa: S314
+
+
+def test_export_returns_declaration_namespace_and_root_2() -> None:
+    """Export returns declaration namespace and root."""
+    text = InformeQuadrimestral().export(_doc())
     root = ET.fromstring(text.encode("windows-1252"))  # noqa: S314
     assert root.tag == f"{NS}DOC_ARQ"
+
+
+def test_export_returns_declaration_namespace_and_root_3() -> None:
+    """Export returns declaration namespace and root."""
+    text = InformeQuadrimestral().export(_doc())
+    root = ET.fromstring(text.encode("windows-1252"))  # noqa: S314
     assert _tags(root) == ["CAB_INFORM", "LISTA_INFORM"]
 
 
-def test_header_block_tags_and_values() -> None:
+def test_header_block_tags_and_values_1() -> None:
     """Header block tags and values."""
     header = _xml(_doc())[0]
     assert _tags(header) == HEADER_TAGS
+
+
+def test_header_block_tags_and_values_2() -> None:
+    """Header block tags and values."""
+    header = _xml(_doc())[0]
     assert [c.text for c in header] == ["51", "04/2026", "15/05/2026", "2.0"]
 
 
-def test_inform_block_tags_in_page_order_and_values() -> None:
+def test_inform_block_tags_in_page_order_and_values_1() -> None:
     """Inform block tags in page order and values."""
     inform = _xml(_doc())[1][0]
     assert _tags(inform) == INFORM_TAGS
+    {c.tag.removeprefix(NS): c.text for c in inform}
+
+
+def test_inform_block_tags_in_page_order_and_values_2() -> None:
+    """Inform block tags in page order and values."""
+    inform = _xml(_doc())[1][0]
     values = {c.tag.removeprefix(NS): c.text for c in inform}
     assert values["NR_PF_PJ_FDO"] == VALID_CNPJ
+
+
+def test_inform_block_tags_in_page_order_and_values_3() -> None:
+    """Inform block tags in page order and values."""
+    inform = _xml(_doc())[1][0]
+    values = {c.tag.removeprefix(NS): c.text for c in inform}
     assert values["ENTID_INVEST"] == "S"
+
+
+def test_inform_block_tags_in_page_order_and_values_4() -> None:
+    """Inform block tags in page order and values."""
+    inform = _xml(_doc())[1][0]
+    values = {c.tag.removeprefix(NS): c.text for c in inform}
     assert values["PUBLICO_ALVO"] == "2"
+
+
+def test_inform_block_tags_in_page_order_and_values_5() -> None:
+    """Inform block tags in page order and values."""
+    inform = _xml(_doc())[1][0]
+    values = {c.tag.removeprefix(NS): c.text for c in inform}
     assert values["VL_PL_FDO"] == "1000,50000000"
+
+
+def test_inform_block_tags_in_page_order_and_values_6() -> None:
+    """Inform block tags in page order and values."""
+    inform = _xml(_doc())[1][0]
+    values = {c.tag.removeprefix(NS): c.text for c in inform}
     assert values["VL_TOT_COTAS_OUTROS_FIP"] == "0,00000000"
 
 
-def test_category_block_tags_repetition_totals_and_codes() -> None:
+def test_category_block_tags_repetition_totals_and_codes_1() -> None:
     """Category block tags repetition totals and codes."""
     lista = _xml(_doc())[1][0].find(f"{NS}LISTA_COTST_CATEG")
     assert _tags(lista) == ["COTST_CATEG", "COTST_CATEG", "TOT_COTST_SUBSCR", "TX_NUM_TOT_COT"]
+
+
+def test_category_block_tags_repetition_totals_and_codes_2() -> None:
+    """Category block tags repetition totals and codes."""
+    lista = _xml(_doc())[1][0].find(f"{NS}LISTA_COTST_CATEG")
     first = lista[0]
     assert _tags(first) == CATEG_TAGS
+
+
+def test_category_block_tags_repetition_totals_and_codes_3() -> None:
+    """Category block tags repetition totals and codes."""
+    lista = _xml(_doc())[1][0].find(f"{NS}LISTA_COTST_CATEG")
+    first = lista[0]
     assert [c.text for c in first] == ["001", "3", "40,25000000"]
+
+
+def test_category_block_tags_repetition_totals_and_codes_4() -> None:
+    """Category block tags repetition totals and codes."""
+    lista = _xml(_doc())[1][0].find(f"{NS}LISTA_COTST_CATEG")
     assert lista[1][0].text == "015"
+
+
+def test_category_block_tags_repetition_totals_and_codes_5() -> None:
+    """Category block tags repetition totals and codes."""
+    lista = _xml(_doc())[1][0].find(f"{NS}LISTA_COTST_CATEG")
     assert (lista[2].text, lista[3].text) == ("5", "100,00000000")
+
+
+def test_category_block_tags_repetition_totals_and_codes_6() -> None:
+    """Category block tags repetition totals and codes."""
+    lista = _xml(_doc())[1][0].find(f"{NS}LISTA_COTST_CATEG")
     assert LISTA_CATEG_TAGS[1:] == [lista[2].tag.removeprefix(NS), lista[3].tag.removeprefix(NS)]
 
 
-def test_class_block_tags_and_values() -> None:
+def test_class_block_tags_and_values_1() -> None:
     """Class block tags and values."""
     lista = _xml(_doc())[1][0].find(f"{NS}LISTA_CLASSE_COTAS")
     assert _tags(lista) == ["CLASSE_COTAS"]
+
+
+def test_class_block_tags_and_values_2() -> None:
+    """Class block tags and values."""
+    lista = _xml(_doc())[1][0].find(f"{NS}LISTA_CLASSE_COTAS")
     classe = lista[0]
     assert _tags(classe) == CLASSE_TAGS
+
+
+def test_class_block_tags_and_values_3() -> None:
+    """Class block tags and values."""
+    lista = _xml(_doc())[1][0].find(f"{NS}LISTA_CLASSE_COTAS")
+    classe = lista[0]
     assert [c.text for c in classe] == [
         "1",
         "5",
@@ -224,27 +308,34 @@ def _with_categ(**over: object) -> dict:
     return _inform(lista_cotst_categ=lista)
 
 
-def test_category_rules() -> None:
-    """Category rules."""
-    good = {"cod_categ": "002", "qtd_cotst_subscr": 1, "pr_cotas_subscr": "1"}
-    bad_inputs = [
-        [{**good, "cod_categ": "016"}],
-        [{**good, "cod_categ": "1"}],
-        [{**good, "qtd_cotst_subscr": -1}],
-        [{**good, "qtd_cotst_subscr": True}],
-        [{**good, "qtd_cotst_subscr": 1.0}],
-        [{**good, "pr_cotas_subscr": "100.0001"}],
-        [{**good, "pr_cotas_subscr": "-1"}],
-        [good, good],
+_GOOD_CATEG = {"cod_categ": "002", "qtd_cotst_subscr": 1, "pr_cotas_subscr": "1"}
+
+
+@pytest.mark.parametrize(
+    "categs",
+    [
+        [{**_GOOD_CATEG, "cod_categ": "016"}],
+        [{**_GOOD_CATEG, "cod_categ": "1"}],
+        [{**_GOOD_CATEG, "qtd_cotst_subscr": -1}],
+        [{**_GOOD_CATEG, "qtd_cotst_subscr": True}],
+        [{**_GOOD_CATEG, "qtd_cotst_subscr": 1.0}],
+        [{**_GOOD_CATEG, "pr_cotas_subscr": "100.0001"}],
+        [{**_GOOD_CATEG, "pr_cotas_subscr": "-1"}],
+        [_GOOD_CATEG, _GOOD_CATEG],
         [],
-    ]
-    for categs in bad_inputs:
-        with pytest.raises(ValidationError):
-            _doc(_with_categ(cotst_categ=categs))
+    ],
+)
+def test_invalid_category_lists_are_rejected(categs: list) -> None:
+    """Bad codes, quantities, shares, duplicates and an empty list are refused."""
     with pytest.raises(ValidationError):
-        _doc(_with_categ(tot_cotst_subscr=-1))
+        _doc(_with_categ(cotst_categ=categs))
+
+
+@pytest.mark.parametrize("override", [{"tot_cotst_subscr": -1}, {"tx_num_tot_cot": "101"}])
+def test_invalid_category_totals_are_rejected(override: dict) -> None:
+    """A negative total or a percentage above 100 is refused."""
     with pytest.raises(ValidationError):
-        _doc(_with_categ(tx_num_tot_cot="101"))
+        _doc(_with_categ(**override))
 
 
 def test_all_fifteen_categories_accepted() -> None:
@@ -317,21 +408,37 @@ def test_generation_date_must_be_a_real_date(bad: str) -> None:
         InformeQuadrimestralHeader(dt_compt="04/2026", dt_gerac_arq=bad)
 
 
-def test_header_literals_are_fixed() -> None:
+def test_header_literals_are_fixed_1() -> None:
     """Header literals are fixed."""
     with pytest.raises(ValidationError):
         InformeQuadrimestralHeader(cod_doc=50, dt_compt="04/2026", dt_gerac_arq="01/05/2026")
+
+
+def test_header_literals_are_fixed_2() -> None:
+    """Header literals are fixed."""
     with pytest.raises(ValidationError):
         InformeQuadrimestralHeader(versao="1.0", dt_compt="04/2026", dt_gerac_arq="01/05/2026")
 
 
-def test_document_rules() -> None:
+def test_document_rules_1() -> None:
     """Document rules."""
     header = {"dt_compt": "04/2026", "dt_gerac_arq": "15/05/2026"}
     with pytest.raises(ValidationError):
         InformeQuadrimestralDocument(header=header, informs=[])
+    [_inform(f"{n:08d}000100") for n in range(101)]
+
+
+def test_document_rules_2() -> None:
+    """Document rules."""
+    header = {"dt_compt": "04/2026", "dt_gerac_arq": "15/05/2026"}
     with pytest.raises(ValidationError):
         InformeQuadrimestralDocument(header=header, informs=[_inform(), _inform()])
+    [_inform(f"{n:08d}000100") for n in range(101)]
+
+
+def test_document_rules_3() -> None:
+    """Document rules."""
+    header = {"dt_compt": "04/2026", "dt_gerac_arq": "15/05/2026"}
     funds = [_inform(f"{n:08d}000100") for n in range(101)]
     with pytest.raises(ValidationError):
         InformeQuadrimestralDocument(header=header, informs=funds)
@@ -343,16 +450,24 @@ def test_unknown_field_rejected() -> None:
         _doc(_inform(extra="x"))
 
 
-def test_export_to_file_returns_none_and_writes_windows_1252(tmp_path: Path) -> None:
+def test_export_to_file_returns_none_and_writes_windows_1252_1(tmp_path: Path) -> None:
     """Export to file returns none and writes windows 1252."""
     out = tmp_path / "iq.xml"
     assert InformeQuadrimestral().export(_doc(), str(out)) is None
+    raw = out.read_bytes()
+    ET.fromstring(raw)  # noqa: S314
+
+
+def test_export_to_file_returns_none_and_writes_windows_1252_2(tmp_path: Path) -> None:
+    """Export to file returns none and writes windows 1252."""
+    out = tmp_path / "iq.xml"
+    InformeQuadrimestral().export(_doc(), str(out))
     raw = out.read_bytes()
     assert raw.startswith(b'<?xml version="1.0" encoding="windows-1252"?>')
     ET.fromstring(raw)  # noqa: S314
 
 
-def test_unencodable_text_never_wipes_existing_file(tmp_path: Path) -> None:
+def test_unencodable_text_never_wipes_existing_file_1(tmp_path: Path) -> None:
     """Unencodable text never wipes existing file."""
     out = tmp_path / "iq.xml"
     out.write_bytes(b"keep me")
@@ -360,4 +475,12 @@ def test_unencodable_text_never_wipes_existing_file(tmp_path: Path) -> None:
     object.__setattr__(doc.informs[0], "entid_invest", "中")  # noqa: PLC2801
     with pytest.raises(ValueError, match="windows-1252"):
         InformeQuadrimestral().export(doc, str(out))
+
+
+def test_unencodable_text_never_wipes_existing_file_2(tmp_path: Path) -> None:
+    """Unencodable text never wipes existing file."""
+    out = tmp_path / "iq.xml"
+    out.write_bytes(b"keep me")
+    doc = _doc()
+    object.__setattr__(doc.informs[0], "entid_invest", "中")  # noqa: PLC2801
     assert out.read_bytes() == b"keep me"

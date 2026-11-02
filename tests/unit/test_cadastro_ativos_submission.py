@@ -62,17 +62,53 @@ def _doc(*rows: CadastroAtivosRow) -> CadastroAtivosDocument:
     )
 
 
-def test_export_structure_and_order() -> None:
+def test_export_structure_and_order_1() -> None:
     """Root, header, no namespace, row tags in the page's order, bare CNPJ."""
     xml = CadastroAtivos().export(_doc(_row()))
     assert xml is not None
+    ET.fromstring(xml.split("\n", 1)[1])
+
+
+def test_export_structure_and_order_2() -> None:
+    """Root, header, no namespace, row tags in the page's order, bare CNPJ."""
+    xml = CadastroAtivos().export(_doc(_row()))
     assert xml.startswith('<?xml version="1.0" encoding="windows-1252"?>')
+    ET.fromstring(xml.split("\n", 1)[1])
+
+
+def test_export_structure_and_order_3() -> None:
+    """Root, header, no namespace, row tags in the page's order, bare CNPJ."""
+    xml = CadastroAtivos().export(_doc(_row()))
     root = ET.fromstring(xml.split("\n", 1)[1])
     assert root.tag == "DOC_ARQ"
+
+
+def test_export_structure_and_order_4() -> None:
+    """Root, header, no namespace, row tags in the page's order, bare CNPJ."""
+    xml = CadastroAtivos().export(_doc(_row()))
+    root = ET.fromstring(xml.split("\n", 1)[1])
     assert [c.tag for c in root] == ["DESC_MERC", "ATIVOS"]
+
+
+def test_export_structure_and_order_5() -> None:
+    """Root, header, no namespace, row tags in the page's order, bare CNPJ."""
+    xml = CadastroAtivos().export(_doc(_row()))
+    root = ET.fromstring(xml.split("\n", 1)[1])
     desc = {c.tag: c.text for c in root[0]}
     assert desc == {"COD_DOC": "2", "CNPJ_MERC": "11222333000181", "DT_GERAC_ARQ": "05/04/2024"}
+
+
+def test_export_structure_and_order_6() -> None:
+    """Root, header, no namespace, row tags in the page's order, bare CNPJ."""
+    xml = CadastroAtivos().export(_doc(_row()))
+    root = ET.fromstring(xml.split("\n", 1)[1])
     assert [c.tag for c in root[1][0]] == ROW_ORDER
+
+
+def test_export_structure_and_order_7() -> None:
+    """Root, header, no namespace, row tags in the page's order, bare CNPJ."""
+    xml = CadastroAtivos().export(_doc(_row()))
+    root = ET.fromstring(xml.split("\n", 1)[1])
     assert root[1][0].findtext("CNPJ_EMP_EMISSORA") == "11222333000181"
 
 
@@ -83,10 +119,16 @@ def test_removal_omits_optional_fields() -> None:
     assert [c.tag for c in root[1][0]] == ["ACAO", "CD_ATIV", "TP_ATIV", "DT_INICIO_VIGEN"]
 
 
-def test_export_to_file_is_windows_1252(tmp_path: Path) -> None:
+def test_export_to_file_is_windows_1252_1(tmp_path: Path) -> None:
     """Writes cp1252 bytes and returns None."""
     out = tmp_path / "a.xml"
     assert CadastroAtivos().export(_doc(_row()), output_path=str(out)) is None
+
+
+def test_export_to_file_is_windows_1252_2(tmp_path: Path) -> None:
+    """Writes cp1252 bytes and returns None."""
+    out = tmp_path / "a.xml"
+    CadastroAtivos().export(_doc(_row()), output_path=str(out))
     assert "ç".encode("windows-1252") in out.read_bytes()
 
 
@@ -143,11 +185,19 @@ def test_cnpj_with_leading_zeros_omitted_is_accepted() -> None:
     assert _row(cnpj_emp_emissora="191").cnpj_emp_emissora == "00000000000191"
 
 
-def test_row_cap_is_1000() -> None:
+def test_row_cap_is_1000_1() -> None:
     """1000 rows fit, 1001 do not, and zero rows are refused."""
     assert len(_doc(*[_row()] * 1000).rows) == 1000
+
+
+def test_row_cap_is_1000_2() -> None:
+    """1000 rows fit, 1001 do not, and zero rows are refused."""
     with pytest.raises(ValidationError):
         _doc(*[_row()] * 1001)
+
+
+def test_row_cap_is_1000_3() -> None:
+    """1000 rows fit, 1001 do not, and zero rows are refused."""
     with pytest.raises(ValidationError):
         _doc()
 

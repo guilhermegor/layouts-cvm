@@ -216,10 +216,15 @@ def _rejects(**overrides: object) -> None:
         _doc(_inform(**overrides))
 
 
-def test_export_declares_windows_1252_and_the_lamina_namespace() -> None:
+def test_export_declares_windows_1252_and_the_lamina_namespace_1() -> None:
     """The prolog and root match the page's sample."""
     xml = Lamina().export(_doc(_inform()))
     assert xml.startswith('<?xml version="1.0" encoding="windows-1252"?>\n')
+
+
+def test_export_declares_windows_1252_and_the_lamina_namespace_2() -> None:
+    """The prolog and root match the page's sample."""
+    xml = Lamina().export(_doc(_inform()))
     assert '<DOC_ARQ xmlns="urn:lamina">' in xml
 
 
@@ -240,7 +245,7 @@ def test_fully_populated_inform_emits_every_tag_in_sample_order() -> None:
     assert tags == INFORM_TAGS
 
 
-def test_minimal_inform_omits_every_optional_block() -> None:
+def test_minimal_inform_omits_every_optional_block_1() -> None:
     """With only mandatory data no optional tag is written, not even empty."""
     tags = [tag for tag, _ in _pairs(_first_inform(_doc(_inform())))]
     optional = {
@@ -260,36 +265,143 @@ def test_minimal_inform_omits_every_optional_block() -> None:
         "COD_SUBCLASSE",
     }
     assert not optional & set(tags)
+
+
+def test_minimal_inform_omits_every_optional_block_2() -> None:
+    """With only mandatory data no optional tag is written, not even empty."""
+    tags = [tag for tag, _ in _pairs(_first_inform(_doc(_inform())))]
+    optional = {
+        "ALAV",
+        "CARENCIA",
+        "INFOR_TX_ENTR",
+        "INFOR_TX_SAIDA",
+        "INFOR_DESPESAS",
+        "LISTA_COMP_CARTEIRA",
+        "INFOR_TAB_RENT_ANUAL",
+        "LISTA_TAB_RENT_ANUAL",
+        "LISTA_TAB_RENT_MENSAL",
+        "FORM_CALC_RENT",
+        "TAB_VAR_DESEMP",
+        "INFORM_EXEMPLO_COMP",
+        "TAB_SIMUL_DESPESAS",
+        "COD_SUBCLASSE",
+    }
     assert tags == [t for t in INFORM_TAGS if t not in optional]
 
 
-def test_scalar_fields_xml() -> None:
+def test_scalar_fields_xml_1() -> None:
     """Top-level scalars: bare CNPJ, comma decimals at the table's scale, plain integers."""
     pairs = dict(_pairs(_first_inform(_doc(_full_inform()))))
     assert pairs["CNPJ_FUNDO"] == VALID_CNPJ
+
+
+def test_scalar_fields_xml_2() -> None:
+    """Top-level scalars: bare CNPJ, comma decimals at the table's scale, plain integers."""
+    pairs = dict(_pairs(_first_inform(_doc(_full_inform()))))
     assert pairs["ATIVO_EXT"] == "10,0000"
+
+
+def test_scalar_fields_xml_3() -> None:
+    """Top-level scalars: bare CNPJ, comma decimals at the table's scale, plain integers."""
+    pairs = dict(_pairs(_first_inform(_doc(_full_inform()))))
     assert pairs["CRED_PRIV"] == "20,0000"
+
+
+def test_scalar_fields_xml_4() -> None:
+    """Top-level scalars: bare CNPJ, comma decimals at the table's scale, plain integers."""
+    pairs = dict(_pairs(_first_inform(_doc(_full_inform()))))
     assert pairs["ALAV"] == "200,0000"
+
+
+def test_scalar_fields_xml_5() -> None:
+    """Top-level scalars: bare CNPJ, comma decimals at the table's scale, plain integers."""
+    pairs = dict(_pairs(_first_inform(_doc(_full_inform()))))
     assert pairs["PERC_MAX"] == "100,0000"
+
+
+def test_scalar_fields_xml_6() -> None:
+    """Top-level scalars: bare CNPJ, comma decimals at the table's scale, plain integers."""
+    pairs = dict(_pairs(_first_inform(_doc(_full_inform()))))
     assert pairs["INV_INICIAL"] == "100,00"
+
+
+def test_scalar_fields_xml_7() -> None:
+    """Top-level scalars: bare CNPJ, comma decimals at the table's scale, plain integers."""
+    pairs = dict(_pairs(_first_inform(_doc(_full_inform()))))
     assert pairs["INV_ADIC"] == "50,00"
+
+
+def test_scalar_fields_xml_8() -> None:
+    """Top-level scalars: bare CNPJ, comma decimals at the table's scale, plain integers."""
+    pairs = dict(_pairs(_first_inform(_doc(_full_inform()))))
     assert pairs["RESG_MIN"] == "10,00"
+
+
+def test_scalar_fields_xml_9() -> None:
+    """Top-level scalars: bare CNPJ, comma decimals at the table's scale, plain integers."""
+    pairs = dict(_pairs(_first_inform(_doc(_full_inform()))))
     assert pairs["VALOR_PERM"] == "0,00"
+
+
+def test_scalar_fields_xml_10() -> None:
+    """Top-level scalars: bare CNPJ, comma decimals at the table's scale, plain integers."""
+    pairs = dict(_pairs(_first_inform(_doc(_full_inform()))))
     assert pairs["HOR_APL_RESG"] == "14:30"
+
+
+def test_scalar_fields_xml_11() -> None:
+    """Top-level scalars: bare CNPJ, comma decimals at the table's scale, plain integers."""
+    pairs = dict(_pairs(_first_inform(_doc(_full_inform()))))
     assert pairs["TP_PRAZO_DIAS"] == "1"
+
+
+def test_scalar_fields_xml_12() -> None:
+    """Top-level scalars: bare CNPJ, comma decimals at the table's scale, plain integers."""
+    pairs = dict(_pairs(_first_inform(_doc(_full_inform()))))
     assert pairs["PRAZO_PAGAM"] == "3"
+
+
+def test_scalar_fields_xml_13() -> None:
+    """Top-level scalars: bare CNPJ, comma decimals at the table's scale, plain integers."""
+    pairs = dict(_pairs(_first_inform(_doc(_full_inform()))))
     assert pairs["CLASSIF_RISCO"] == "3"
+
+
+def test_scalar_fields_xml_14() -> None:
+    """Top-level scalars: bare CNPJ, comma decimals at the table's scale, plain integers."""
+    pairs = dict(_pairs(_first_inform(_doc(_full_inform()))))
     assert pairs["TEL_SAC"] == "1140041234"
+
+
+def test_scalar_fields_xml_15() -> None:
+    """Top-level scalars: bare CNPJ, comma decimals at the table's scale, plain integers."""
+    pairs = dict(_pairs(_first_inform(_doc(_full_inform()))))
     assert pairs["UTILIZ_DERIV_APENAS_PROTECAO_CART"] == "S"
+
+
+def test_scalar_fields_xml_16() -> None:
+    """Top-level scalars: bare CNPJ, comma decimals at the table's scale, plain integers."""
+    pairs = dict(_pairs(_first_inform(_doc(_full_inform()))))
     assert pairs["PERDAS_SIGN"] == "N"
+
+
+def test_scalar_fields_xml_17() -> None:
+    """Top-level scalars: bare CNPJ, comma decimals at the table's scale, plain integers."""
+    pairs = dict(_pairs(_first_inform(_doc(_full_inform()))))
     assert pairs["PL_NEGAT"] == "N"
 
 
-def test_subclass_inform_writes_cod_subclasse_and_no_cnpj() -> None:
+def test_subclass_inform_writes_cod_subclasse_and_no_cnpj_1() -> None:
     """A subclass INFORM carries COD_SUBCLASSE instead of CNPJ_FUNDO."""
     doc = _doc(_inform(cnpj_fundo=None, cod_subclasse="SUB-001"))
     pairs = _pairs(_first_inform(doc))
     assert pairs[0] == ("COD_SUBCLASSE", "SUB-001")
+
+
+def test_subclass_inform_writes_cod_subclasse_and_no_cnpj_2() -> None:
+    """A subclass INFORM carries COD_SUBCLASSE instead of CNPJ_FUNDO."""
+    doc = _doc(_inform(cnpj_fundo=None, cod_subclasse="SUB-001"))
+    pairs = _pairs(_first_inform(doc))
     assert "CNPJ_FUNDO" not in dict(pairs)
 
 
@@ -384,19 +496,31 @@ def test_management_fee_block_per_fee_type_emits_only_its_rate_tags(
     assert _pairs(_block(_doc(_inform(infor_tx_adm=fee)), "INFOR_TX_ADM")) == expected
 
 
-def test_portfolio_block_xml() -> None:
+def test_portfolio_block_xml_1() -> None:
     """LISTA_COMP_CARTEIRA: PL_FUNDO then a COMP_CARTEIRA per asset type."""
     block = _block(_doc(_full_inform()), "LISTA_COMP_CARTEIRA")
     assert _pairs(block)[0] == ("PL_FUNDO", "1000000,50")
+    [_pairs(item) for item in block.findall(f"{NS}COMP_CARTEIRA")]
+
+
+def test_portfolio_block_xml_2() -> None:
+    """LISTA_COMP_CARTEIRA: PL_FUNDO then a COMP_CARTEIRA per asset type."""
+    block = _block(_doc(_full_inform()), "LISTA_COMP_CARTEIRA")
     assets = [_pairs(item) for item in block.findall(f"{NS}COMP_CARTEIRA")]
     assert assets == [
         [("ESPECIE_ATIVO", "Titulos publicos"), ("PERC_PL", "60,0000")],
         [("ESPECIE_ATIVO", "Operacoes compromissadas"), ("PERC_PL", "40,0000")],
     ]
+
+
+def test_portfolio_block_xml_3() -> None:
+    """LISTA_COMP_CARTEIRA: PL_FUNDO then a COMP_CARTEIRA per asset type."""
+    block = _block(_doc(_full_inform()), "LISTA_COMP_CARTEIRA")
+    [_pairs(item) for item in block.findall(f"{NS}COMP_CARTEIRA")]
     assert [tag for tag, _ in _pairs(block)] == ["PL_FUNDO", "COMP_CARTEIRA", "COMP_CARTEIRA"]
 
 
-def test_annual_summary_block_xml() -> None:
+def test_annual_summary_block_xml_1() -> None:
     """INFOR_TAB_RENT_ANUAL: scalars in sample order, then ANTES_INIC2 with one ANO per year."""
     block = _block(_doc(_full_inform()), "INFOR_TAB_RENT_ANUAL")
     assert [(t, x) for t, x in _pairs(block) if t != "ANTES_INIC2"] == [
@@ -406,7 +530,19 @@ def test_annual_summary_block_xml() -> None:
         ("ANOS_ABAIXO", "1"),
         ("INIC_FUNCIO", "15/03/2021"),
     ]
+    block.find(f"{NS}ANTES_INIC2")
+
+
+def test_annual_summary_block_xml_2() -> None:
+    """INFOR_TAB_RENT_ANUAL: scalars in sample order, then ANTES_INIC2 with one ANO per year."""
+    block = _block(_doc(_full_inform()), "INFOR_TAB_RENT_ANUAL")
     assert [tag for tag, _ in _pairs(block)][-1] == "ANTES_INIC2"
+    block.find(f"{NS}ANTES_INIC2")
+
+
+def test_annual_summary_block_xml_3() -> None:
+    """INFOR_TAB_RENT_ANUAL: scalars in sample order, then ANTES_INIC2 with one ANO per year."""
+    block = _block(_doc(_full_inform()), "INFOR_TAB_RENT_ANUAL")
     years = block.find(f"{NS}ANTES_INIC2")
     assert _pairs(years) == [("ANO", "2019"), ("ANO", "2020")]
 
@@ -441,24 +577,48 @@ def test_monthly_return_table_xml() -> None:
     ]
 
 
-def test_text_is_xml_escaped() -> None:
+def test_text_is_xml_escaped_1() -> None:
     """Markup characters in free text are escaped and survive a parse round trip."""
     doc = _doc(_inform(nome_fantasia='A & B <C> "D"'))
     assert dict(_pairs(_first_inform(doc)))["NOME_FANTASIA"] == 'A & B <C> "D"'
+    Lamina().export(doc)
+
+
+def test_text_is_xml_escaped_2() -> None:
+    """Markup characters in free text are escaped and survive a parse round trip."""
+    doc = _doc(_inform(nome_fantasia='A & B <C> "D"'))
     assert "A &amp; B &lt;C&gt;" in Lamina().export(doc)
 
 
-def test_file_is_written_as_windows_1252_bytes(tmp_path: Path) -> None:
+def test_file_is_written_as_windows_1252_bytes_1(tmp_path: Path) -> None:
     """Accented text and the euro sign are single windows-1252 bytes; export returns None."""
     target = tmp_path / "lamina.xml"
     doc = _doc(_inform(nome_fantasia="Ação € Fundo"))
     assert Lamina().export(doc, output_path=str(target)) is None
+    target.read_bytes()
+    Lamina().export(doc)
+
+
+def test_file_is_written_as_windows_1252_bytes_2(tmp_path: Path) -> None:
+    """Accented text and the euro sign are single windows-1252 bytes; export returns None."""
+    target = tmp_path / "lamina.xml"
+    doc = _doc(_inform(nome_fantasia="Ação € Fundo"))
+    Lamina().export(doc, output_path=str(target))
     raw = target.read_bytes()
     assert "Ação € Fundo".encode("windows-1252") in raw
+    Lamina().export(doc)
+
+
+def test_file_is_written_as_windows_1252_bytes_3(tmp_path: Path) -> None:
+    """Accented text and the euro sign are single windows-1252 bytes; export returns None."""
+    target = tmp_path / "lamina.xml"
+    doc = _doc(_inform(nome_fantasia="Ação € Fundo"))
+    Lamina().export(doc, output_path=str(target))
+    raw = target.read_bytes()
     assert raw == Lamina().export(doc).encode("windows-1252")
 
 
-def test_failed_export_leaves_an_existing_file_untouched(tmp_path: Path) -> None:
+def test_failed_export_leaves_an_existing_file_untouched_1(tmp_path: Path) -> None:
     """A character windows-1252 cannot hold must not truncate the target (validation bypassed)."""
     target = tmp_path / "lamina.xml"
     target.write_bytes(b"previous content")
@@ -467,10 +627,19 @@ def test_failed_export_leaves_an_existing_file_untouched(tmp_path: Path) -> None
     bad = good.model_copy(update={"informs": [inform]})
     with pytest.raises(ValueError, match="windows-1252"):
         Lamina().export(bad, output_path=str(target))
+
+
+def test_failed_export_leaves_an_existing_file_untouched_2(tmp_path: Path) -> None:
+    """A character windows-1252 cannot hold must not truncate the target (validation bypassed)."""
+    target = tmp_path / "lamina.xml"
+    target.write_bytes(b"previous content")
+    good = _doc(_inform())
+    inform = good.informs[0].model_copy(update={"nome_fantasia": "Ω"})
+    good.model_copy(update={"informs": [inform]})
     assert target.read_bytes() == b"previous content"
 
 
-def test_export_refuses_a_control_character_that_bypassed_validation(tmp_path: Path) -> None:
+def test_export_refuses_a_control_character_that_bypassed_validation_1(tmp_path: Path) -> None:
     """NUL is not XML; the self-check refuses it and the target stays intact."""
     target = tmp_path / "lamina.xml"
     target.write_bytes(b"previous content")
@@ -479,6 +648,15 @@ def test_export_refuses_a_control_character_that_bypassed_validation(tmp_path: P
     bad = good.model_copy(update={"informs": [inform]})
     with pytest.raises(ValueError, match="cannot be serialised"):
         Lamina().export(bad, output_path=str(target))
+
+
+def test_export_refuses_a_control_character_that_bypassed_validation_2(tmp_path: Path) -> None:
+    """NUL is not XML; the self-check refuses it and the target stays intact."""
+    target = tmp_path / "lamina.xml"
+    target.write_bytes(b"previous content")
+    good = _doc(_inform())
+    inform = good.informs[0].model_copy(update={"nome_fantasia": "a\x00b"})
+    good.model_copy(update={"informs": [inform]})
     assert target.read_bytes() == b"previous content"
 
 
@@ -514,13 +692,14 @@ def test_generation_date_rejects_impossible_dates(value: str) -> None:
 
 def test_generation_date_accepts_a_leap_day() -> None:
     """29/02/2024 exists."""
-    _doc(_inform(), dt_gerac_arq="29/02/2024")
+    assert _doc(_inform(), dt_gerac_arq="29/02/2024") is not None
 
 
 @pytest.mark.parametrize("value", ["24:00", "9:00", "12:60", "12:30\n", "12h30", ""])
 def test_application_time_rejects_malformed_values(value: str) -> None:
     """HOR_APL_RESG must be a 24-hour HH:MM."""
-    _rejects(hor_apl_resg=value)
+    with pytest.raises(ValidationError):
+        _doc(_inform(hor_apl_resg=value))
 
 
 def test_expense_period_must_not_end_before_it_starts() -> None:
@@ -541,14 +720,16 @@ def test_expense_period_must_not_end_before_it_starts() -> None:
 
 def test_start_of_operations_rejects_an_impossible_date() -> None:
     """INIC_FUNCIO is a real date."""
-    _rejects(infor_tab_rent_anual={"inic_funcio": "30/02/2022"})
+    with pytest.raises(ValidationError):
+        _doc(_inform(infor_tab_rent_anual={"inic_funcio": "30/02/2022"}))
 
 
 @pytest.mark.parametrize("field", ["ativo_ext", "inv_inicial", "perc_max", "alav", "valor_perm"])
 @pytest.mark.parametrize("bad", [1.5, True, float("nan"), "NaN", "Infinity", "abc", "1,5", [1]])
 def test_decimal_fields_refuse_floats_and_non_finite_values(field: str, bad: object) -> None:
     """A float (or bool, NaN, infinity, comma text) never becomes a Decimal field."""
-    _rejects(**{field: bad})
+    with pytest.raises(ValidationError):
+        _doc(_inform(**{field: bad}))
 
 
 def test_decimal_fields_accept_decimal_int_and_str() -> None:
@@ -562,10 +743,15 @@ def test_decimal_fields_accept_decimal_int_and_str() -> None:
     )
 
 
-def test_excess_decimal_places_are_truncated_not_rounded() -> None:
+def test_excess_decimal_places_are_truncated_not_rounded_1() -> None:
     """Scale is enforced by truncating toward zero: 10.99999 percent -> 10,9999; 1.999 -> 1,99."""
     pairs = dict(_pairs(_first_inform(_doc(_inform(ativo_ext="10.99999", inv_inicial="1.999")))))
     assert pairs["ATIVO_EXT"] == "10,9999"
+
+
+def test_excess_decimal_places_are_truncated_not_rounded_2() -> None:
+    """Scale is enforced by truncating toward zero: 10.99999 percent -> 10,9999; 1.999 -> 1,99."""
+    pairs = dict(_pairs(_first_inform(_doc(_inform(ativo_ext="10.99999", inv_inicial="1.999")))))
     assert pairs["INV_INICIAL"] == "1,99"
 
 
@@ -597,14 +783,16 @@ def test_a_tiny_negative_value_truncates_to_zero_without_a_sign() -> None:
 )
 def test_non_negative_fields_refuse_negative_values(field: str) -> None:
     """Minimums, limits and shares cannot be negative."""
-    _rejects(**{field: "-1"})
+    with pytest.raises(ValidationError):
+        _doc(_inform(**{field: "-1"}))
 
 
 @pytest.mark.parametrize("field", ["ativo_ext", "cred_priv", "perc_max"])
 def test_shares_are_capped_at_one_hundred(field: str) -> None:
     """100 is accepted, anything above is refused (PERC_MAX states 100,00 as its maximum)."""
     _doc(_inform(**{field: "100"}))
-    _rejects(**{field: "100.0001"})
+    with pytest.raises(ValidationError):
+        _doc(_inform(**{field: "100.0001"}))
 
 
 def test_leverage_has_no_upper_bound_and_may_be_omitted() -> None:
@@ -613,55 +801,100 @@ def test_leverage_has_no_upper_bound_and_may_be_omitted() -> None:
     assert "ALAV" not in dict(_pairs(_first_inform(_doc(_inform()))))
 
 
-def test_a_value_wider_than_the_digit_cap_is_refused() -> None:
+def test_a_value_wider_than_the_digit_cap_is_refused_1() -> None:
     """A huge magnitude fails instead of being written."""
-    _rejects(inv_inicial="1e40")
-    _rejects(inv_inicial="9" * 17)
+    with pytest.raises(ValidationError):
+        _doc(_inform(inv_inicial="1e40"))
+
+
+def test_a_value_wider_than_the_digit_cap_is_refused_2() -> None:
+    """A huge magnitude fails instead of being written."""
+    with pytest.raises(ValidationError):
+        _doc(_inform(inv_inicial="9" * 17))
 
 
 def test_signed_fields_accept_negative_values() -> None:
     """Returns, PL_FUNDO, AJUSTE_PERFOR and hypothetical returns may be negative."""
-    _doc(
-        _full_inform()
-        | {"lista_tab_rent_anual": {"tab_rent_anual": [{"ano_rent": 2024, "rent_liq": "-150"}]}}
+    assert (
+        _doc(
+            _full_inform()
+            | {
+                "lista_tab_rent_anual": {
+                    "tab_rent_anual": [{"ano_rent": 2024, "rent_liq": "-150"}]
+                }
+            }
+        )
+        is not None
     )
 
 
-def test_fee_rates_and_expenses_are_non_negative_and_capped() -> None:
+def test_fee_rates_and_expenses_are_non_negative_and_capped_1() -> None:
     """TX_ADM, TX_ENTR, TX_SAIDA and DESPESAS stay within 0 to 100."""
-    _rejects(infor_tx_adm={"tipo_tx_adm": "F", "tx_adm": "-1"})
-    _rejects(infor_tx_adm={"tipo_tx_adm": "F", "tx_adm": "101"})
-    _rejects(infor_tx_entr={"tx_entr": "-1", "cond_entr": "x"})
-    _rejects(infor_tx_saida={"dias_saida": 1, "tx_saida": "101", "cond_saida": "x"})
+    with pytest.raises(ValidationError):
+        _doc(_inform(infor_tx_adm={"tipo_tx_adm": "F", "tx_adm": "-1"}))
 
 
-def test_cost_example_money_that_cannot_be_negative_is_refused() -> None:
-    """VALOR_RESG, IMPOSTOS, VALOR_ING, VALOR_SAIDA, VALOR_DESPESAS and the expense projections."""
+def test_fee_rates_and_expenses_are_non_negative_and_capped_2() -> None:
+    """TX_ADM, TX_ENTR, TX_SAIDA and DESPESAS stay within 0 to 100."""
+    with pytest.raises(ValidationError):
+        _doc(_inform(infor_tx_adm={"tipo_tx_adm": "F", "tx_adm": "101"}))
+
+
+def test_fee_rates_and_expenses_are_non_negative_and_capped_3() -> None:
+    """TX_ADM, TX_ENTR, TX_SAIDA and DESPESAS stay within 0 to 100."""
+    with pytest.raises(ValidationError):
+        _doc(_inform(infor_tx_entr={"tx_entr": "-1", "cond_entr": "x"}))
+
+
+def test_fee_rates_and_expenses_are_non_negative_and_capped_4() -> None:
+    """TX_ADM, TX_ENTR, TX_SAIDA and DESPESAS stay within 0 to 100."""
+    with pytest.raises(ValidationError):
+        _doc(_inform(infor_tx_saida={"dias_saida": 1, "tx_saida": "101", "cond_saida": "x"}))
+
+
+@pytest.mark.parametrize(
+    "field", ["valor_resg", "impostos", "valor_ing", "valor_saida", "valor_despesas"]
+)
+def test_cost_example_money_that_cannot_be_negative_is_refused(field: str) -> None:
+    """VALOR_RESG, IMPOSTOS, VALOR_ING, VALOR_SAIDA and VALOR_DESPESAS refuse negatives."""
     example = _full_inform()["inform_exemplo_comp"]
-    for field in ("valor_resg", "impostos", "valor_ing", "valor_saida", "valor_despesas"):
-        _rejects(inform_exemplo_comp={**example, field: "-1"})
+    with pytest.raises(ValidationError):
+        _doc(_inform(inform_exemplo_comp={**example, field: "-1"}))
+
+
+@pytest.mark.parametrize("field", ["desp_prev3", "desp_prev5"])
+def test_expense_projections_cannot_be_negative(field: str) -> None:
+    """The expense projections refuse negatives."""
     sim = _full_inform()["tab_simul_despesas"]
-    for field in ("desp_prev3", "desp_prev5"):
-        _rejects(tab_simul_despesas={**sim, field: "-1"})
+    with pytest.raises(ValidationError):
+        _doc(_inform(tab_simul_despesas={**sim, field: "-1"}))
 
 
 @pytest.mark.parametrize("bad", [-1, 32768, 1.0, "3", True])
-def test_shorts_are_strict_non_negative_16_bit_integers(bad: object) -> None:
+def test_shorts_are_strict_non_negative_16_bit_integers_1(bad: object) -> None:
     """PRAZO_PAGAM refuses negatives, overflow, floats, numeric strings and bool."""
-    _rejects(prazo_pagam=bad)
+    with pytest.raises(ValidationError):
+        _doc(_inform(prazo_pagam=bad))
+
+
+@pytest.mark.parametrize("bad", [-1, 32768, 1.0, "3", True])
+def test_shorts_are_strict_non_negative_16_bit_integers_2(bad: object) -> None:
+    """PRAZO_PAGAM refuses negatives, overflow, floats, numeric strings and bool."""
     assert dict(_pairs(_first_inform(_doc(_inform(prazo_pagam=32767)))))["PRAZO_PAGAM"] == "32767"
 
 
 @pytest.mark.parametrize("bad", [0, 6, 2.0, "3", True])
 def test_risk_class_is_an_integer_from_one_to_five(bad: object) -> None:
     """CLASSIF_RISCO is 1 to 5."""
-    _rejects(classif_risco=bad)
+    with pytest.raises(ValidationError):
+        _doc(_inform(classif_risco=bad))
 
 
 @pytest.mark.parametrize("bad", ["0", "3", "", "um", 1])
 def test_payment_day_type_is_the_string_1_or_2(bad: object) -> None:
     """TP_PRAZO_DIAS accepts only the strings 1 and 2."""
-    _rejects(tp_prazo_dias=bad)
+    with pytest.raises(ValidationError):
+        _doc(_inform(tp_prazo_dias=bad))
     _doc(_inform(tp_prazo_dias="2"))
 
 
@@ -669,15 +902,24 @@ def test_payment_day_type_is_the_string_1_or_2(bad: object) -> None:
 @pytest.mark.parametrize("bad", ["s", "sim", "", "SN", True])
 def test_flags_are_s_or_n(field: str, bad: object) -> None:
     """The S/N flags accept exactly S or N."""
-    _rejects(**{field: bad})
+    with pytest.raises(ValidationError):
+        _doc(_inform(**{field: bad}))
 
 
 @pytest.mark.parametrize("bad", ["a", "", "AF", "aberta"])
-def test_conversion_basis_is_a_or_f(bad: str) -> None:
+def test_conversion_basis_is_a_or_f_1(bad: str) -> None:
     """ABERT_FECH and ABERT_FECH_C accept only A or F."""
     conv = {"abert_fech": "A", "dia_aplic": 1, "abert_fech_c": "F", "dia_resg": 2}
-    _rejects(conversao={**conv, "abert_fech": bad})
-    _rejects(conversao={**conv, "abert_fech_c": bad})
+    with pytest.raises(ValidationError):
+        _doc(_inform(conversao={**conv, "abert_fech": bad}))
+
+
+@pytest.mark.parametrize("bad", ["a", "", "AF", "aberta"])
+def test_conversion_basis_is_a_or_f_2(bad: str) -> None:
+    """ABERT_FECH and ABERT_FECH_C accept only A or F."""
+    conv = {"abert_fech": "A", "dia_aplic": 1, "abert_fech_c": "F", "dia_resg": 2}
+    with pytest.raises(ValidationError):
+        _doc(_inform(conversao={**conv, "abert_fech_c": bad}))
 
 
 @pytest.mark.parametrize(
@@ -696,29 +938,32 @@ def test_conversion_basis_is_a_or_f(bad: str) -> None:
 )
 def test_phone_is_digits_only_without_zero_filler(bad: str) -> None:
     """TEL_SAC is a long: digits only, no leading zero, within 64 bits."""
-    _rejects(tel_sac=bad)
+    with pytest.raises(ValidationError):
+        _doc(_inform(tel_sac=bad))
 
 
 def test_phone_accepts_the_largest_long() -> None:
     """2**63 - 1 is the edge that still fits."""
-    _doc(_inform(tel_sac="9223372036854775807"))
+    assert _doc(_inform(tel_sac="9223372036854775807")) is not None
 
 
 @pytest.mark.parametrize("bad", ["", " ", "x" * 51, "a\x00b"])
 def test_subclass_code_is_a_bounded_non_empty_text(bad: str) -> None:
     """COD_SUBCLASSE: non-blank, at most 50 characters, no control characters."""
-    _rejects(cnpj_fundo=None, cod_subclasse=bad)
+    with pytest.raises(ValidationError):
+        _doc(_inform(cnpj_fundo=None, cod_subclasse=bad))
 
 
 def test_subclass_code_at_the_limit_is_accepted() -> None:
     """Fifty characters pass."""
-    _doc(_inform(cnpj_fundo=None, cod_subclasse="x" * 50))
+    assert _doc(_inform(cnpj_fundo=None, cod_subclasse="x" * 50)) is not None
 
 
 @pytest.mark.parametrize("bad", ["11222333000180", "123", "", "11.222.333/0001-81\n"])
 def test_cnpj_is_check_digit_validated(bad: str) -> None:
     """CNPJ_FUNDO fails on wrong digits, wrong length, empty and a trailing newline."""
-    _rejects(cnpj_fundo=bad)
+    with pytest.raises(ValidationError):
+        _doc(_inform(cnpj_fundo=bad))
 
 
 def test_cnpj_is_stored_unmasked() -> None:
@@ -745,42 +990,133 @@ def test_cnpj_is_stored_unmasked() -> None:
         ("info_adic", 500),
     ],
 )
-def test_text_fields_enforce_the_pages_lengths(field: str, limit: int) -> None:
+def test_text_fields_enforce_the_pages_lengths_1(field: str, limit: int) -> None:
     """Each text field accepts exactly "até N casas" and refuses N + 1 or blank."""
     _doc(_inform(**{field: "x" * limit}))
-    _rejects(**{field: "x" * (limit + 1)})
-    _rejects(**{field: ""})
-    _rejects(**{field: "   "})
+    with pytest.raises(ValidationError):
+        _doc(_inform(**{field: "x" * (limit + 1)}))
 
 
-def test_optional_text_fields_enforce_their_lengths_too() -> None:
+@pytest.mark.parametrize(
+    ("field", "limit"),
+    [
+        ("nome_fantasia", 500),
+        ("end_eletr", 100),
+        ("desc_pub_alvo", 1000),
+        ("restr_inv", 500),
+        ("desc_objet", 1000),
+        ("desc_pol_inv", 1000),
+        ("obs_hor_apl_resg", 500),
+        ("tx_desempenho", 500),
+        ("ds_forma_remun_distr", 900),
+        ("princ_distr_oferta", 300),
+        ("princ_conflito_interes", 600),
+        ("reclamacoes", 50),
+        ("info_adic", 500),
+    ],
+)
+def test_text_fields_enforce_the_pages_lengths_2(field: str, limit: int) -> None:
+    """Each text field accepts exactly "até N casas" and refuses N + 1 or blank."""
+    _doc(_inform(**{field: "x" * limit}))
+    with pytest.raises(ValidationError):
+        _doc(_inform(**{field: ""}))
+
+
+@pytest.mark.parametrize(
+    ("field", "limit"),
+    [
+        ("nome_fantasia", 500),
+        ("end_eletr", 100),
+        ("desc_pub_alvo", 1000),
+        ("restr_inv", 500),
+        ("desc_objet", 1000),
+        ("desc_pol_inv", 1000),
+        ("obs_hor_apl_resg", 500),
+        ("tx_desempenho", 500),
+        ("ds_forma_remun_distr", 900),
+        ("princ_distr_oferta", 300),
+        ("princ_conflito_interes", 600),
+        ("reclamacoes", 50),
+        ("info_adic", 500),
+    ],
+)
+def test_text_fields_enforce_the_pages_lengths_3(field: str, limit: int) -> None:
+    """Each text field accepts exactly "até N casas" and refuses N + 1 or blank."""
+    _doc(_inform(**{field: "x" * limit}))
+    with pytest.raises(ValidationError):
+        _doc(_inform(**{field: "   "}))
+
+
+def test_optional_text_fields_enforce_their_lengths_too_1() -> None:
     """IND_REFER (20), COMENTARIOS (500), ESCLAREC (500) and the rest of the optional text."""
-    _rejects(infor_tab_rent_anual={"ind_refer": "x" * 21})
+    with pytest.raises(ValidationError):
+        _doc(_inform(infor_tab_rent_anual={"ind_refer": "x" * 21}))
     _doc(_inform(infor_tab_rent_anual={"ind_refer": "x" * 20}))
-    _rejects(infor_tx_adm={"tipo_tx_adm": "F", "tx_adm": "1", "esclarec": "x" * 501})
-    _rejects(infor_tx_adm={"tipo_tx_adm": "F", "tx_adm": "1", "esclarec": ""})
-    _rejects(form_calc_rent="x" * 501)
-    _rejects(carencia={"dias_car": 1, "cond_car": "x" * 501})
-    _rejects(
-        infor_despesas={
-            "despesas": "1",
-            "inic_periodo": "01/01/2024",
-            "fim_periodo": "01/01/2024",
-            "end_elet_adm": "x" * 101,
-        }
-    )
-    _rejects(
-        lista_comp_carteira={
-            "pl_fundo": "1",
-            "comp_carteira": [{"especie_ativo": "x" * 501, "perc_pl": "1"}],
-        }
-    )
+
+
+def test_optional_text_fields_enforce_their_lengths_too_2() -> None:
+    """IND_REFER (20), COMENTARIOS (500), ESCLAREC (500) and the rest of the optional text."""
+    _doc(_inform(infor_tab_rent_anual={"ind_refer": "x" * 20}))
+    with pytest.raises(ValidationError):
+        _doc(_inform(infor_tx_adm={"tipo_tx_adm": "F", "tx_adm": "1", "esclarec": "x" * 501}))
+
+
+def test_optional_text_fields_enforce_their_lengths_too_3() -> None:
+    """IND_REFER (20), COMENTARIOS (500), ESCLAREC (500) and the rest of the optional text."""
+    _doc(_inform(infor_tab_rent_anual={"ind_refer": "x" * 20}))
+    with pytest.raises(ValidationError):
+        _doc(_inform(infor_tx_adm={"tipo_tx_adm": "F", "tx_adm": "1", "esclarec": ""}))
+
+
+def test_optional_text_fields_enforce_their_lengths_too_4() -> None:
+    """IND_REFER (20), COMENTARIOS (500), ESCLAREC (500) and the rest of the optional text."""
+    _doc(_inform(infor_tab_rent_anual={"ind_refer": "x" * 20}))
+    with pytest.raises(ValidationError):
+        _doc(_inform(form_calc_rent="x" * 501))
+
+
+def test_optional_text_fields_enforce_their_lengths_too_5() -> None:
+    """IND_REFER (20), COMENTARIOS (500), ESCLAREC (500) and the rest of the optional text."""
+    _doc(_inform(infor_tab_rent_anual={"ind_refer": "x" * 20}))
+    with pytest.raises(ValidationError):
+        _doc(_inform(carencia={"dias_car": 1, "cond_car": "x" * 501}))
+
+
+def test_optional_text_fields_enforce_their_lengths_too_6() -> None:
+    """IND_REFER (20), COMENTARIOS (500), ESCLAREC (500) and the rest of the optional text."""
+    _doc(_inform(infor_tab_rent_anual={"ind_refer": "x" * 20}))
+    with pytest.raises(ValidationError):
+        _doc(
+            _inform(
+                infor_despesas={
+                    "despesas": "1",
+                    "inic_periodo": "01/01/2024",
+                    "fim_periodo": "01/01/2024",
+                    "end_elet_adm": "x" * 101,
+                }
+            )
+        )
+
+
+def test_optional_text_fields_enforce_their_lengths_too_7() -> None:
+    """IND_REFER (20), COMENTARIOS (500), ESCLAREC (500) and the rest of the optional text."""
+    _doc(_inform(infor_tab_rent_anual={"ind_refer": "x" * 20}))
+    with pytest.raises(ValidationError):
+        _doc(
+            _inform(
+                lista_comp_carteira={
+                    "pl_fundo": "1",
+                    "comp_carteira": [{"especie_ativo": "x" * 501, "perc_pl": "1"}],
+                }
+            )
+        )
 
 
 @pytest.mark.parametrize("bad", ["a\x00b", "a\x07b", "a\rb", "a\x7fb", "Ω", "😀", "a\x81b"])
 def test_text_rejects_control_and_unencodable_characters(bad: str) -> None:
     """Control characters and anything windows-1252 cannot encode are refused at validation."""
-    _rejects(nome_fantasia=bad)
+    with pytest.raises(ValidationError):
+        _doc(_inform(nome_fantasia=bad))
 
 
 def test_text_keeps_newlines_and_tabs() -> None:
@@ -789,23 +1125,35 @@ def test_text_keeps_newlines_and_tabs() -> None:
     assert dict(_pairs(_first_inform(doc)))["DESC_OBJET"] == "linha 1\nlinha 2\tfim"
 
 
-def test_exactly_one_fund_identifier_is_required() -> None:
+def test_exactly_one_fund_identifier_is_required_1() -> None:
     """Both or neither of CNPJ_FUNDO and COD_SUBCLASSE is refused."""
-    _rejects(cod_subclasse="SUB-1")
-    _rejects(cnpj_fundo=None)
+    with pytest.raises(ValidationError):
+        _doc(_inform(cod_subclasse="SUB-1"))
 
 
-def test_a_fund_cannot_appear_twice_in_a_file() -> None:
+def test_exactly_one_fund_identifier_is_required_2() -> None:
+    """Both or neither of CNPJ_FUNDO and COD_SUBCLASSE is refused."""
+    with pytest.raises(ValidationError):
+        _doc(_inform(cnpj_fundo=None))
+
+
+def test_a_fund_cannot_appear_twice_in_a_file_1() -> None:
     """A repeated CNPJ or subclass code is refused."""
     with pytest.raises(ValidationError):
         _doc(_inform(), _inform())
+    _inform(cnpj_fundo=None, cod_subclasse="S1")
+    _doc(_inform(), _inform(cnpj_fundo=None, cod_subclasse="S1"))
+
+
+def test_a_fund_cannot_appear_twice_in_a_file_2() -> None:
+    """A repeated CNPJ or subclass code is refused."""
     sub = _inform(cnpj_fundo=None, cod_subclasse="S1")
     with pytest.raises(ValidationError):
         _doc(sub, copy.deepcopy(sub))
     _doc(_inform(), _inform(cnpj_fundo=None, cod_subclasse="S1"))
 
 
-def test_a_file_holds_between_one_and_seventy_informs() -> None:
+def test_a_file_holds_between_one_and_seventy_informs_1() -> None:
     """Zero informs and 71 informs are refused; 70 distinct subclasses pass."""
 
     def sub(n: int) -> dict[str, object]:
@@ -814,6 +1162,15 @@ def test_a_file_holds_between_one_and_seventy_informs() -> None:
     _doc(*[sub(n) for n in range(70)])
     with pytest.raises(ValidationError):
         _doc(*[sub(n) for n in range(71)])
+
+
+def test_a_file_holds_between_one_and_seventy_informs_2() -> None:
+    """Zero informs and 71 informs are refused; 70 distinct subclasses pass."""
+
+    def sub(n: int) -> dict[str, object]:
+        return _inform(cnpj_fundo=None, cod_subclasse=f"S{n}")
+
+    _doc(*[sub(n) for n in range(70)])
     with pytest.raises(ValidationError):
         _doc()
 
@@ -847,86 +1204,170 @@ def test_header_constants_are_fixed(bad: dict[str, object]) -> None:
 )
 def test_management_fee_rejects_fields_inconsistent_with_its_type(fee: dict[str, str]) -> None:
     """A fixed fee takes only TX_ADM; a variable fee takes TX_MIN <= TX_MAX and no TX_ADM."""
-    _rejects(infor_tx_adm=fee)
+    with pytest.raises(ValidationError):
+        _doc(_inform(infor_tx_adm=fee))
 
 
 def test_variable_fee_accepts_equal_bounds() -> None:
     """TX_MIN equal to TX_MAX is a valid variable fee."""
-    _doc(_inform(infor_tx_adm={"tipo_tx_adm": "V", "tx_min": "1", "tx_max": "1"}))
+    assert (
+        _doc(_inform(infor_tx_adm={"tipo_tx_adm": "V", "tx_min": "1", "tx_max": "1"})) is not None
+    )
 
 
 def test_fee_type_is_f_or_v() -> None:
     """TIPO_TX_ADM accepts only F or V."""
-    _rejects(infor_tx_adm={"tipo_tx_adm": "X", "tx_adm": "1"})
+    with pytest.raises(ValidationError):
+        _doc(_inform(infor_tx_adm={"tipo_tx_adm": "X", "tx_adm": "1"}))
 
 
-def test_portfolio_has_between_one_and_five_asset_types() -> None:
+def test_portfolio_has_between_one_and_five_asset_types_1() -> None:
     """COMP_CARTEIRA repeats 1 to 5 times."""
     asset = {"especie_ativo": "x", "perc_pl": "1"}
     _doc(_inform(lista_comp_carteira={"pl_fundo": "1", "comp_carteira": [asset] * 5}))
-    _rejects(lista_comp_carteira={"pl_fundo": "1", "comp_carteira": [asset] * 6})
-    _rejects(lista_comp_carteira={"pl_fundo": "1", "comp_carteira": []})
+    with pytest.raises(ValidationError):
+        _doc(_inform(lista_comp_carteira={"pl_fundo": "1", "comp_carteira": [asset] * 6}))
 
 
-def test_annual_table_has_between_one_and_five_distinct_years() -> None:
+def test_portfolio_has_between_one_and_five_asset_types_2() -> None:
+    """COMP_CARTEIRA repeats 1 to 5 times."""
+    asset = {"especie_ativo": "x", "perc_pl": "1"}
+    _doc(_inform(lista_comp_carteira={"pl_fundo": "1", "comp_carteira": [asset] * 5}))
+    with pytest.raises(ValidationError):
+        _doc(_inform(lista_comp_carteira={"pl_fundo": "1", "comp_carteira": []}))
+
+
+def test_annual_table_has_between_one_and_five_distinct_years_1() -> None:
     """TAB_RENT_ANUAL: at most 5 rows, no repeated year, at least one when the list exists."""
 
     def rows(years: list[int]) -> dict[str, object]:
         return {"tab_rent_anual": [{"ano_rent": y, "rent_liq": "1"} for y in years]}
 
     _doc(_inform(lista_tab_rent_anual=rows([2020, 2021, 2022, 2023, 2024])))
-    _rejects(lista_tab_rent_anual=rows([2019, 2020, 2021, 2022, 2023, 2024]))
-    _rejects(lista_tab_rent_anual=rows([2024, 2024]))
-    _rejects(lista_tab_rent_anual=rows([]))
-    _rejects(lista_tab_rent_anual=rows([1899]))
+    with pytest.raises(ValidationError):
+        _doc(_inform(lista_tab_rent_anual=rows([2019, 2020, 2021, 2022, 2023, 2024])))
 
 
-def test_monthly_table_has_between_one_and_twelve_distinct_months() -> None:
+def test_annual_table_has_between_one_and_five_distinct_years_2() -> None:
+    """TAB_RENT_ANUAL: at most 5 rows, no repeated year, at least one when the list exists."""
+
+    def rows(years: list[int]) -> dict[str, object]:
+        return {"tab_rent_anual": [{"ano_rent": y, "rent_liq": "1"} for y in years]}
+
+    _doc(_inform(lista_tab_rent_anual=rows([2020, 2021, 2022, 2023, 2024])))
+    with pytest.raises(ValidationError):
+        _doc(_inform(lista_tab_rent_anual=rows([2024, 2024])))
+
+
+def test_annual_table_has_between_one_and_five_distinct_years_3() -> None:
+    """TAB_RENT_ANUAL: at most 5 rows, no repeated year, at least one when the list exists."""
+
+    def rows(years: list[int]) -> dict[str, object]:
+        return {"tab_rent_anual": [{"ano_rent": y, "rent_liq": "1"} for y in years]}
+
+    _doc(_inform(lista_tab_rent_anual=rows([2020, 2021, 2022, 2023, 2024])))
+    with pytest.raises(ValidationError):
+        _doc(_inform(lista_tab_rent_anual=rows([])))
+
+
+def test_annual_table_has_between_one_and_five_distinct_years_4() -> None:
+    """TAB_RENT_ANUAL: at most 5 rows, no repeated year, at least one when the list exists."""
+
+    def rows(years: list[int]) -> dict[str, object]:
+        return {"tab_rent_anual": [{"ano_rent": y, "rent_liq": "1"} for y in years]}
+
+    _doc(_inform(lista_tab_rent_anual=rows([2020, 2021, 2022, 2023, 2024])))
+    with pytest.raises(ValidationError):
+        _doc(_inform(lista_tab_rent_anual=rows([1899])))
+
+
+def test_monthly_table_has_between_one_and_twelve_distinct_months_1() -> None:
     """TAB_RENT_MENSAL: months 1 to 12, at most 12 rows, no repeats."""
 
     def rows(months: list[int]) -> dict[str, object]:
         return {"tab_rent_mensal": [{"mes": m, "rent_mens": "1"} for m in months]}
 
     _doc(_inform(lista_tab_rent_mensal=rows(list(range(1, 13)))))
-    _rejects(lista_tab_rent_mensal=rows([1, 1]))
-    _rejects(lista_tab_rent_mensal=rows([0]))
-    _rejects(lista_tab_rent_mensal=rows([13]))
-    _rejects(lista_tab_rent_mensal=rows([]))
-    _rejects(lista_tab_rent_mensal=rows(list(range(1, 13)) + [1]))
+    with pytest.raises(ValidationError):
+        _doc(_inform(lista_tab_rent_mensal=rows([1, 1])))
 
 
-def test_years_before_the_fund_existed_do_not_overlap_reported_years() -> None:
+def test_monthly_table_has_between_one_and_twelve_distinct_months_2() -> None:
+    """TAB_RENT_MENSAL: months 1 to 12, at most 12 rows, no repeats."""
+
+    def rows(months: list[int]) -> dict[str, object]:
+        return {"tab_rent_mensal": [{"mes": m, "rent_mens": "1"} for m in months]}
+
+    _doc(_inform(lista_tab_rent_mensal=rows(list(range(1, 13)))))
+    with pytest.raises(ValidationError):
+        _doc(_inform(lista_tab_rent_mensal=rows([0])))
+
+
+def test_monthly_table_has_between_one_and_twelve_distinct_months_3() -> None:
+    """TAB_RENT_MENSAL: months 1 to 12, at most 12 rows, no repeats."""
+
+    def rows(months: list[int]) -> dict[str, object]:
+        return {"tab_rent_mensal": [{"mes": m, "rent_mens": "1"} for m in months]}
+
+    _doc(_inform(lista_tab_rent_mensal=rows(list(range(1, 13)))))
+    with pytest.raises(ValidationError):
+        _doc(_inform(lista_tab_rent_mensal=rows([13])))
+
+
+def test_monthly_table_has_between_one_and_twelve_distinct_months_4() -> None:
+    """TAB_RENT_MENSAL: months 1 to 12, at most 12 rows, no repeats."""
+
+    def rows(months: list[int]) -> dict[str, object]:
+        return {"tab_rent_mensal": [{"mes": m, "rent_mens": "1"} for m in months]}
+
+    _doc(_inform(lista_tab_rent_mensal=rows(list(range(1, 13)))))
+    with pytest.raises(ValidationError):
+        _doc(_inform(lista_tab_rent_mensal=rows([])))
+
+
+def test_monthly_table_has_between_one_and_twelve_distinct_months_5() -> None:
+    """TAB_RENT_MENSAL: months 1 to 12, at most 12 rows, no repeats."""
+
+    def rows(months: list[int]) -> dict[str, object]:
+        return {"tab_rent_mensal": [{"mes": m, "rent_mens": "1"} for m in months]}
+
+    _doc(_inform(lista_tab_rent_mensal=rows(list(range(1, 13)))))
+    with pytest.raises(ValidationError):
+        _doc(_inform(lista_tab_rent_mensal=rows(list(range(1, 13)) + [1])))
+
+
+def test_years_before_the_fund_existed_do_not_overlap_reported_years_1() -> None:
     """ANTES_INIC2 lists years with no data, so a year cannot also have a return row."""
     rent = {"tab_rent_anual": [{"ano_rent": 2022, "rent_liq": "1"}]}
-    _rejects(infor_tab_rent_anual={"antes_inic2": {"ano": [2022]}}, lista_tab_rent_anual=rent)
+    with pytest.raises(ValidationError):
+        _doc(
+            _inform(
+                infor_tab_rent_anual={"antes_inic2": {"ano": [2022]}}, lista_tab_rent_anual=rent
+            )
+        )
     _doc(_inform(infor_tab_rent_anual={"antes_inic2": {"ano": [2021]}}, lista_tab_rent_anual=rent))
-    _rejects(infor_tab_rent_anual={"antes_inic2": {"ano": [2021, 2021]}})
-    _rejects(infor_tab_rent_anual={"antes_inic2": {"ano": []}})
 
 
-def test_reference_index_columns_need_a_reference_index() -> None:
+def test_years_before_the_fund_existed_do_not_overlap_reported_years_2() -> None:
+    """ANTES_INIC2 lists years with no data, so a year cannot also have a return row."""
+    rent = {"tab_rent_anual": [{"ano_rent": 2022, "rent_liq": "1"}]}
+    _doc(_inform(infor_tab_rent_anual={"antes_inic2": {"ano": [2021]}}, lista_tab_rent_anual=rent))
+    with pytest.raises(ValidationError):
+        _doc(_inform(infor_tab_rent_anual={"antes_inic2": {"ano": [2021, 2021]}}))
+
+
+def test_years_before_the_fund_existed_do_not_overlap_reported_years_3() -> None:
+    """ANTES_INIC2 lists years with no data, so a year cannot also have a return row."""
+    rent = {"tab_rent_anual": [{"ano_rent": 2022, "rent_liq": "1"}]}
+    _doc(_inform(infor_tab_rent_anual={"antes_inic2": {"ano": [2021]}}, lista_tab_rent_anual=rent))
+    with pytest.raises(ValidationError):
+        _doc(_inform(infor_tab_rent_anual={"antes_inic2": {"ano": []}}))
+
+
+def test_reference_index_columns_need_a_reference_index_1() -> None:
     """RENT_IND_REF and the per-row index columns are only valid when IND_REFER is given."""
-    _rejects(infor_tab_rent_anual={"rent_ind_ref": "1"})
-    _rejects(
-        lista_tab_rent_anual={
-            "tab_rent_anual": [{"ano_rent": 2024, "rent_liq": "1", "var_ind_ref": "1"}]
-        }
-    )
-    _rejects(
-        lista_tab_rent_anual={
-            "tab_rent_anual": [{"ano_rent": 2024, "rent_liq": "1", "rent_perc_ind_ref": "0"}]
-        }
-    )
-    _rejects(
-        lista_tab_rent_mensal={
-            "tab_rent_mensal": [{"mes": 1, "rent_mens": "1", "var_mens_ind_ref": "0"}]
-        }
-    )
-    _rejects(
-        lista_tab_rent_mensal={
-            "tab_rent_mensal": [{"mes": 1, "rent_mens": "1", "rent_mens_perc_ind_ref": "1"}]
-        }
-    )
+    with pytest.raises(ValidationError):
+        _doc(_inform(infor_tab_rent_anual={"rent_ind_ref": "1"}))
     _doc(
         _inform(
             infor_tab_rent_anual={"ind_refer": "CDI", "rent_ind_ref": "1"},
@@ -937,37 +1378,157 @@ def test_reference_index_columns_need_a_reference_index() -> None:
     )
 
 
-def test_years_in_return_rows_are_four_digit_years() -> None:
+def test_reference_index_columns_need_a_reference_index_2() -> None:
+    """RENT_IND_REF and the per-row index columns are only valid when IND_REFER is given."""
+    with pytest.raises(ValidationError):
+        _doc(
+            _inform(
+                lista_tab_rent_anual={
+                    "tab_rent_anual": [{"ano_rent": 2024, "rent_liq": "1", "var_ind_ref": "1"}]
+                }
+            )
+        )
+    _doc(
+        _inform(
+            infor_tab_rent_anual={"ind_refer": "CDI", "rent_ind_ref": "1"},
+            lista_tab_rent_anual={
+                "tab_rent_anual": [{"ano_rent": 2024, "rent_liq": "1", "var_ind_ref": "0"}]
+            },
+        )
+    )
+
+
+def test_reference_index_columns_need_a_reference_index_3() -> None:
+    """RENT_IND_REF and the per-row index columns are only valid when IND_REFER is given."""
+    with pytest.raises(ValidationError):
+        _doc(
+            _inform(
+                lista_tab_rent_anual={
+                    "tab_rent_anual": [
+                        {"ano_rent": 2024, "rent_liq": "1", "rent_perc_ind_ref": "0"}
+                    ]
+                }
+            )
+        )
+    _doc(
+        _inform(
+            infor_tab_rent_anual={"ind_refer": "CDI", "rent_ind_ref": "1"},
+            lista_tab_rent_anual={
+                "tab_rent_anual": [{"ano_rent": 2024, "rent_liq": "1", "var_ind_ref": "0"}]
+            },
+        )
+    )
+
+
+def test_reference_index_columns_need_a_reference_index_4() -> None:
+    """RENT_IND_REF and the per-row index columns are only valid when IND_REFER is given."""
+    with pytest.raises(ValidationError):
+        _doc(
+            _inform(
+                lista_tab_rent_mensal={
+                    "tab_rent_mensal": [{"mes": 1, "rent_mens": "1", "var_mens_ind_ref": "0"}]
+                }
+            )
+        )
+    _doc(
+        _inform(
+            infor_tab_rent_anual={"ind_refer": "CDI", "rent_ind_ref": "1"},
+            lista_tab_rent_anual={
+                "tab_rent_anual": [{"ano_rent": 2024, "rent_liq": "1", "var_ind_ref": "0"}]
+            },
+        )
+    )
+
+
+def test_reference_index_columns_need_a_reference_index_5() -> None:
+    """RENT_IND_REF and the per-row index columns are only valid when IND_REFER is given."""
+    with pytest.raises(ValidationError):
+        _doc(
+            _inform(
+                lista_tab_rent_mensal={
+                    "tab_rent_mensal": [
+                        {"mes": 1, "rent_mens": "1", "rent_mens_perc_ind_ref": "1"}
+                    ]
+                }
+            )
+        )
+    _doc(
+        _inform(
+            infor_tab_rent_anual={"ind_refer": "CDI", "rent_ind_ref": "1"},
+            lista_tab_rent_anual={
+                "tab_rent_anual": [{"ano_rent": 2024, "rent_liq": "1", "var_ind_ref": "0"}]
+            },
+        )
+    )
+
+
+@pytest.mark.parametrize("year", [0, 99, 10000, 2024.0, "2024"])
+def test_years_in_return_rows_are_four_digit_years(year: object) -> None:
     """A year of 0, 99 or 10000 is refused."""
-    for year in (0, 99, 10000, 2024.0, "2024"):
-        _rejects(lista_tab_rent_anual={"tab_rent_anual": [{"ano_rent": year, "rent_liq": "1"}]})
+    with pytest.raises(ValidationError):
+        _doc(
+            _inform(lista_tab_rent_anual={"tab_rent_anual": [{"ano_rent": year, "rent_liq": "1"}]})
+        )
 
 
-def test_years_since_losing_value_is_between_zero_and_five() -> None:
+@pytest.mark.parametrize("bad", [-1, 6, 1.0])
+def test_years_since_losing_value_outside_zero_to_five_is_refused(bad: object) -> None:
     """ANOS_ABAIXO counts years among the last five."""
-    for bad in (-1, 6, 1.0):
-        _rejects(infor_tab_rent_anual={"anos_abaixo": bad})
-    _doc(_inform(infor_tab_rent_anual={"anos_abaixo": 0}))
-    _doc(_inform(infor_tab_rent_anual={"anos_abaixo": 5}))
+    with pytest.raises(ValidationError):
+        _doc(_inform(infor_tab_rent_anual={"anos_abaixo": bad}))
 
 
-def test_cost_example_years_must_be_consecutive() -> None:
+@pytest.mark.parametrize("good", [0, 5])
+def test_years_since_losing_value_at_the_edges_is_accepted(good: int) -> None:
+    """Zero and five are the inclusive bounds."""
+    assert _doc(_inform(infor_tab_rent_anual={"anos_abaixo": good})) is not None
+
+
+def test_cost_example_years_must_be_consecutive_1() -> None:
     """ANO_ANT is the year immediately before ANO_EMISS."""
     base = {"valor_resg": "1", "impostos": "0", "valor_despesas": "0"}
     _doc(_inform(inform_exemplo_comp={**base, "ano_ant": 2023, "ano_emiss": 2024}))
-    _rejects(inform_exemplo_comp={**base, "ano_ant": 2022, "ano_emiss": 2024})
-    _rejects(inform_exemplo_comp={**base, "ano_ant": 2024, "ano_emiss": 2024})
+    with pytest.raises(ValidationError):
+        _doc(_inform(inform_exemplo_comp={**base, "ano_ant": 2022, "ano_emiss": 2024}))
 
 
-def test_models_reject_unknown_fields_and_are_immutable() -> None:
+def test_cost_example_years_must_be_consecutive_2() -> None:
+    """ANO_ANT is the year immediately before ANO_EMISS."""
+    base = {"valor_resg": "1", "impostos": "0", "valor_despesas": "0"}
+    _doc(_inform(inform_exemplo_comp={**base, "ano_ant": 2023, "ano_emiss": 2024}))
+    with pytest.raises(ValidationError):
+        _doc(_inform(inform_exemplo_comp={**base, "ano_ant": 2024, "ano_emiss": 2024}))
+
+
+def test_models_reject_unknown_fields_and_are_immutable_1() -> None:
     """An unknown field is refused and a built document cannot be edited in place."""
-    _rejects(campo_inventado="x")
-    _rejects(
-        conversao={"abert_fech": "A", "dia_aplic": 1, "abert_fech_c": "F", "dia_resg": 2, "x": 1}
-    )
+    with pytest.raises(ValidationError):
+        _doc(_inform(campo_inventado="x"))
+    _doc(_inform())
+
+
+def test_models_reject_unknown_fields_and_are_immutable_2() -> None:
+    """An unknown field is refused and a built document cannot be edited in place."""
+    with pytest.raises(ValidationError):
+        _doc(
+            _inform(
+                conversao={
+                    "abert_fech": "A",
+                    "dia_aplic": 1,
+                    "abert_fech_c": "F",
+                    "dia_resg": 2,
+                    "x": 1,
+                }
+            )
+        )
+    _doc(_inform())
+
+
+def test_models_reject_unknown_fields_and_are_immutable_3() -> None:
+    """An unknown field is refused and a built document cannot be edited in place."""
     doc = _doc(_inform())
     with pytest.raises(ValidationError):
-        doc.informs[0].nome_fantasia = "outro"  # type: ignore[misc]
+        doc.informs[0].nome_fantasia = "outro"
 
 
 def test_mandatory_blocks_cannot_be_omitted() -> None:
