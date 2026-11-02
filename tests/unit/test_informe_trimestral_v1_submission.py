@@ -8,7 +8,7 @@ the wrong scale fails here. Every test holds one assertion site.
 from contextlib import suppress
 from decimal import Decimal
 from pathlib import Path
-from xml.etree import ElementTree as ET
+from xml.etree import ElementTree as ET  # noqa: S405
 
 from pydantic import ValidationError
 import pytest
@@ -262,7 +262,7 @@ def test_export_leaves_no_temp_file(tmp_path: Path) -> None:
 
 def _unencodable_doc() -> InformeTrimestralV1Document:
     doc = _doc()
-    object.__setattr__(doc.informs[0], "cnpj_fdo", "中")
+    object.__setattr__(doc.informs[0], "cnpj_fdo", "中")  # noqa: PLC2801
     return doc
 
 

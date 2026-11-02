@@ -24,12 +24,12 @@ da CVM. Os modelos são imutáveis e recusam campos desconhecidos. O namespace �
 
 ## Tipagem
 
-A página **não tem nenhum campo decimal**. Datas são parseadas (`31/02` é recusada, ano ≥ 1900);
+A página **não tem nenhum campo decimal**. Datas são parseadas (`31/02` é recusada, ano ≥ 1900); <!-- codespell:ignore Datas,datas -->
 o formato é checado antes do dígito verificador, sem espaços ou quebra de linha: o CPF são
 exatamente 11 dígitos `[0-9]`; o CNPJ aceita `[0-9A-Z]` nas 12 primeiras posições (CNPJ
 alfanumérico de 2026) e dígitos verificadores numéricos, com ou sem máscara, e é gravado sem
 máscara. `NOME` é não vazio, até 200 caracteres, sem caracteres de
-controle e codificável em `windows-1252`.
+controle e codificável em `windows-1252`. <!-- codespell:ignore controle -->
 
 ### O que a página não diz (decisões deste repositório)
 
@@ -68,4 +68,4 @@ InfFundo157().export(doc, output_path="inf157.xml")    # grava windows-1252, ret
 ```
 
 O texto é codificado e checado como XML bem formado **antes** de abrir o destino: uma falha não
-trunca um arquivo existente. Nenhum validador da CVM foi executado contra a saída.
+trunca um arquivo existente. Nenhum validador da CVM foi executado contra a saída. <!-- codespell:ignore validador -->

@@ -4,7 +4,7 @@ Produces CVM-compliant asset-register update XML (``COD_DOC=2``, no namespace) f
 validated schema models. Pure logic plus file I/O at the edges — no network.
 """
 
-from xml.etree import ElementTree as ET
+from xml.etree import ElementTree as ET  # noqa: S405
 
 from layouts_cvm._internal.config.ports.submission_writer import SubmissionWriter
 from layouts_cvm._internal.utils.atomic_write import atomic_write_bytes

@@ -25,12 +25,12 @@ usa namespace, tem `COD_DOC=2` e é gravado em `windows-1252`.
   (informe `1`, não `01`: a página proíbe zeros à esquerda fora de CNPJ).
 - O ativo é identificado por `CD_ATIV`, `TP_ATIV` e `DT_INICIO_VIGEN`: sempre obrigatórios.
 - `DS_ATIV`, `CNPJ_EMP_EMISSORA`, `TP_EMP_EMISSORA`, `NM_EMP_EMISSORA` e `DS_ISIN` são
-  obrigatórios em `I`/`A` e opcionais em `R`. Fim de vigência e datas de suspensão são sempre
+  obrigatórios em `I`/`A` e opcionais em `R`. Fim de vigência e datas de suspensão são sempre <!-- codespell:ignore datas -->
   opcionais.
 - `TP_ATIV`/`TP_EMP_EMISSORA` são `int` estritos: `True`, `2.0` e `"2"` são recusados.
 - CNPJs: o formato é checado antes de qualquer normalização (`NN.NNN.NNN/NNNN-NN`, 14
   caracteres sem máscara, ou só dígitos sem os zeros à esquerda, como a página permite);
-  depois, dígito verificador, e a gravação é sem máscara. Datas `DD/MM/AAAA` reais, ano ≥ 1900.
+  depois, dígito verificador, e a gravação é sem máscara. Datas `DD/MM/AAAA` reais, ano ≥ 1900. <!-- codespell:ignore Datas,datas -->
 - Textos não vazios, de uma linha e compatíveis com `windows-1252`.
 - A página não informa tamanhos máximos; nenhum é imposto. Os códigos 16 e 25 a 46 da Tabela 1
   não constam da página e são recusados.

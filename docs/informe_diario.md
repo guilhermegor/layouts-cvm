@@ -31,7 +31,7 @@ levanta `ValidationError`.
 
 - **Decimais** são **truncados em direção a zero** (`ROUND_DOWN`), nunca arredondados; passe
   `str`/`Decimal`, nunca `float`.
-- Na serialização, decimais saem com **vírgula** (`1,50`); o arquivo é gravado em `windows-1252`.
+- Na serialização, decimais saem com **vírgula** (`1,50`); o arquivo é gravado em `windows-1252`. <!-- codespell:ignore saem -->
 
 ---
 

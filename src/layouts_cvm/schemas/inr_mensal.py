@@ -1,4 +1,4 @@
-"""Pydantic models for the Informe Mensal de Investidor Não Residente XML standard.
+"""Pydantic models for the Non-Resident Investor Monthly Report XML standard.
 
 Direction-neutral schema for ``PadraoXMLInfoMensalINR.asp``
 (https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoMensalINR.asp). The

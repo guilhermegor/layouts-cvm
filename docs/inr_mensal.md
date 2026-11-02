@@ -43,7 +43,7 @@ não podem ser negativos; valor de mercado e patrimônio líquido podem.
 - Premissas não declaradas pela página: código de participante único por arquivo. A página define
   `CD_CVM` e o `AAAAA` de `COD_PARTIC` como o código CVM do representante, então o `AAAAA` de cada
   participante tem de igualar `CD_CVM`.
-- Nenhum validador da CVM foi executado.
+- Nenhum validador da CVM foi executado. <!-- codespell:ignore validador -->
 
 ---
 

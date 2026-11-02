@@ -7,7 +7,7 @@ models, so a field declared out of order or under the wrong name fails here.
 import copy
 from decimal import Decimal
 from pathlib import Path
-from xml.etree import ElementTree as ET
+from xml.etree import ElementTree as ET  # noqa: S405
 
 from pydantic import ValidationError
 import pytest

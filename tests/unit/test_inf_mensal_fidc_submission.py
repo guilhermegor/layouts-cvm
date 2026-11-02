@@ -23,7 +23,7 @@ VALID_CPF = "52998224725"
 SPEC_LISTA_INFORM_ORDER = [
     "APLIC_ATIVO",
     "CART_SEGMT",
-    "PASSIV",
+    "PASSIV",  # codespell:ignore passiv,PASSIV
     "PATRLIQ",
     "COMPMT_DICRED_AQUIS",
     "COMPMT_DICRED_SEM_AQUIS",
@@ -34,7 +34,7 @@ SPEC_LISTA_INFORM_ORDER = [
 ]
 
 
-def _value_for(annotation: Any, name: str) -> Any:  # noqa: ANN401
+def _value_for(annotation: Any, name: str) -> Any:  # noqa: ANN401, PLR0911
     """Build a zero/neutral value for a required field annotation."""
     origin = get_origin(annotation)
     if origin is list:
@@ -199,7 +199,7 @@ def test_sacado_with_placeholder_document_is_accepted() -> None:
 
 
 def test_invalid_fund_cnpj_is_rejected() -> None:
-    """CNPJ with bad check digits fails the page's 'CPF/CNPJ tem que ser válidos'."""
+    """CNPJ with bad check digits fails the page's CPF/CNPJ validity rule."""
     with pytest.raises(ValidationError, match="CNPJ"):
         _doc(lambda d: d["cab_inform"].update(nr_cnpj_fundo="11222333000182"))
 

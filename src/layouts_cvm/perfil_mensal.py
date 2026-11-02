@@ -6,7 +6,7 @@ the *sending* half of the standard; parsing CVM files back into models lives in 
 """
 
 from decimal import Decimal
-import xml.sax.saxutils as saxutils
+from xml.sax import saxutils  # noqa: S406
 
 from layouts_cvm._internal.config.ports.submission_writer import SubmissionWriter
 from layouts_cvm._internal.utils.atomic_write import atomic_write_bytes

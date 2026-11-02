@@ -43,9 +43,9 @@ e `TIT_PRE_FIX_TAXA_CONTR` 3 + 6. Passe `str`/`Decimal`, nunca `float`.
 - CNPJ/CPF validados por dígito verificador. Conforme a página, zeros à esquerda são omitidos
   na saída.
 
-- Datas `DD/MM/AAAA` precisam existir no calendário (`31/02/2024` é recusada), em todos os campos de
-  data. Textos livres e códigos não podem ser vazios, em branco, nem conter tabulação ou quebra de linha, devem caber em `windows-1252` e não podem
-  conter caracteres de controle proibidos em XML; a validação recusa antes de gravar, e o arquivo
+- Datas `DD/MM/AAAA` precisam existir no calendário (`31/02/2024` é recusada), em todos os campos de <!-- codespell:ignore Datas,datas -->
+  data. Textos livres e códigos não podem ser vazios, em branco, nem conter tabulação ou quebra de linha, devem caber em `windows-1252` e não podem <!-- codespell:ignore conter -->
+  conter caracteres de controle proibidos em XML; a validação recusa antes de gravar, e o arquivo <!-- codespell:ignore conter,controle -->
   só é aberto depois de o conteúdo estar codificado, então uma falha de codificação nunca apaga um envio anterior (disco cheio no meio da gravação não é coberto).
 - Quantidades de vendas/aquisições são não negativas; `NEGOC` vazio é recusado; `ATIVO_EXT` só
   existe em `INV_EXT`. No `SWAP`, `MERC_POS_FIM` fica dentro de `POS_FIM` (`CdaSwapPosFim`), como na

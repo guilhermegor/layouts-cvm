@@ -30,7 +30,7 @@ Cada campo do schema é a tag da página em minúsculas, declarado na ordem do X
 ### Decimais
 
 A página declara todo número como "decimal com até 12 algarismos na parte inteira e até 8 na
-parte decimal". Os decimais são `Decimal` (nunca `float`, que é recusado), saem com **8 casas** e
+parte decimal". Os decimais são `Decimal` (nunca `float`, que é recusado), saem com **8 casas** e <!-- codespell:ignore saem -->
 vírgula decimal, e casas excedentes são **truncadas** (nunca arredondadas). Quantidades, capital
 e percentuais não podem ser negativos; percentuais ficam entre 0 e 100. `vl_pl_fdo` e
 `vl_atual_cota` aceitam valor negativo.
@@ -47,7 +47,7 @@ e percentuais não podem ser negativos; percentuais ficam entre 0 e 100. `vl_pl_
 
 ### Regras entre campos
 
-- Um fundo não repete categoria nem número de classe; um arquivo não repete fundo.
+- Um fundo não repete categoria nem número de classe; um arquivo não repete fundo. <!-- codespell:ignore repete -->
 - Os dois blocos de lista são obrigatórios e têm ao menos um item.
 
 ## Limites e pontos em aberto
@@ -58,8 +58,8 @@ e percentuais não podem ser negativos; percentuais ficam entre 0 e 100. `vl_pl_
 - A página não diz se `LISTA_COTST_CATEG` e `LISTA_CLASSE_COTAS` são obrigatórias; tratadas como
   obrigatórias (todo fundo tem cotistas e ao menos uma classe).
 - Os totais (`tot_cotst_subscr`, `tx_num_tot_cot`) não são recalculados nem conferidos contra os
-  itens: a página não define a relação.
-- Nenhum validador da CVM foi executado (a página oferece um verificador de sintaxe).
+  itens: a página não define a relação. <!-- codespell:ignore itens -->
+- Nenhum validador da CVM foi executado (a página oferece um verificador de sintaxe). <!-- codespell:ignore validador -->
 
 ## Exemplos
 

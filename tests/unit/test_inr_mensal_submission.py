@@ -1,4 +1,4 @@
-"""Unit tests for the Informe Mensal de Investidor Não Residente submission writer."""
+"""Unit tests for the Non-Resident Investor Monthly Report submission writer."""
 
 from collections.abc import Callable
 import contextlib
@@ -101,7 +101,7 @@ def test_export_header_block_matches_spec_tags(pick: Callable, expected: object)
     ("pick", "expected"),
     [
         (lambda p: p.tag, f"{NS}PARTICIPANTE"),
-        (lambda p: _tags(p), ["COD_PARTIC", "ENTRADA_SAIDA", "MOV_RECURSOS", "PATRIM_LIQ"]),
+        (_tags, ["COD_PARTIC", "ENTRADA_SAIDA", "MOV_RECURSOS", "PATRIM_LIQ"]),
         (lambda p: p[0].text, CODE),
         (
             lambda p: [(c.tag.removeprefix(NS), c.text) for c in p[1]],
@@ -132,7 +132,7 @@ def _same_investor_mov() -> ET.Element:
 @pytest.mark.parametrize(
     ("pick", "expected"),
     [
-        (lambda e: _tags(e), ["TRANSF_RECURSOS", "RECURSOS_MESMO_INVEST"]),
+        (_tags, ["TRANSF_RECURSOS", "RECURSOS_MESMO_INVEST"]),
         (
             lambda e: _tags(e[1]),
             ["RECURSOS_RECEB_MESMO_INVEST", "RECURSOS_ENV_MESMO_INVEST"],
@@ -165,7 +165,7 @@ def _other_investor_container() -> ET.Element:
     ("pick", "expected"),
     [
         (
-            lambda c: _tags(c),
+            _tags,
             [
                 "RECURSOS_RECEB_OUTRO_INVEST",
                 "RECURSOS_RECEB_OUTRO_INVEST",
@@ -193,7 +193,7 @@ def _participant_with_applications() -> ET.Element:
     ("pick", "expected"),
     [
         (
-            lambda p: _tags(p),
+            _tags,
             [
                 "COD_PARTIC",
                 "ENTRADA_SAIDA",

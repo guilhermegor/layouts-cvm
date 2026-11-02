@@ -6,7 +6,7 @@ I/A/R rules, 1000-row cap), not from the writer.
 # ruff: noqa: S314  (parses the writer's own output, not untrusted input)
 
 from pathlib import Path
-from xml.etree import ElementTree as ET
+from xml.etree import ElementTree as ET  # noqa: S405
 
 from pydantic import ValidationError
 import pytest

@@ -12,7 +12,7 @@ Envio (→ CVM) do padrão **Perfil Mensal V4**
 
 Monte um `PerfilMensalDocument` (um `DocumentHeader` + uma ou mais `PerfilMensalRow`, cada uma
 por classe de fundo) e serialize com `PerfilMensal().export(...)`. A validação acontece na
-construção dos modelos [Pydantic](https://docs.pydantic.dev/): formato de datas, dígitos
+construção dos modelos [Pydantic](https://docs.pydantic.dev/): formato de datas, dígitos <!-- codespell:ignore datas -->
 verificadores de CNPJ/CPF e a escala decimal de cada campo.
 
 | Modelo | Tag XML | Papel |
@@ -29,7 +29,7 @@ performance, etc.) e a lista completa de modelos estão na [Referência da API](
 
 - **Decimais** têm escala fixada por campo; a precisão excedente é **truncada em direção a zero**
   (`ROUND_DOWN`), nunca arredondada. Passe valores como `str`/`Decimal`, nunca `float`.
-- Na serialização, decimais saem com **vírgula** (`10,99`); o arquivo é gravado em
+- Na serialização, decimais saem com **vírgula** (`10,99`); o arquivo é gravado em <!-- codespell:ignore saem -->
   `windows-1252`.
 
 ---

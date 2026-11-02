@@ -4,7 +4,7 @@ The expected tag lists are typed from the CVM page's sample file, not derived fr
 """
 
 from pathlib import Path
-from xml.etree import ElementTree as ET
+from xml.etree import ElementTree as ET  # noqa: S405
 
 from pydantic import ValidationError
 import pytest

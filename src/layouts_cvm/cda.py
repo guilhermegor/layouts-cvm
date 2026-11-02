@@ -1,11 +1,11 @@
-"""CVM CDA (Composição e Diversificação das Aplicações) — submission (envio) writer.
+"""CVM CDA (portfolio composition report) — submission (envio) writer.
 
 Produces CVM-compliant CDA V4 XML (namespace ``urn:cda``) from validated schema models.
 Pure logic plus file I/O at the edges — no network.
 """
 
 from decimal import Decimal
-from xml.etree import ElementTree as ET
+from xml.etree import ElementTree as ET  # noqa: S405
 
 from pydantic import BaseModel
 

@@ -6,7 +6,7 @@ so a field declared out of order or under the wrong name fails here.
 
 from decimal import Decimal
 from pathlib import Path
-from xml.etree import ElementTree as ET
+from xml.etree import ElementTree as ET  # noqa: S405
 
 from pydantic import ValidationError
 import pytest
@@ -357,7 +357,7 @@ def test_unencodable_text_never_wipes_existing_file(tmp_path: Path) -> None:
     out = tmp_path / "iq.xml"
     out.write_bytes(b"keep me")
     doc = _doc()
-    object.__setattr__(doc.informs[0], "entid_invest", "中")
+    object.__setattr__(doc.informs[0], "entid_invest", "中")  # noqa: PLC2801
     with pytest.raises(ValueError, match="windows-1252"):
         InformeQuadrimestral().export(doc, str(out))
     assert out.read_bytes() == b"keep me"

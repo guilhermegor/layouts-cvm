@@ -35,7 +35,7 @@ subclasse de cotas, todas da **mesma competência**) e serialize com `Lamina().e
 
 Os campos de cada modelo são o nome da tag em minúsculas (`nome_fantasia` → `NOME_FANTASIA`) e
 estão declarados **na ordem do arquivo de exemplo da CVM**; o serializador percorre os campos nessa
-ordem, omite o que é `None` e repete o elemento de cada lista. Os modelos são imutáveis e recusam
+ordem, omite o que é `None` e repete o elemento de cada lista. Os modelos são imutáveis e recusam <!-- codespell:ignore repete -->
 campos desconhecidos.
 
 **Identificação:** cada `INFORM` informa **exatamente um** de `cnpj_fundo` (classe, validado por
@@ -66,11 +66,11 @@ serialização a vírgula é o separador decimal e a escala é fixa (`10,5000`).
 - **`short`** (`dias_car`, `dia_aplic`, `dia_resg`, `prazo_pagam`, `dias_saida`): inteiro estrito de
   0 a 32767. Anos: 1900 a 9999. `mes`: 1 a 12. `classif_risco`: 1 a 5. `anos_abaixo`: 0 a 5.
   Sem zeros à esquerda na saída.
-- **Datas** (`DD/MM/AAAA`, `MM/AAAA`): precisam existir no calendário (31/02 é recusado), com
+- **Datas** (`DD/MM/AAAA`, `MM/AAAA`): precisam existir no calendário (31/02 é recusado), com <!-- codespell:ignore Datas,datas -->
   dígitos ASCII, e ano ≥ 1900. `HOR_APL_RESG` é `HH:MM` de 00:00 a 23:59. Os formatos mantêm o
-  preenchimento com zeros que a própria página define para eles.
+  preenchimento com zeros que a própria página define para eles. <!-- codespell:ignore eles -->
 - **Textos**: nunca vazios nem só espaços, até o tamanho máximo "até N casas" da página (500, 100, 1000,
-  900, 300, 600, 50 e 20 conforme o campo; `reclamacoes` tem só 50). Caracteres de controle
+  900, 300, 600, 50 e 20 conforme o campo; `reclamacoes` tem só 50). Caracteres de controle <!-- codespell:ignore controle -->
   (exceto `\n` e `\t`) e qualquer caractere que o `windows-1252` não codifica são recusados na
   construção do modelo.
 - **`tel_sac`** (long): só dígitos, sem zero à esquerda, até 19 dígitos e cabendo em 64 bits. Por
@@ -84,7 +84,7 @@ serialização a vírgula é o separador decimal e a escala é fixa (`10,5000`).
 - `inic_periodo ≤ fim_periodo`; `ano_ant = ano_emiss − 1`.
 - `COMP_CARTEIRA`: 1 a 5; `TAB_RENT_ANUAL`: 1 a 5 linhas sem ano repetido; `TAB_RENT_MENSAL`: 1 a
   12 linhas sem mês repetido; um ano não pode estar ao mesmo tempo em `ANTES_INIC2` e numa linha
-  anual.
+  anual. <!-- codespell:ignore anual -->
 - `rent_ind_ref`, `var_ind_ref`, `rent_perc_ind_ref`, `var_mens_ind_ref` e
   `rent_mens_perc_ind_ref` só são aceitos com `ind_refer` ("quando houver").
 
@@ -92,7 +92,7 @@ serialização a vírgula é o separador decimal e a escala é fixa (`10,5000`).
 
 O que a biblioteca **não** garante, e o que a página deixa sem resposta:
 
-1. **Nenhum validador da CVM foi executado.** A página oferece um teste de sintaxe do arquivo; o XML
+1. **Nenhum validador da CVM foi executado.** A página oferece um teste de sintaxe do arquivo; o XML <!-- codespell:ignore validador -->
    gerado foi verificado apenas contra os testes deste repositório.
 2. **Namespace:** o exemplo da página usa `xmlns="urn:lamina"` e a lista de tags diz
    `urn:infdiario` (cópia do Informe Diário). Foi usado `urn:lamina`.
@@ -101,7 +101,7 @@ O que a biblioteca **não** garante, e o que a página deixa sem resposta:
 4. **Escalas decimais** não constam da página (acima). A faixa de cada campo é inferida do
    significado, não declarada pela CVM.
 5. **`cod_subclasse`:** a página não dá formato nem tamanho; assumido 1 a 50 caracteres.
-6. **Fundos com menos de um ano:** a página marca vários blocos como "não obrigatório" para eles,
+6. **Fundos com menos de um ano:** a página marca vários blocos como "não obrigatório" para eles, <!-- codespell:ignore eles -->
    mas a idade do fundo não consta do arquivo. Esses blocos são opcionais para todos e **a
    obrigatoriedade para os fundos mais antigos não é verificada**. Dentro de um bloco presente,
    todo campo que a página não marca como opcional é obrigatório.

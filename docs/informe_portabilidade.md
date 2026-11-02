@@ -28,7 +28,7 @@ Campos de `PortabilidadeInform` (ordem do XML): `cnpj_partic`, `dt_event`, `qtde
 - `cnpj_partic`: forma (14 caracteres, nu ou mascarado) e dígitos verificadores; gravado nu.
 - As seis quantidades são **inteiros não negativos estritos**: `float`, `bool` e texto numérico
   levantam `ValidationError`. Não há campo decimal neste padrão.
-- Datas são interpretadas (mês 13 ou `31/02` são recusados; ano mínimo 1900).
+- Datas são interpretadas (mês 13 ou `31/02` são recusados; ano mínimo 1900). <!-- codespell:ignore Datas,datas -->
 - `export` codifica o texto em `windows-1252` e confere a boa formação **antes** de abrir o
   arquivo de saída: um caractere não codificável levanta `ValueError` e não apaga o arquivo.
 
@@ -37,4 +37,4 @@ Campos de `PortabilidadeInform` (ordem do XML): `cnpj_partic`, `dt_event`, `qtde
 - `DT_EVENT` ("mês das solicitações") não tem formato declarado: adotado `MM/AAAA`.
 - A cardinalidade de `INFORM` não é declarada: ao menos um, sem teto superior.
 - Nenhuma relação entre as quantidades é declarada, então nenhuma é imposta.
-- Nenhum validador da CVM foi executado contra a saída.
+- Nenhum validador da CVM foi executado contra a saída. <!-- codespell:ignore validador -->

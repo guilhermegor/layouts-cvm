@@ -6,7 +6,7 @@ comma decimals, Table A/B, block x application-type table), not from the writer.
 # ruff: noqa: S314  (parses the writer's own output, not untrusted input)
 
 from decimal import Decimal
-from xml.etree import ElementTree as ET
+from xml.etree import ElementTree as ET  # noqa: S405
 
 from pydantic import ValidationError
 import pytest
@@ -382,7 +382,7 @@ def test_export_non_cp1252_text_rejected_and_file_untouched(tmp_path: object) ->
 def test_export_failure_does_not_truncate_existing_file(tmp_path: object) -> None:
     """Even if unencodable text got past validation, the old file survives."""
     doc = _doc()
-    object.__setattr__(doc.header, "dt_gerac_arq", "\u2192")
+    object.__setattr__(doc.header, "dt_gerac_arq", "\u2192")  # noqa: PLC2801
     out = tmp_path / "cda.xml"
     out.write_bytes(b"previous export")
     with pytest.raises(UnicodeEncodeError):

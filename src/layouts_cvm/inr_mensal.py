@@ -1,4 +1,4 @@
-"""CVM Informe Mensal de Investidor Não Residente — submission (envio) writer.
+"""CVM Non-Resident Investor Monthly Report (INR) — submission (envio) writer.
 
 Produces the INR monthly XML from a validated :class:`InrMensalDocument`. The schema declares
 its fields in XML order and named after their tag, so the serialiser is one recursive walk over
@@ -97,7 +97,7 @@ def _require_within_limit(payload: bytes) -> None:
 class InrMensal(SubmissionWriter[InrMensalDocument]):
     """Serialize a validated INR monthly document to CVM-compliant XML.
 
-    Concrete :class:`SubmissionWriter` for the Informe Mensal de Investidor Não Residente.
+    Concrete :class:`SubmissionWriter` for the Non-Resident Investor Monthly Report (INR).
 
     Methods
     -------
@@ -127,8 +127,8 @@ class InrMensal(SubmissionWriter[InrMensalDocument]):
         Raises
         ------
         ValueError
-                If the document cannot be encoded as windows-1252 XML (only possible when validation
-                was bypassed, e.g. ``model_construct``).
+                If the document cannot be encoded as windows-1252 XML (only possible when
+                validation was bypassed, e.g. ``model_construct``).
         """
         xml_str = _build_xml(doc)
         payload = _encode_checked(xml_str)

@@ -47,10 +47,10 @@ privado. Taxa em R$ (`2`) aceita só 2 casas. Em cada par `*_MIN`/`*_MAX` o mín
 máximo. A taxa de performance de público **não qualificado** exige taxa, índice (tabela D: 1 a 35
 ou 99) e percentual do índice, e proíbe `INFO_ADICIONAL`.
 
-### Texto e datas
+### Texto e datas <!-- codespell:ignore datas -->
 
 Textos são não vazios, no teto da página (`DETALHAMENTO_PRAZO` 200; `INFO_ADICIONAL` 5 a 400),
-sem caracteres de controle e codificáveis em `windows-1252`. Datas são lidas de fato
+sem caracteres de controle e codificáveis em `windows-1252`. Datas são lidas de fato <!-- codespell:ignore Datas,controle,datas -->
 (`31/02/2026` é recusada).
 
 ## Política de retry
@@ -87,4 +87,4 @@ xml = Extrato().export(doc)                       # retorna str
 Extrato().export(doc, output_path="extrato.xml")  # grava windows-1252, retorna None
 ```
 
-Nenhum validador da CVM foi executado contra a saída.
+Nenhum validador da CVM foi executado contra a saída. <!-- codespell:ignore validador -->

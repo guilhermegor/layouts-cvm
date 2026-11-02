@@ -33,7 +33,7 @@ Cada tag XML é o nome do atributo em maiúsculas, na ordem do modelo (que é a 
   (idem) e `liquidez` (obrigatória para fundo **aberto**, com ao menos um campo).
 - **Fundo fechado** não pode informar `pr_entre_resgate`, `tp_dias_resgate`, `pr_entre_conver`
   nem `tp_dias_conver`.
-- **Somatórios (itens 1 a 30 da página):** cada total deve ser igual à soma prescrita; a provisão
+- **Somatórios (itens 1 a 30 da página):** cada total deve ser igual à soma prescrita; a provisão <!-- codespell:ignore itens -->
   deve ser positiva e menor ou igual aos créditos que cobre; `VL_SOM_PRAZO_VENC` e
   `VL_SOM_INAD_VENC` devem fechar com a carteira; `QT_TOTAL_COTISTAS_*` com as séries.
 - **Sacados:** de 1 a 25, com CPF/CNPJ válido ou o marcador `99.999.999/9999-99` /
@@ -48,7 +48,7 @@ Cada tag XML é o nome do atributo em maiúsculas, na ordem do modelo (que é a 
 ### Gerar o XML
 
 O documento completo tem centenas de tags obrigatórias; monte-o a partir de um dicionário e
-valide com `model_validate`.
+valide com `model_validate`. <!-- codespell:ignore valide -->
 
 ```python
 from layouts_cvm import InfMensalFidc, InfMensalFidcDocument

@@ -730,20 +730,20 @@ class PassivPosicoes(_FidcBlock):
         return self
 
 
-class Passiv(_FidcBlock):
-    """PASSIV — liabilities."""
+class Passiv(_FidcBlock):  # codespell:ignore Passiv,passiv
+    """PASSIV — liabilities."""  # codespell:ignore PASSIV,passiv
 
     vl_som_passiv: Money
     passiv_valores: PassivValores
     passiv_posicoes: PassivPosicoes
 
     @model_validator(mode="after")
-    def _check_item_13(self) -> Passiv:
+    def _check_item_13(self) -> Passiv:  # codespell:ignore Passiv,passiv
         """Check item 13.
 
         Returns
         -------
-        Passiv
+        Passiv  # codespell:ignore Passiv,passiv
                 The validated block.
         """
         _require_sum(
@@ -1269,7 +1269,7 @@ class InfMensalFidcInform(_FidcBlock):
 
     aplic_ativo: AplicAtivo
     cart_segmt: CartSegmt
-    passiv: Passiv
+    passiv: Passiv  # codespell:ignore Passiv,passiv
     patrliq: Patrliq
     compmt_dicred_aquis: CompmtDicred
     compmt_dicred_sem_aquis: CompmtDicred

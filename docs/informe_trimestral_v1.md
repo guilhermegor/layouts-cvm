@@ -50,7 +50,7 @@ serializador de elementos é compartilhado com o writer da V2.
 ## Limites e pontos em aberto
 
 - **Conflito na página:** o exemplo traz `<VERSAO>1.0</VERSAO>`, mas a nota do campo diz "Deve
-  conter o número 2.0 que indica que o arquivo está na nova versão" (texto herdado da V2). Adotado
+  conter o número 2.0 que indica que o arquivo está na nova versão" (texto herdado da V2). Adotado <!-- codespell:ignore conter -->
   `1.0`: o exemplo, e o verificador de sintaxe da página é chamado com `VERSAO=1`. `"2.0"` é
   recusado.
 - A página não fixa largura máxima dos números: aceitos até 18 dígitos inteiros nos decimais e
@@ -58,7 +58,7 @@ serializador de elementos é compartilhado com o writer da V2.
 - A página não diz se o patrimônio líquido pode ser negativo; aceito (fundo descoberto).
 - A página não diz quais meses de competência valem além de "mês final do trimestre civil":
   `03`, `06`, `09` e `12`.
-- Nenhum validador da CVM foi executado (a página oferece um verificador de sintaxe).
+- Nenhum validador da CVM foi executado (a página oferece um verificador de sintaxe). <!-- codespell:ignore validador -->
 - A gravação em disco usa arquivo temporário no mesmo diretório + `os.replace`; a #330
   (`atomic_write_bytes`) passa a fornecê-la.
 
