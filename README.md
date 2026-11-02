@@ -50,7 +50,8 @@ bash bin/poe_exec.sh init
 ```
 
 `poe` lives inside the virtualenv, so `bin/venv.sh` creates it first; `bin/poe_exec.sh` then
-runs `poe init` without activating anything.
+runs `poe init` without activating anything. Once the virtualenv exists, `poetry run poe init`
+does the same.
 
 <!-- slug: usage -->
 ### Usage
