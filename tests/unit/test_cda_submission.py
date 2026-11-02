@@ -35,6 +35,7 @@ from layouts_cvm import (
     CdaTitAgroCredPriv,
     CdaTitPub,
 )
+from layouts_cvm.cda import _leaf_text
 
 
 VALID_CNPJ = "11222333000181"
@@ -750,10 +751,8 @@ def test_compt_year_zero_rejected() -> None:
 
 def test_export_never_writes_negative_zero() -> None:
     """Truncating a small negative must not emit -0,00."""
-    node = ET.Element("N")
     value = CdaPosFim(qtde_pos_fim="1", merc_pos_fim="-0.001").merc_pos_fim
-    Cda._leaf(node, "MERC_POS_FIM", value)
-    assert node[0].text == "0,00"
+    assert _leaf_text("MERC_POS_FIM", value) == "0,00"
 
 
 def test_export_writes_cp1252_accents_to_file(tmp_path: object) -> None:

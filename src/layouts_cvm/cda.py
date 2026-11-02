@@ -154,10 +154,10 @@ def _build_inform(node: ET.Element, inform: CdaInform) -> None:
     _leaf(node, "CNPJ_FDO", inform.cnpj_fdo)
     _leaf(node, "VL_PL", inform.vl_pl)
     ativ = ET.SubElement(node, "LISTA_ATIV")
-    for block, item in [
-        (block, item) for block in CdaInform.BLOCK_ORDER for item in getattr(inform, block)
+    for name, item in [
+        (blk, itm) for blk in CdaInform.BLOCK_ORDER for itm in getattr(inform, blk)
     ]:
-        _build_model(ET.SubElement(ativ, block.upper()), item)
+        _build_model(ET.SubElement(ativ, name.upper()), item)
 
 
 class Cda(SubmissionWriter[CdaDocument]):
