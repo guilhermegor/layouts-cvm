@@ -10,10 +10,15 @@ src_prefix_depth: 2
 
 layers:
   __root__:
-    allow: {}
+    allow:
+      pydantic: >-
+        The submission writers and their schemas ARE the public surface: a layout is a
+        pydantic model that validates a document before it is serialised, so the model type
+        is part of every writer's signature and cannot sit behind a seam.
 
   utils:
     allow:
+      pydantic: "xml_writer walks a pydantic document model's fields to emit the XML tags"
       pandas: "the seam layer owns the pandas surface (frames, dtypes, tabular_reader)"
       wwdates: "BR business-day calendar, wrapped by utils.dates"
       win32com: "Outlook COM automation, wrapped by utils.ms_office.outlook_gateway (Windows only)"
@@ -35,6 +40,7 @@ layers:
 
   config:
     allow:
+      pydantic: "the SubmissionWriter port is generic over a pydantic document model (TDoc)"
       dotenv: "loads .env at startup; this is the layer that owns environment resolution"
       yaml: "parses inputs.yaml / outputs.yaml"
       psycopg: "PostgreSQL driver, imported lazily by the configured DB_BACKEND"

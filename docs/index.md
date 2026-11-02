@@ -1,6 +1,6 @@
 # **layouts-cvm** <img src="assets/logo.png" align="right" width="200" style="border-radius: 15px;" alt="layouts-cvm">
 
-A minimal Python library with packaging, tests, CI, and linting pre-configured.
+Build, validate and serialise the files a fund sends to CVM, in CVM's own file layouts.
 
 ---
 
@@ -9,6 +9,7 @@ A minimal Python library with packaging, tests, CI, and linting pre-configured.
 | Section | Description |
 |---------|-------------|
 | [Usage](usage.md) | Installation, imports, and usage examples |
+| [Layouts](cadastro_ativos.md) | One page per CVM file layout (14) |
 | [API Reference](api/index.md) | Module-level functions and public interface |
 
 ---

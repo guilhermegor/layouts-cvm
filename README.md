@@ -27,7 +27,27 @@ Build, validate and serialise the files a fund sends to CVM, in CVM's own file l
 <!-- slug: features -->
 ## Features
 
-- The capabilities users care about, one line each.
+- Pydantic models for 14 CVM XML layouts, validated before anything is serialised.
+- One writer per layout (`export(doc, output_path=None)`), producing windows-1252 XML.
+- Byte-identical to the original `filings-cvm` writers, pinned by a golden-file test.
+- Runtime dependencies: `pydantic` and `beartype`. No network.
+
+| Layout | Writer | Document |
+|---|---|---|
+| Atualização do Cadastro de Ativos | `CadastroAtivos` | `CadastroAtivosDocument` |
+| CDA V4 | `Cda` | `CdaDocument` |
+| Extrato das Informações sobre o Fundo V3 | `Extrato` | `ExtratoDocument` |
+| Informe de Fundo 157 | `InfFundo157` | `InfFundo157Document` |
+| Informe Mensal FIDC (ICVM 576) | `InfMensalFidc` | `InfMensalFidcDocument` |
+| Informe Diário V4 | `InformeDiario` | `InformeDiarioDocument` |
+| Informe Diário V3 | `InformeDiarioV3` | `InformeDiarioV3Document` |
+| Informe de Portabilidade | `InformePortabilidade` | `InformePortabilidadeDocument` |
+| Informe Quadrimestral V2 | `InformeQuadrimestral` | `InformeQuadrimestralDocument` |
+| Informe Trimestral V1 | `InformeTrimestralV1` | `InformeTrimestralV1Document` |
+| Informe Mensal de Investidor Não Residente | `InrMensal` | `InrMensalDocument` |
+| Lâmina de Fundos V3 | `Lamina` | `LaminaDocument` |
+| Perfil Mensal V4 | `PerfilMensal` | `PerfilMensalDocument` |
+| Perfil Mensal (original) | `PerfilMensalOriginal` | `PerfilMensalOriginalDocument` |
 
 <!-- slug: documentation -->
 ## Documentation
@@ -55,8 +75,15 @@ runs `poe init` without activating anything.
 <!-- slug: usage -->
 ### Usage
 
-Run the project through its entry points under `src/`; replace this paragraph with the
-commands your users run first.
+```python
+from layouts_cvm import InformeDiario, InformeDiarioDocument
+
+doc = InformeDiarioDocument.model_validate(dict_payload)
+xml = InformeDiario().export(doc)                      # returns the XML text
+InformeDiario().export(doc, "informe_diario.xml")      # or writes it, atomically
+```
+
+Each layout has its own page under the Layouts section of the documentation.
 
 <!-- slug: project-structure -->
 ## Project Structure
@@ -117,7 +144,7 @@ This project is licensed under MIT; see [LICENSE](LICENSE).
 <!-- slug: authors -->
 ## Authors
 
-- guilhermegor — [GitHub](https://github.com/guilhermegor) | [LinkedIn](https://www.linkedin.com/in/your-linkedin-handle)
+- guilhermegor — [GitHub](https://github.com/guilhermegor) | [LinkedIn](https://www.linkedin.com/in/guilhermegor/)
 
 <!-- slug: useful-links -->
 ## Useful Links
