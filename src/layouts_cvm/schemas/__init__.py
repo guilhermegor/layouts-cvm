@@ -173,6 +173,11 @@ from layouts_cvm.schemas.informe_diario import (
     SignificantShareholder,
     TwoDecimalField,
 )
+from layouts_cvm.schemas.informe_diario_v2 import (
+    InformeDiarioV2Document,
+    InformeDiarioV2Header,
+    InformeDiarioV2Inform,
+)
 from layouts_cvm.schemas.informe_diario_v3 import (
     InformeDiarioV3Document,
     InformeDiarioV3Header,
@@ -389,6 +394,9 @@ __all__ = [
     "InformeDiarioDocument",
     "InformeDiarioHeader",
     "InformeDiarioInform",
+    "InformeDiarioV2Document",
+    "InformeDiarioV2Header",
+    "InformeDiarioV2Inform",
     "InformeDiarioV3Document",
     "InformeDiarioV3Header",
     "InformeDiarioV3Inform",
