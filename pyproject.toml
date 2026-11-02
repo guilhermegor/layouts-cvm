@@ -1,11 +1,12 @@
 [tool.poetry]
 name = "layouts-cvm"
-version = "0.0.1"
+version = "0.0.0"  # set from the git tag, see docs/contributing.md#releasing
 description = "Build, validate and serialise the files a fund sends to CVM, in CVM's own file layouts."
 authors = ["guilhermegor"]
 readme = "README.md"
 license = "MIT"
-homepage = "https://example.com/layouts-cvm"
+homepage = "https://guilhermegor.github.io/layouts-cvm/"
+documentation = "https://guilhermegor.github.io/layouts-cvm/"
 repository = "https://github.com/guilhermegor/layouts-cvm"
 keywords = ["layouts-cvm", "python", "library"]
 packages = [{ include = "layouts_cvm", from = "src" }]
@@ -23,6 +24,7 @@ classifiers = [
 [tool.poetry.urls]
 "Bug Reports" = "https://github.com/guilhermegor/layouts-cvm/issues"
 "Source" = "https://github.com/guilhermegor/layouts-cvm"
+"Documentation" = "https://guilhermegor.github.io/layouts-cvm/"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<4.0"
@@ -63,6 +65,11 @@ mike = ">=2.1.0"
 [tool.deptry.per_rule_ignores]
 DEP002 = ["openpyxl"]
 
+[tool.poetry-dynamic-versioning]
+enable = true
+vcs = "git"
+style = "pep440"
+
 [build-system]
-requires = ["poetry-core>=1.7.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=1.7.0", "poetry-dynamic-versioning>=1.4.0,<2.0.0"]
+build-backend = "poetry_dynamic_versioning.backend"
