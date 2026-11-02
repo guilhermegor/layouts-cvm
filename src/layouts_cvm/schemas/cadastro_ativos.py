@@ -36,6 +36,70 @@ _BAD_CHAR_RE = re.compile(r"[\x00-\x1f]")
 
 ASSET_TYPE_CODES = frozenset({*range(1, 16), *range(17, 25), 47, 48, 49})
 ISSUER_TYPE_CODES = frozenset({0, 1, 45, 67})
+_REQUIRED_FIELDS = (
+    "ds_ativ",
+    "cnpj_emp_emissora",
+    "tp_emp_emissora",
+    "nm_emp_emissora",
+    "ds_isin",
+)
+_REQUIRED_BY_ACAO = {"I": _REQUIRED_FIELDS, "A": _REQUIRED_FIELDS, "R": ()}
+
+
+def _require_non_blank(value: str) -> None:
+    """Raise if the text is empty or blank.
+
+    Parameters
+    ----------
+    value : str
+            Candidate text.
+
+    Raises
+    ------
+    ValueError
+            If blank.
+    """
+    if not value.strip():
+        raise ValueError("text must not be empty or blank")
+
+
+def _require_single_line(value: str) -> None:
+    """Raise if the text holds a control character, tab or line break.
+
+    Parameters
+    ----------
+    value : str
+            Candidate text.
+
+    Raises
+    ------
+    ValueError
+            If a control character is present.
+    """
+    if _BAD_CHAR_RE.search(value):
+        raise ValueError("text must not hold a control character, tab or line break")
+
+
+def _require_windows_1252(value: str) -> None:
+    """Raise if the text is not encodable in windows-1252.
+
+    Parameters
+    ----------
+    value : str
+            Candidate text.
+
+    Raises
+    ------
+    ValueError
+            If a character is not windows-1252.
+    """
+    try:
+        value.encode("windows-1252")
+    except UnicodeEncodeError as exc:
+        raise ValueError(f"character {value[exc.start]!r} is not windows-1252") from exc
+
+
+_TEXT_CHECKS = (_require_non_blank, _require_single_line, _require_windows_1252)
 
 
 @type_checker
@@ -57,14 +121,8 @@ def _check_text(value: str) -> str:
     ValueError
             If blank, holding a control character, or not encodable in windows-1252.
     """
-    if not value.strip():
-        raise ValueError("text must not be empty or blank")
-    if _BAD_CHAR_RE.search(value):
-        raise ValueError("text must not hold a control character, tab or line break")
-    try:
-        value.encode("windows-1252")
-    except UnicodeEncodeError as exc:
-        raise ValueError(f"character {value[exc.start]!r} is not windows-1252") from exc
+    for fn_check in _TEXT_CHECKS:
+        fn_check(value)
     return value
 
 
@@ -214,16 +272,7 @@ class CadastroAtivosRow(BaseModel):
         ValueError
                 If an inclusion or alteration omits a field the page makes mandatory.
         """
-        if self.acao == "R":
-            return self
-        required = (
-            "ds_ativ",
-            "cnpj_emp_emissora",
-            "tp_emp_emissora",
-            "nm_emp_emissora",
-            "ds_isin",
-        )
-        missing = [name for name in required if getattr(self, name) is None]
+        missing = [name for name in _REQUIRED_BY_ACAO[self.acao] if getattr(self, name) is None]
         if missing:
             raise ValueError(f"acao {self.acao!r} requires: {', '.join(missing)}")
         return self
