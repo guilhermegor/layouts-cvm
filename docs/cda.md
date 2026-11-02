@@ -42,7 +42,6 @@ e `TIT_PRE_FIX_TAXA_CONTR` 3 + 6. Passe `str`/`Decimal`, nunca `float`.
   `CLASSIF_RISCO` existe se, e somente se, `ST_CLASSIF_RISCO` é `S`.
 - CNPJ/CPF validados por dígito verificador. Conforme a página, zeros à esquerda são omitidos
   na saída.
-
 - Datas `DD/MM/AAAA` precisam existir no calendário (`31/02/2024` é recusada), em todos os campos de <!-- codespell:ignore Datas,datas -->
   data. Textos livres e códigos não podem ser vazios, em branco, nem conter tabulação ou quebra de linha, devem caber em `windows-1252` e não podem <!-- codespell:ignore conter -->
   conter caracteres de controle proibidos em XML; a validação recusa antes de gravar, e o arquivo <!-- codespell:ignore conter,controle -->

@@ -4,8 +4,7 @@ Envio (→ CVM) do padrão **Extrato das Informações sobre a Classe de Cotas d
 ([`PadraoXMLInfExtratoV3.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfExtratoV3.asp)).
 
 > **Veja também:** [Referência da API](api/index.md) para cada símbolo público · [Uso](usage.md)
-> para instalação e o conceito geral · leitura do dump aberto (**outro artefato**, outro contrato):
-> Extrato FI.
+> para instalação e o conceito geral.
 
 ---
 

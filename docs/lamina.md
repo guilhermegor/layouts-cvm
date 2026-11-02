@@ -4,8 +4,7 @@ Envio (→ CVM) do padrão **Lâmina de Fundos V3**
 ([`PadraoXMLLaminaV3.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLLaminaV3.asp)).
 
 > **Veja também:** [Referência da API](api/index.md) para cada símbolo público · [Uso](usage.md)
-> para instalação e o conceito geral · leitura do dump aberto:
-> Lâmina FIF.
+> para instalação e o conceito geral.
 
 ---
 
@@ -110,7 +109,7 @@ O que a biblioteca **não** garante, e o que a página deixa sem resposta:
    A competência única por arquivo é garantida por haver um só `DT_COMPT`.
 8. **Autorização e envio** (administrador de carteira, delegação no CVMWeb) estão fora do escopo; a
    biblioteca só gera o arquivo.
-9. Não há leitura do XML de volta (`ingestion` lê o dump aberto, que é outro artefato).
+9. Não há leitura do XML de volta (a leitura do dump aberto é outro artefato).
 10. Um erro de codificação ou de XML (só possível com validação contornada, p. ex.
     `model_construct`) levanta `ValueError` **antes** de abrir o destino.
 

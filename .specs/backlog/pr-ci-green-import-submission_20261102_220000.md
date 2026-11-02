@@ -5,5 +5,5 @@
 - [x] Decorate schema helper functions with `@type_checker`
 - [x] Fix mypy errors in `perfil_mensal`, `cda`, `extrato`, `lamina`
 - [x] Take the one-assert fixes for `test_review_threads_gate` and `test_typing` from PR 23
-- [ ] Bring the submission test files under the complexity and one-assert caps
-- [ ] Merge `main` once PR 23 lands and re-run the hooks
+- [x] Bring the submission test files under the complexity and one-assert caps
+- [x] Merge `main` once PR 23 lands and re-run the hooks

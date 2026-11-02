@@ -59,8 +59,8 @@ serializador de elementos é compartilhado com o writer da V2.
 - A página não diz quais meses de competência valem além de "mês final do trimestre civil":
   `03`, `06`, `09` e `12`.
 - Nenhum validador da CVM foi executado (a página oferece um verificador de sintaxe). <!-- codespell:ignore validador -->
-- A gravação em disco usa arquivo temporário no mesmo diretório + `os.replace`; a #330
-  (`atomic_write_bytes`) passa a fornecê-la.
+- A gravação em disco usa arquivo temporário no mesmo diretório + `os.replace`
+  (`atomic_write_bytes`).
 
 ## Exemplos
 
