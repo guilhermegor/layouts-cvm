@@ -262,6 +262,13 @@ from layouts_cvm.schemas.lamina import (
     TimeField,
     YearField,
 )
+from layouts_cvm.schemas.lamina_v2 import (
+    LaminaV2Document,
+    LaminaV2Header,
+    LaminaV2Inform,
+    LaminaV2ListaTabRentMensal,
+    LaminaV2TabRentMensal,
+)
 from layouts_cvm.schemas.perfil_mensal import (
     AvgTermField,
     ClientCount,
@@ -423,6 +430,11 @@ __all__ = [
     "LaminaTaxaAdministracao",
     "LaminaTaxaEntrada",
     "LaminaTaxaSaida",
+    "LaminaV2Document",
+    "LaminaV2Header",
+    "LaminaV2Inform",
+    "LaminaV2ListaTabRentMensal",
+    "LaminaV2TabRentMensal",
     "Liquidez",
     "ListaCedent",
     "ListaCedentCredExiste",

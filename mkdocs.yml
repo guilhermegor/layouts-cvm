@@ -19,6 +19,7 @@ nav:
       - "Informe Trimestral — V1": informe_trimestral_v1.md
       - "Informe Mensal de Investidor Não Residente": inr_mensal.md
       - "Lâmina de Fundos — V3": lamina.md
+      - "Lâmina de Fundos — V2": lamina_v2.md
       - "Perfil Mensal — V4": perfil_mensal.md
       - "Perfil Mensal — original": perfil_mensal_original.md
   - API Reference:

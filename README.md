@@ -46,6 +46,7 @@ Build, validate and serialise the files a fund sends to CVM, in CVM's own file l
 | Informe Trimestral V1 | `InformeTrimestralV1` | `InformeTrimestralV1Document` |
 | Informe Mensal de Investidor Não Residente | `InrMensal` | `InrMensalDocument` |
 | Lâmina de Fundos V3 | `Lamina` | `LaminaDocument` |
+| Lâmina de Fundos V2 | `LaminaV2` | `LaminaV2Document` |
 | Perfil Mensal V4 | `PerfilMensal` | `PerfilMensalDocument` |
 | Perfil Mensal (original) | `PerfilMensalOriginal` | `PerfilMensalOriginalDocument` |
 
