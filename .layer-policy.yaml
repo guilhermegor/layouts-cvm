@@ -18,6 +18,7 @@ layers:
 
   utils:
     allow:
+      pydantic: "xml_writer walks a pydantic document model's fields to emit the XML tags"
       pandas: "the seam layer owns the pandas surface (frames, dtypes, tabular_reader)"
       wwdates: "BR business-day calendar, wrapped by utils.dates"
       win32com: "Outlook COM automation, wrapped by utils.ms_office.outlook_gateway (Windows only)"

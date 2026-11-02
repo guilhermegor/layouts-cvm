@@ -9,10 +9,10 @@ order and names them after their tag, so the serialiser is one recursive walk ov
 from decimal import Decimal
 from xml.etree import ElementTree as ET  # noqa: S405
 
-from layouts_cvm._internal.utils.typing import type_checker
 from pydantic import BaseModel
 
 from layouts_cvm._internal.utils.atomic_write import atomic_write_bytes
+from layouts_cvm._internal.utils.typing import type_checker
 
 
 ENCODING = "windows-1252"
