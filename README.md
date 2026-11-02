@@ -1,7 +1,7 @@
 <!-- readme-archetype: library -->
 # layouts-cvm
 
-<p align="center"><img src="https://raw.githubusercontent.com/guilhermegor/layouts-cvm/main/assets/cvm-logo.png" width="200" alt="Emblema da CVM"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/guilhermegor/layouts-cvm/main/assets/cvm-logo.png" width="200" alt="CVM emblem"></p>
 
 [![Project Status: Active](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 ![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)
@@ -130,4 +130,4 @@ This project is licensed under MIT; see [LICENSE](LICENSE).
 
 <sub>Generated from the lib-minimal template via [BlueprintX](https://github.com/guilhermegor/blueprintx).
 Unofficial, community library. Not affiliated with or endorsed by the Comissão de Valores Mobiliários (CVM);
-the emblem is theirs.</sub>
+the emblem is theirs and is not covered by this project's MIT license.</sub>
