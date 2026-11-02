@@ -73,16 +73,47 @@ class InfMensalFidc(SubmissionWriter[InfMensalFidcDocument]):
         list[str]
                 XML lines; ``None`` fields are omitted (optional tags).
         """
-        lines: list[str] = []
-        for name, info in type(block).model_fields.items():
-            value = getattr(block, name)
-            if value is None:
-                continue
-            tag = info.alias or name.upper()
-            scale = self._scale(info)
-            for item in value if isinstance(value, list) else [value]:
-                lines.extend(self._element_lines(tag, item, scale, depth))
-        return lines
+        return [
+            line
+            for tag, item, scale in self._items(block)
+            for line in self._element_lines(tag, item, scale, depth)
+        ]
+
+    def _items(self, block: BaseModel) -> list[tuple[str, object, int]]:
+        """List ``(tag, item, scale)`` for every set field of a block, lists flattened.
+
+        Parameters
+        ----------
+        block : BaseModel
+            The block whose fields are listed.
+
+        Returns
+        -------
+        list of tuple
+            One entry per element to emit, in schema field order.
+        """
+        return [
+            (info.alias or name.upper(), item, self._scale(info))
+            for name, info in type(block).model_fields.items()
+            if getattr(block, name) is not None
+            for item in self._as_list(getattr(block, name))
+        ]
+
+    @staticmethod
+    def _as_list(value: object) -> list[object]:
+        """Wrap a scalar or block in a list; pass a list through.
+
+        Parameters
+        ----------
+        value : object
+            A field value.
+
+        Returns
+        -------
+        list
+            The repetitions of the element.
+        """
+        return value if isinstance(value, list) else [value]
 
     def _element_lines(self, tag: str, item: object, scale: int, depth: int) -> list[str]:
         """Emit one element: a nested block or a leaf value.
@@ -105,12 +136,33 @@ class InfMensalFidc(SubmissionWriter[InfMensalFidcDocument]):
         """
         pad = _INDENT * depth
         if isinstance(item, BaseModel):
-            children = self._block_lines(item, depth + 1)
-            if not children:
-                return [f"{pad}<{tag}></{tag}>"]
-            return [f"{pad}<{tag}>", *children, f"{pad}</{tag}>"]
+            return self._wrap(tag, self._block_lines(item, depth + 1), pad)
         text = self._fmt_decimal(item, scale) if isinstance(item, Decimal) else escape(str(item))
         return [f"{pad}<{tag}>{text}</{tag}>"]
+
+    @staticmethod
+    def _wrap(tag: str, children: list[str], pad: str) -> list[str]:
+        """Wrap child lines in their tag; an empty block is written inline.
+
+        Parameters
+        ----------
+        tag : str
+            Element name.
+        children : list[str]
+            Already indented child lines.
+        pad : str
+            Indentation of the element.
+
+        Returns
+        -------
+        list[str]
+            XML lines for the element.
+        """
+        return (
+            [f"{pad}<{tag}>", *children, f"{pad}</{tag}>"]
+            if children
+            else [f"{pad}<{tag}></{tag}>"]
+        )
 
     @staticmethod
     def _scale(info: FieldInfo) -> int:
@@ -129,10 +181,15 @@ class InfMensalFidc(SubmissionWriter[InfMensalFidcDocument]):
         int
                 Declared decimal places, or 0 for a non-decimal field.
         """
-        metadata = list(info.metadata)
-        for member in get_args(info.annotation):
-            for meta in getattr(member, "__metadata__", ()):
-                metadata.extend(meta.metadata if isinstance(meta, FieldInfo) else [meta])
+        metadata = [
+            *info.metadata,
+            *[
+                inner
+                for member in get_args(info.annotation)
+                for meta in getattr(member, "__metadata__", ())
+                for inner in (meta.metadata if isinstance(meta, FieldInfo) else [meta])
+            ],
+        ]
         return next((m.decimal_places for m in metadata if hasattr(m, "decimal_places")), 0)
 
     @staticmethod
