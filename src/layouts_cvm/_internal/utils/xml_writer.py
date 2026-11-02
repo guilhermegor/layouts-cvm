@@ -129,3 +129,43 @@ def deliver(xml_str: str, payload: bytes, output_path: str | None) -> str | None
         return xml_str
     atomic_write_bytes(output_path, payload)
     return None
+
+
+@type_checker
+def fill_children(node: ET.Element, list_pairs: list[tuple[str, str]]) -> None:
+    """Append one text child per ``(tag, text)`` pair, in order.
+
+    Parameters
+    ----------
+    node : ET.Element
+        The parent element.
+    list_pairs : list of tuple of (str, str)
+        Child tag and text.
+    """
+    for tag, text in list_pairs:
+        ET.SubElement(node, tag).text = text
+
+
+@type_checker
+def deliver_text(xml_str: str, output_path: str | None) -> str | None:
+    """Return the XML text, or write it as windows-1252 and return ``None``.
+
+    Unlike :func:`deliver`, nothing is encoded or re-parsed unless a file is written.
+
+    Parameters
+    ----------
+    xml_str : str
+        The serialised document.
+    output_path : str, optional
+        Destination file.
+
+    Returns
+    -------
+    str or None
+        ``xml_str`` when ``output_path`` is ``None``, else ``None``.
+    """
+    return (
+        deliver(xml_str, xml_str.encode(ENCODING), output_path)
+        if output_path is not None
+        else xml_str
+    )

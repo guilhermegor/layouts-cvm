@@ -10,7 +10,8 @@ from xml.etree import ElementTree as ET  # noqa: S405
 from pydantic import BaseModel
 
 from layouts_cvm._internal.config.ports.submission_writer import SubmissionWriter
-from layouts_cvm._internal.utils.atomic_write import atomic_write_bytes
+from layouts_cvm._internal.utils.typing import type_checker
+from layouts_cvm._internal.utils.xml_writer import deliver_text, fill_children
 from layouts_cvm.schemas.cda import CdaDocument, CdaInform
 
 
@@ -40,6 +41,125 @@ _WRAPPERS = frozenset(
 )
 
 
+@type_checker
+def _decimal_text(tag: str, value: Decimal) -> str:
+    """Render a decimal with a comma separator at the tag's declared scale.
+
+    Parameters
+    ----------
+    tag : str
+        The XML tag; its scale comes from the page.
+    value : Decimal
+        The amount; negative zero is written as zero.
+
+    Returns
+    -------
+    str
+        The element text.
+    """
+    value = abs(value) if value == 0 else value
+    places = _PLACES.get(tag)
+    return (f"{value:f}" if places is None else f"{value:.{places}f}").replace(".", ",")
+
+
+@type_checker
+def _leaf_text(tag: str, value: object) -> str:
+    """Render one leaf value: decimals at scale, identifiers without leading zeros.
+
+    Parameters
+    ----------
+    tag : str
+        The XML tag.
+    value : object
+        The value to render.
+
+    Returns
+    -------
+    str
+        The element text.
+    """
+    return (
+        _decimal_text(tag, value)
+        if isinstance(value, Decimal)
+        else str(value).lstrip("0")
+        if tag in _ID_TAGS
+        else str(value)
+    )
+
+
+@type_checker
+def _leaf(node: ET.Element, tag: str, value: object) -> None:
+    """Append a text element rendered by :func:`_leaf_text`.
+
+    Parameters
+    ----------
+    node : ET.Element
+        Parent element.
+    tag : str
+        Tag name.
+    value : object
+        Value to render.
+    """
+    ET.SubElement(node, tag).text = _leaf_text(tag, value)
+
+
+@type_checker
+def _emit(node: ET.Element, name: str, value: object) -> None:
+    """Emit one set field: a wrapper becomes a block, anything else a leaf.
+
+    Parameters
+    ----------
+    node : ET.Element
+        Parent element.
+    name : str
+        The schema field name.
+    value : object
+        The field value.
+    """
+    _build_model(ET.SubElement(node, name.upper()), value) if name in _WRAPPERS else _leaf(
+        node, name.upper(), value
+    )
+
+
+@type_checker
+def _build_model(node: ET.Element, model: BaseModel) -> None:
+    """Emit a model's set fields as children, in declaration order (the spec's order).
+
+    Parameters
+    ----------
+    node : ET.Element
+        Parent element.
+    model : BaseModel
+        Model whose set fields become child elements.
+    """
+    for name, value in [
+        (name, getattr(model, name))
+        for name in type(model).model_fields
+        if getattr(model, name) is not None
+    ]:
+        _emit(node, name, value)
+
+
+@type_checker
+def _build_inform(node: ET.Element, inform: CdaInform) -> None:
+    """Fill one INFORM element, blocks in the page's mandated order.
+
+    Parameters
+    ----------
+    node : ET.Element
+        The INFORM element.
+    inform : CdaInform
+        Validated fund model.
+    """
+    _leaf(node, "CNPJ_FDO", inform.cnpj_fdo)
+    _leaf(node, "VL_PL", inform.vl_pl)
+    ativ = ET.SubElement(node, "LISTA_ATIV")
+    for block, item in [
+        (block, item) for block in CdaInform.BLOCK_ORDER for item in getattr(inform, block)
+    ]:
+        _build_model(ET.SubElement(ativ, block.upper()), item)
+
+
 class Cda(SubmissionWriter[CdaDocument]):
     """Serialize a validated CDA document to CVM-compliant XML.
 
@@ -48,7 +168,7 @@ class Cda(SubmissionWriter[CdaDocument]):
     Methods
     -------
     export(doc, output_path)
-            Serialize a validated document to a CVM-compliant XML string.
+        Serialize a validated document to a CVM-compliant XML string.
     """
 
     def export(self, doc: CdaDocument, output_path: str | None = None) -> str | None:
@@ -57,92 +177,31 @@ class Cda(SubmissionWriter[CdaDocument]):
         Parameters
         ----------
         doc : CdaDocument
-                Fully validated document model.
+            Fully validated document model.
         output_path : Optional[str]
-                Destination file path (written as windows-1252). If given, None is
-                returned; otherwise the XML string is returned, by default None.
+            Destination file path (written as windows-1252). If given, None is
+            returned; otherwise the XML string is returned, by default None.
 
         Returns
         -------
         Optional[str]
-                XML string when output_path is None, else None.
+            XML string when output_path is None, else None.
         """
         root = ET.Element("DOC_ARQ", {"xmlns": "urn:cda"})
-        head = ET.SubElement(root, "CAB_INFORM")
-        for tag, value in (
-            ("COD_DOC", doc.header.cod_doc),
-            ("VERSAO", doc.header.versao),
-            ("DT_COMPT", doc.header.dt_compt),
-            ("DT_GERAC_ARQ", doc.header.dt_gerac_arq),
-        ):
-            ET.SubElement(head, tag).text = str(value)
+        fill_children(
+            ET.SubElement(root, "CAB_INFORM"),
+            [
+                ("COD_DOC", str(doc.header.cod_doc)),
+                ("VERSAO", str(doc.header.versao)),
+                ("DT_COMPT", str(doc.header.dt_compt)),
+                ("DT_GERAC_ARQ", str(doc.header.dt_gerac_arq)),
+            ],
+        )
         lista = ET.SubElement(root, "LISTA_INFORM")
         for inform in doc.informs:
-            self._build_inform(ET.SubElement(lista, "INFORM"), inform)
+            _build_inform(ET.SubElement(lista, "INFORM"), inform)
         ET.indent(root, space="    ")
         xml_str = '<?xml version="1.0" encoding="windows-1252"?>\n' + ET.tostring(
             root, encoding="unicode"
         )
-        if output_path is not None:
-            atomic_write_bytes(output_path, xml_str.encode("windows-1252"))
-            return None
-        return xml_str
-
-    def _build_inform(self, node: ET.Element, inform: CdaInform) -> None:
-        """Fill one INFORM element, blocks in the page's mandated order.
-
-        Parameters
-        ----------
-        node : ET.Element
-                The INFORM element.
-        inform : CdaInform
-                Validated fund model.
-        """
-        self._leaf(node, "CNPJ_FDO", inform.cnpj_fdo)
-        self._leaf(node, "VL_PL", inform.vl_pl)
-        ativ = ET.SubElement(node, "LISTA_ATIV")
-        for block in CdaInform.BLOCK_ORDER:
-            for item in getattr(inform, block):
-                self._build_model(ET.SubElement(ativ, block.upper()), item)
-
-    def _build_model(self, node: ET.Element, model: BaseModel) -> None:
-        """Emit a model's fields as children, in declaration order (the spec's order).
-
-        Parameters
-        ----------
-        node : ET.Element
-                Parent element.
-        model : BaseModel
-                Model whose set fields become child elements.
-        """
-        for name in type(model).model_fields:
-            value = getattr(model, name)
-            if value is None:
-                continue
-            if name in _WRAPPERS:
-                self._build_model(ET.SubElement(node, name.upper()), value)
-                continue
-            self._leaf(node, name.upper(), value)
-
-    @staticmethod
-    def _leaf(node: ET.Element, tag: str, value: object) -> None:
-        """Append a text element, formatting decimals with a comma separator.
-
-        Parameters
-        ----------
-        node : ET.Element
-                Parent element.
-        tag : str
-                Tag name.
-        value : object
-                Value to render.
-        """
-        if isinstance(value, Decimal):
-            value = abs(value) if value == 0 else value
-            places = _PLACES.get(tag)
-            text = (f"{value:f}" if places is None else f"{value:.{places}f}").replace(".", ",")
-        elif tag in _ID_TAGS:
-            text = str(value).lstrip("0")
-        else:
-            text = str(value)
-        ET.SubElement(node, tag).text = text
+        return deliver_text(xml_str, output_path)
