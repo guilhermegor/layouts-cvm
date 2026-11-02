@@ -711,7 +711,7 @@ class CdaAplic(BaseModel):
 
 
 @type_checker
-def _code_implicit(block: str, aplic: CdaAplic, implicit: int | None) -> int:
+def _code_implicit(block: str, aplic: CdaAplic, implicit: int) -> int:
     """Take the block's implied type, refusing an explicit tag.
 
     Parameters
@@ -720,7 +720,7 @@ def _code_implicit(block: str, aplic: CdaAplic, implicit: int | None) -> int:
         Block tag.
     aplic : CdaAplic
         The application.
-    implicit : Optional[int]
+    implicit : int
         Application type implied by the block.
 
     Returns
@@ -784,8 +784,9 @@ def _resolve_code(block: str, aplic: CdaAplic, implicit: int | None) -> int:
     int
         The result.
     """
-    fn_resolve = _code_implicit if implicit is not None else _code_explicit
-    return fn_resolve(block, aplic, implicit)
+    if implicit is not None:
+        return _code_implicit(block, aplic, implicit)
+    return _code_explicit(block, aplic, implicit)
 
 
 @type_checker

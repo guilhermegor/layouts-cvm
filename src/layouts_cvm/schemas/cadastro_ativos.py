@@ -46,6 +46,7 @@ _REQUIRED_FIELDS = (
 _REQUIRED_BY_ACAO = {"I": _REQUIRED_FIELDS, "A": _REQUIRED_FIELDS, "R": ()}
 
 
+@type_checker
 def _require_non_blank(value: str) -> None:
     """Raise if the text is empty or blank.
 
@@ -63,6 +64,7 @@ def _require_non_blank(value: str) -> None:
         raise ValueError("text must not be empty or blank")
 
 
+@type_checker
 def _require_single_line(value: str) -> None:
     """Raise if the text holds a control character, tab or line break.
 
@@ -80,6 +82,7 @@ def _require_single_line(value: str) -> None:
         raise ValueError("text must not hold a control character, tab or line break")
 
 
+@type_checker
 def _require_windows_1252(value: str) -> None:
     """Raise if the text is not encodable in windows-1252.
 

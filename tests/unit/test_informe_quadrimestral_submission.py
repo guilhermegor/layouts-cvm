@@ -352,9 +352,9 @@ def _classe(**over: object) -> dict:
     return {**_inform()["lista_classe_cotas"]["classe_cotas"][0], **over}
 
 
-def test_class_rules() -> None:
-    """Class rules."""
-    bad_lists = [
+@pytest.mark.parametrize(
+    "classes",
+    [
         [],
         [_classe(num_classe=0)],
         [_classe(num_classe=1), _classe(num_classe=1)],
@@ -363,10 +363,12 @@ def test_class_rules() -> None:
         [_classe(qtd_atual_cotas_integ=2.5)],
         [_classe(direito_polit_especial="Y")],
         [_classe(direito_dist_econ_finan="")],
-    ]
-    for classes in bad_lists:
-        with pytest.raises(ValidationError):
-            _doc(_inform(lista_classe_cotas={"classe_cotas": classes}))
+    ],
+)
+def test_class_rules(classes: list[dict]) -> None:
+    """Class rules."""
+    with pytest.raises(ValidationError):
+        _doc(_inform(lista_classe_cotas={"classe_cotas": classes}))
 
 
 def test_two_classes_repeat() -> None:

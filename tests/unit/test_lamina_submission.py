@@ -1164,24 +1164,28 @@ def test_a_fund_cannot_appear_twice_in_a_file_2() -> None:
     _doc(_inform(), _inform(cnpj_fundo=None, cod_subclasse="S1"))
 
 
+def _sub_inform(n: int) -> dict[str, object]:
+    return _inform(cnpj_fundo=None, cod_subclasse=f"S{n}")
+
+
+def _annual_rows(years: list[int]) -> dict[str, object]:
+    return {"tab_rent_anual": [{"ano_rent": y, "rent_liq": "1"} for y in years]}
+
+
+def _monthly_rows(months: list[int]) -> dict[str, object]:
+    return {"tab_rent_mensal": [{"mes": m, "rent_mens": "1"} for m in months]}
+
+
 def test_a_file_holds_between_one_and_seventy_informs_1() -> None:
     """Zero informs and 71 informs are refused; 70 distinct subclasses pass."""
-
-    def sub(n: int) -> dict[str, object]:
-        return _inform(cnpj_fundo=None, cod_subclasse=f"S{n}")
-
-    _doc(*[sub(n) for n in range(70)])
+    _doc(*[_sub_inform(n) for n in range(70)])
     with pytest.raises(ValidationError):
-        _doc(*[sub(n) for n in range(71)])
+        _doc(*[_sub_inform(n) for n in range(71)])
 
 
 def test_a_file_holds_between_one_and_seventy_informs_2() -> None:
     """Zero informs and 71 informs are refused; 70 distinct subclasses pass."""
-
-    def sub(n: int) -> dict[str, object]:
-        return _inform(cnpj_fundo=None, cod_subclasse=f"S{n}")
-
-    _doc(*[sub(n) for n in range(70)])
+    _doc(*[_sub_inform(n) for n in range(70)])
     with pytest.raises(ValidationError):
         _doc()
 
@@ -1250,101 +1254,65 @@ def test_portfolio_has_between_one_and_five_asset_types_2() -> None:
 
 def test_annual_table_has_between_one_and_five_distinct_years_1() -> None:
     """TAB_RENT_ANUAL: at most 5 rows, no repeated year, at least one when the list exists."""
-
-    def rows(years: list[int]) -> dict[str, object]:
-        return {"tab_rent_anual": [{"ano_rent": y, "rent_liq": "1"} for y in years]}
-
-    _doc(_inform(lista_tab_rent_anual=rows([2020, 2021, 2022, 2023, 2024])))
+    _doc(_inform(lista_tab_rent_anual=_annual_rows([2020, 2021, 2022, 2023, 2024])))
     with pytest.raises(ValidationError):
-        _doc(_inform(lista_tab_rent_anual=rows([2019, 2020, 2021, 2022, 2023, 2024])))
+        _doc(_inform(lista_tab_rent_anual=_annual_rows([2019, 2020, 2021, 2022, 2023, 2024])))
 
 
 def test_annual_table_has_between_one_and_five_distinct_years_2() -> None:
     """TAB_RENT_ANUAL: at most 5 rows, no repeated year, at least one when the list exists."""
-
-    def rows(years: list[int]) -> dict[str, object]:
-        return {"tab_rent_anual": [{"ano_rent": y, "rent_liq": "1"} for y in years]}
-
-    _doc(_inform(lista_tab_rent_anual=rows([2020, 2021, 2022, 2023, 2024])))
+    _doc(_inform(lista_tab_rent_anual=_annual_rows([2020, 2021, 2022, 2023, 2024])))
     with pytest.raises(ValidationError):
-        _doc(_inform(lista_tab_rent_anual=rows([2024, 2024])))
+        _doc(_inform(lista_tab_rent_anual=_annual_rows([2024, 2024])))
 
 
 def test_annual_table_has_between_one_and_five_distinct_years_3() -> None:
     """TAB_RENT_ANUAL: at most 5 rows, no repeated year, at least one when the list exists."""
-
-    def rows(years: list[int]) -> dict[str, object]:
-        return {"tab_rent_anual": [{"ano_rent": y, "rent_liq": "1"} for y in years]}
-
-    _doc(_inform(lista_tab_rent_anual=rows([2020, 2021, 2022, 2023, 2024])))
+    _doc(_inform(lista_tab_rent_anual=_annual_rows([2020, 2021, 2022, 2023, 2024])))
     with pytest.raises(ValidationError):
-        _doc(_inform(lista_tab_rent_anual=rows([])))
+        _doc(_inform(lista_tab_rent_anual=_annual_rows([])))
 
 
 def test_annual_table_has_between_one_and_five_distinct_years_4() -> None:
     """TAB_RENT_ANUAL: at most 5 rows, no repeated year, at least one when the list exists."""
-
-    def rows(years: list[int]) -> dict[str, object]:
-        return {"tab_rent_anual": [{"ano_rent": y, "rent_liq": "1"} for y in years]}
-
-    _doc(_inform(lista_tab_rent_anual=rows([2020, 2021, 2022, 2023, 2024])))
+    _doc(_inform(lista_tab_rent_anual=_annual_rows([2020, 2021, 2022, 2023, 2024])))
     with pytest.raises(ValidationError):
-        _doc(_inform(lista_tab_rent_anual=rows([1899])))
+        _doc(_inform(lista_tab_rent_anual=_annual_rows([1899])))
 
 
 def test_monthly_table_has_between_one_and_twelve_distinct_months_1() -> None:
     """TAB_RENT_MENSAL: months 1 to 12, at most 12 rows, no repeats."""
-
-    def rows(months: list[int]) -> dict[str, object]:
-        return {"tab_rent_mensal": [{"mes": m, "rent_mens": "1"} for m in months]}
-
-    _doc(_inform(lista_tab_rent_mensal=rows(list(range(1, 13)))))
+    _doc(_inform(lista_tab_rent_mensal=_monthly_rows(list(range(1, 13)))))
     with pytest.raises(ValidationError):
-        _doc(_inform(lista_tab_rent_mensal=rows([1, 1])))
+        _doc(_inform(lista_tab_rent_mensal=_monthly_rows([1, 1])))
 
 
 def test_monthly_table_has_between_one_and_twelve_distinct_months_2() -> None:
     """TAB_RENT_MENSAL: months 1 to 12, at most 12 rows, no repeats."""
-
-    def rows(months: list[int]) -> dict[str, object]:
-        return {"tab_rent_mensal": [{"mes": m, "rent_mens": "1"} for m in months]}
-
-    _doc(_inform(lista_tab_rent_mensal=rows(list(range(1, 13)))))
+    _doc(_inform(lista_tab_rent_mensal=_monthly_rows(list(range(1, 13)))))
     with pytest.raises(ValidationError):
-        _doc(_inform(lista_tab_rent_mensal=rows([0])))
+        _doc(_inform(lista_tab_rent_mensal=_monthly_rows([0])))
 
 
 def test_monthly_table_has_between_one_and_twelve_distinct_months_3() -> None:
     """TAB_RENT_MENSAL: months 1 to 12, at most 12 rows, no repeats."""
-
-    def rows(months: list[int]) -> dict[str, object]:
-        return {"tab_rent_mensal": [{"mes": m, "rent_mens": "1"} for m in months]}
-
-    _doc(_inform(lista_tab_rent_mensal=rows(list(range(1, 13)))))
+    _doc(_inform(lista_tab_rent_mensal=_monthly_rows(list(range(1, 13)))))
     with pytest.raises(ValidationError):
-        _doc(_inform(lista_tab_rent_mensal=rows([13])))
+        _doc(_inform(lista_tab_rent_mensal=_monthly_rows([13])))
 
 
 def test_monthly_table_has_between_one_and_twelve_distinct_months_4() -> None:
     """TAB_RENT_MENSAL: months 1 to 12, at most 12 rows, no repeats."""
-
-    def rows(months: list[int]) -> dict[str, object]:
-        return {"tab_rent_mensal": [{"mes": m, "rent_mens": "1"} for m in months]}
-
-    _doc(_inform(lista_tab_rent_mensal=rows(list(range(1, 13)))))
+    _doc(_inform(lista_tab_rent_mensal=_monthly_rows(list(range(1, 13)))))
     with pytest.raises(ValidationError):
-        _doc(_inform(lista_tab_rent_mensal=rows([])))
+        _doc(_inform(lista_tab_rent_mensal=_monthly_rows([])))
 
 
 def test_monthly_table_has_between_one_and_twelve_distinct_months_5() -> None:
     """TAB_RENT_MENSAL: months 1 to 12, at most 12 rows, no repeats."""
-
-    def rows(months: list[int]) -> dict[str, object]:
-        return {"tab_rent_mensal": [{"mes": m, "rent_mens": "1"} for m in months]}
-
-    _doc(_inform(lista_tab_rent_mensal=rows(list(range(1, 13)))))
+    _doc(_inform(lista_tab_rent_mensal=_monthly_rows(list(range(1, 13)))))
     with pytest.raises(ValidationError):
-        _doc(_inform(lista_tab_rent_mensal=rows(list(range(1, 13)) + [1])))
+        _doc(_inform(lista_tab_rent_mensal=_monthly_rows(list(range(1, 13)) + [1])))
 
 
 def test_years_before_the_fund_existed_do_not_overlap_reported_years_1() -> None:
@@ -1542,9 +1510,9 @@ def test_models_reject_unknown_fields_and_are_immutable_3() -> None:
         doc.informs[0].nome_fantasia = "outro"
 
 
-def test_mandatory_blocks_cannot_be_omitted() -> None:
-    """CONVERSAO, INFOR_TX_ADM and the mandatory scalars are required."""
-    for field in (
+@pytest.mark.parametrize(
+    "field",
+    [
         "conversao",
         "infor_tx_adm",
         "classif_risco",
@@ -1554,11 +1522,14 @@ def test_mandatory_blocks_cannot_be_omitted() -> None:
         "tx_desempenho",
         "ativo_ext",
         "perc_max",
-    ):
-        kwargs = _inform()
-        del kwargs[field]
-        with pytest.raises(ValidationError):
-            _doc(kwargs)
+    ],
+)
+def test_mandatory_blocks_cannot_be_omitted(field: str) -> None:
+    """CONVERSAO, INFOR_TX_ADM and the mandatory scalars are required."""
+    kwargs = _inform()
+    del kwargs[field]
+    with pytest.raises(ValidationError):
+        _doc(kwargs)
 
 
 def test_lamina_is_exported_from_the_submission_package() -> None:

@@ -31,6 +31,7 @@ from pydantic import (
     model_validator,
 )
 
+from layouts_cvm._internal.utils.typing import type_checker
 from layouts_cvm._internal.utils.xml_fields import (
     check_br_date,
     check_cnpj_shape,
@@ -146,6 +147,7 @@ class LaminaConversao(LaminaBlock):
     dia_resg: ShortField
 
 
+@type_checker
 def _check_fixed_fee(block: LaminaTaxaAdministracao) -> None:
     """Require TX_ADM alone for a fixed fee.
 
@@ -163,6 +165,7 @@ def _check_fixed_fee(block: LaminaTaxaAdministracao) -> None:
         raise ValueError("a fixed fee (F) takes tx_adm only")
 
 
+@type_checker
 def _check_variable_fee_fields(block: LaminaTaxaAdministracao) -> None:
     """Require TX_MIN with TX_MAX, and no TX_ADM, for a variable fee.
 
@@ -180,6 +183,7 @@ def _check_variable_fee_fields(block: LaminaTaxaAdministracao) -> None:
         raise ValueError("a variable fee (V) takes tx_min and tx_max, not tx_adm")
 
 
+@type_checker
 def _check_variable_fee_order(block: LaminaTaxaAdministracao) -> None:
     """Require TX_MIN not to exceed TX_MAX.
 
@@ -193,7 +197,7 @@ def _check_variable_fee_order(block: LaminaTaxaAdministracao) -> None:
     ValueError
         If the minimum exceeds the maximum.
     """
-    if block.tx_min > block.tx_max:
+    if block.tx_min is not None and block.tx_max is not None and block.tx_min > block.tx_max:
         raise ValueError("tx_min must not exceed tx_max")
 
 
@@ -421,6 +425,7 @@ class LaminaTabSimulDespesas(LaminaBlock):
     retor_brut5: SignedMoneyField
 
 
+@type_checker
 def _annual_rows(inform: LaminaInform) -> list:
     """List the annual return rows, empty when the table is absent.
 
@@ -438,6 +443,7 @@ def _annual_rows(inform: LaminaInform) -> list:
     return table.tab_rent_anual if table else []
 
 
+@type_checker
 def _monthly_rows(inform: LaminaInform) -> list:
     """List the monthly return rows, empty when the table is absent.
 
@@ -455,6 +461,7 @@ def _monthly_rows(inform: LaminaInform) -> list:
     return table.tab_rent_mensal if table else []
 
 
+@type_checker
 def _annual_years(inform: LaminaInform) -> list:
     """List the years reported in the annual return table.
 
@@ -471,6 +478,7 @@ def _annual_years(inform: LaminaInform) -> list:
     return [row.ano_rent for row in _annual_rows(inform)]
 
 
+@type_checker
 def _monthly_months(inform: LaminaInform) -> list:
     """List the months reported in the monthly return table.
 
@@ -487,6 +495,7 @@ def _monthly_months(inform: LaminaInform) -> list:
     return [row.mes for row in _monthly_rows(inform)]
 
 
+@type_checker
 def _before_existence_years(inform: LaminaInform) -> set:
     """Collect the years declared as "before the fund existed".
 
@@ -504,6 +513,7 @@ def _before_existence_years(inform: LaminaInform) -> set:
     return set(info.antes_inic2.ano) if info and info.antes_inic2 else set()
 
 
+@type_checker
 def _annual_index_cells(inform: LaminaInform) -> list:
     """List every index cell of the annual return table.
 
@@ -520,6 +530,7 @@ def _annual_index_cells(inform: LaminaInform) -> list:
     return [c for r in _annual_rows(inform) for c in (r.var_ind_ref, r.rent_perc_ind_ref)]
 
 
+@type_checker
 def _monthly_index_cells(inform: LaminaInform) -> list:
     """List every index cell of the monthly return table.
 
@@ -538,6 +549,7 @@ def _monthly_index_cells(inform: LaminaInform) -> list:
     ]
 
 
+@type_checker
 def _has_index_reference(inform: LaminaInform) -> bool:
     """Tell whether ``ind_refer`` is declared.
 
@@ -555,6 +567,7 @@ def _has_index_reference(inform: LaminaInform) -> bool:
     return info is not None and info.ind_refer is not None
 
 
+@type_checker
 def _any_index_cell_filled(inform: LaminaInform) -> bool:
     """Tell whether any index column carries a value.
 
@@ -572,6 +585,7 @@ def _any_index_cell_filled(inform: LaminaInform) -> bool:
     return any(cell is not None for cell in cells)
 
 
+@type_checker
 def _check_unique_years(inform: LaminaInform) -> None:
     """Reject a repeated year in the annual return table.
 
@@ -590,6 +604,7 @@ def _check_unique_years(inform: LaminaInform) -> None:
         raise ValueError("ano_rent must not repeat a year")
 
 
+@type_checker
 def _check_unique_months(inform: LaminaInform) -> None:
     """Reject a repeated month in the monthly return table.
 
@@ -608,6 +623,7 @@ def _check_unique_months(inform: LaminaInform) -> None:
         raise ValueError("mes must not repeat a month")
 
 
+@type_checker
 def _check_year_overlap(inform: LaminaInform) -> None:
     """Reject a year both reported and listed as before the fund existed.
 
@@ -625,6 +641,7 @@ def _check_year_overlap(inform: LaminaInform) -> None:
         raise ValueError("a year cannot be both in antes_inic2 and in tab_rent_anual")
 
 
+@type_checker
 def _check_index_columns(inform: LaminaInform) -> None:
     """Require a reference index when an index column is filled.
 

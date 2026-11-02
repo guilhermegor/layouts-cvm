@@ -114,11 +114,11 @@ MODALIDADE_BASES = [
 
 
 def _pairs(bases: list[str], low: str = "1.00", high: str = "50.00") -> dict[str, str]:
-    out: dict[str, str] = {}
-    for base in bases:
-        out[f"{base.lower()}_min"] = low
-        out[f"{base.lower()}_max"] = high
-    return out
+    return {
+        f"{base.lower()}_{suffix}": value
+        for base in bases
+        for suffix, value in (("min", low), ("max", high))
+    }
 
 
 def _row(**over: object) -> dict[str, object]:

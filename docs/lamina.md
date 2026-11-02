@@ -3,9 +3,9 @@
 Envio (→ CVM) do padrão **Lâmina de Fundos V3**
 ([`PadraoXMLLaminaV3.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLLaminaV3.asp)).
 
-> **Veja também:** [Referência da API](../api.md) para cada símbolo público · [Uso](../usage.md)
+> **Veja também:** [Referência da API](api/index.md) para cada símbolo público · [Uso](usage.md)
 > para instalação e o conceito geral · leitura do dump aberto:
-> [Lâmina FIF](../ingestion/lamina.md).
+> Lâmina FIF.
 
 ---
 

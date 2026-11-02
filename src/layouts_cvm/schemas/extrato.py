@@ -31,6 +31,7 @@ from pydantic import (
     model_validator,
 )
 
+from layouts_cvm._internal.utils.typing import type_checker
 from layouts_cvm._internal.utils.xml_fields import (
     check_br_date,
     check_cnpj_shape,
@@ -93,7 +94,6 @@ _FEE_REQUIRED = ("taxa_performance", "tp_taxa_performance", "per_indice_referenc
 
 _REQUIRED_MSG = "{name} is required when {flag} is {trigger}"
 _FORBIDDEN_MSG = "{name} must be omitted unless {flag} is {trigger}"
-# (triggered, present, forbid) -> message; absent keys are valid states.
 _GATE_ERRORS = {
     (True, False, True): _REQUIRED_MSG,
     (True, False, False): _REQUIRED_MSG,
@@ -101,6 +101,7 @@ _GATE_ERRORS = {
 }
 
 
+@type_checker
 def _check_dependent(
     block: BaseModel, name: str, flag: str, trigger: str, triggered: bool, forbid: bool
 ) -> None:
@@ -134,6 +135,7 @@ def _check_dependent(
         )
 
 
+@type_checker
 def _check_gate(
     block: BaseModel, flag: str, trigger: str, dependents: tuple[str, ...], forbid: bool
 ) -> None:
@@ -157,6 +159,7 @@ def _check_gate(
         _check_dependent(block, name, flag, trigger, triggered, forbid)
 
 
+@type_checker
 def _check_percentage(amount: Decimal) -> None:
     """Reject a percentage fee above 100.
 
@@ -174,6 +177,7 @@ def _check_percentage(amount: Decimal) -> None:
         raise ValueError("a percentage fee must not exceed 100")
 
 
+@type_checker
 def _check_reais(amount: Decimal) -> None:
     """Reject an R$ fee with more than two decimal places.
 
@@ -191,6 +195,7 @@ def _check_reais(amount: Decimal) -> None:
         raise ValueError("an R$ fee takes at most two decimal places")
 
 
+@type_checker
 def _accept_amount(amount: Decimal) -> None:
     """Accept any amount (no rule for an undeclared kind).
 
@@ -204,6 +209,7 @@ def _accept_amount(amount: Decimal) -> None:
 _AMOUNT_CHECKS = {"1": _check_percentage, "2": _check_reais}
 
 
+@type_checker
 def _is_min_field(name: str) -> bool:
     """Tell whether a field name is a ``*_min`` bound.
 
@@ -220,6 +226,7 @@ def _is_min_field(name: str) -> bool:
     return name.endswith("_min")
 
 
+@type_checker
 def _check_pair(block: BaseModel, name: str) -> None:
     """Require one minimum not to exceed its maximum.
 
@@ -240,6 +247,7 @@ def _check_pair(block: BaseModel, name: str) -> None:
         raise ValueError(f"{name.upper()} must not exceed {name_max.upper()}")
 
 
+@type_checker
 def _is_unset(calc: BaseModel, name: str) -> bool:
     """Tell whether a field of the fee block is ``None``.
 
@@ -258,6 +266,7 @@ def _is_unset(calc: BaseModel, name: str) -> bool:
     return getattr(calc, name) is None
 
 
+@type_checker
 def _check_fee_fields_present(calc: BaseModel) -> None:
     """Require the mandatory fee fields.
 
@@ -276,6 +285,7 @@ def _check_fee_fields_present(calc: BaseModel) -> None:
         raise ValueError(f"{', '.join(list_missing)} required for non-qualified investors")
 
 
+@type_checker
 def _check_fee_info_empty(calc: BaseModel) -> None:
     """Require ``INFO_ADICIONAL`` to be empty.
 
@@ -469,7 +479,7 @@ class _FixedFee(ExtratoBlock):
         """
         if amount is None:
             return
-        _AMOUNT_CHECKS.get(kind, _accept_amount)(amount)
+        _AMOUNT_CHECKS.get(kind or "", _accept_amount)(amount)
 
 
 class TxIngresso(_FixedFee):

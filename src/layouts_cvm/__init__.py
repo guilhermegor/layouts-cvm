@@ -112,7 +112,7 @@ from layouts_cvm.schemas.inf_mensal_fidc import (
     NumCotistasDesc,
     OutrasInform,
     OutrosAtivos,
-    Passiv,  # codespell:ignore Passiv,passiv
+    Passiv,
     PassivPosicoes,
     PassivValores,
     Patrliq,
@@ -362,7 +362,7 @@ __all__ = [
     "OutrasInform",
     "OutrosAtivos",
     "Participante",
-    "Passiv",  # codespell:ignore Passiv,passiv
+    "Passiv",
     "PassivPosicoes",
     "PassivValores",
     "PatrimonyDistribution",

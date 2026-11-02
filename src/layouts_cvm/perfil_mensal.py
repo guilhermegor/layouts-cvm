@@ -15,9 +15,12 @@ from layouts_cvm._internal.utils.atomic_write import atomic_write_bytes
 from layouts_cvm.schemas.perfil_mensal import (
     ClientCount,
     NominalRiskBlock,
+    OtcOperation,
     PatrimonyDistribution,
     PerfilMensalDocument,
     PerfilMensalRow,
+    PerformanceFeeDetails,
+    PrivateCreditIssuer,
     VarOutros,
     VarPercValCota,
 )
@@ -512,12 +515,12 @@ class PerfilMensal(SubmissionWriter[PerfilMensalDocument]):
         children = [ln for otc in lista_otc or [] for ln in self._build_otc_item_lines(otc, ind)]
         return self._wrap_list_block("LISTA_OPER_CURS_MERC_BALCAO", children, ind)
 
-    def _build_otc_item_lines(self, otc: object, ind: str) -> list[str]:
+    def _build_otc_item_lines(self, otc: OtcOperation, ind: str) -> list[str]:
         """Build XML lines for one OPER_CURS_MERC_BALCAO element.
 
         Parameters
         ----------
-        otc : object
+        otc : OtcOperation
                 OTC counterparty model.
         ind : str
                 Base indentation string.
@@ -576,12 +579,12 @@ class PerfilMensal(SubmissionWriter[PerfilMensalDocument]):
         ]
         return self._wrap_list_block("LISTA_EMISSORES_TIT_CRED_PRIV", children, ind)
 
-    def _build_issuer_item_lines(self, iss: object, ind: str) -> list[str]:
+    def _build_issuer_item_lines(self, iss: PrivateCreditIssuer, ind: str) -> list[str]:
         """Build XML lines for one EMISSORES_TIT_CRED_PRIV element.
 
         Parameters
         ----------
-        iss : object
+        iss : PrivateCreditIssuer
                 Private credit issuer model.
         ind : str
                 Base indentation string.
@@ -621,12 +624,12 @@ class PerfilMensal(SubmissionWriter[PerfilMensalDocument]):
             row.resp_ved_regul_cobr_taxa_perform, self._build_resp_ved_regul_lines, ind
         )
 
-    def _build_resp_ved_regul_lines(self, pfd: object, ind: str) -> list[str]:
+    def _build_resp_ved_regul_lines(self, pfd: PerformanceFeeDetails, ind: str) -> list[str]:
         """Build XML lines for the RESP_VED_REGUL_COBR_TAXA_PERFORM block.
 
         Parameters
         ----------
-        pfd : object
+        pfd : PerformanceFeeDetails
                 Performance-fee responsible model.
         ind : str
                 Base indentation string.
