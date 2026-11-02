@@ -33,6 +33,9 @@ _STR_BASH = shutil.which("bash") or "bash"
 
 _MAPPING_NO_EXTRA_ENV: Mapping[str, str] = MappingProxyType({})
 
+_LIST_WINDOWS_COREUTILS_DIRS: list[Path] = [Path(_STR_BASH).parent] * (sys.platform == "win32")
+_STR_STUB_SHEBANG_BASH = "/usr/bin/bash" if sys.platform == "win32" else _STR_BASH
+
 
 def _skip_unless(bool_available: bool, str_reason: str) -> None:
     """Skip the calling test when a capability discovered AT RUNTIME is missing.
@@ -341,6 +344,7 @@ _GLYPH_GATES = (
     "check_docstrings.py",
     "check_dtypes.py",
     "check_provenance.py",
+    "check_template_drift.py",
     "check_typing.py",
     "pr_gate.py",
 )
@@ -708,7 +712,7 @@ def test_export_deps_writes_the_lock_file(tmp_path: Path) -> None:
     """The happy path forwards ``--output`` and reports the artifact it wrote."""
     path_out = tmp_path / "requirements-lock.txt"
     dict_env = _stub_poetry(tmp_path, '\tprintf "pandas==2.2.0\\n" >"$5"; exit 0')
-    dict_env["OUTPUT_FILE"] = str(path_out)
+    dict_env["OUTPUT_FILE"] = path_out.as_posix()
 
     cls_result = _run("export_deps.sh", dict_env=dict_env)
 
@@ -1354,7 +1358,7 @@ def test_docs_code_refs_gate_fires_on_a_symbol_that_does_not_exist(tmp_path: Pat
     str_all = cls_result.stdout + cls_result.stderr
 
     assert cls_result.returncode == 1
-    assert "docs/bad.md:4" in str_all
+    assert "docs/bad.md:4" in str_all.replace("\\", "/")
     assert "build_gadget" in str_all
     assert "chassis.widgets" in str_all
 
@@ -2350,7 +2354,8 @@ def _write_stub_python(path_dir: Path, int_in_venv: int) -> Path:
     path_log = path_dir / "calls.log"
     path_stub = _write(
         path_dir / "python3",
-        f'#!{_STR_BASH}\nprintf "%s\\n" "$*" >>"{path_log}"\ncase "$1" in\n'
+        f'#!{_STR_STUB_SHEBANG_BASH}\nprintf "%s\\n" "$*" >>"{path_log.as_posix()}"\n'
+        'case "$1" in\n'
         f'--version) echo "Python 3.12.2" ;;\n-c) exit {int_in_venv} ;;\n'
         '-m) [ "$2" = venv ] && mkdir -p "$3/bin" || exit 1 ;;\n*) exit 1 ;;\nesac\n',
     )
@@ -2379,7 +2384,7 @@ def _run_venv_sh(
         The completed run.
     """
     dict_env = {
-        "PATH": ":".join(map(str, list_path_dirs)),
+        "PATH": os.pathsep.join(map(str, [*list_path_dirs, *_LIST_WINDOWS_COREUTILS_DIRS])),
         "HOME": str(path_script.parent),
         **dict_extra_env,
     }
