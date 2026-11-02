@@ -44,21 +44,15 @@ from layouts_cvm._internal.utils.typing import type_checker
 from layouts_cvm.schemas._fields import truncate_to_scale, validated_cnpj
 
 
-# DT_COMPT: "MM/AAAA".
 _COMPETENCE_RE = re.compile(r"^(0[1-9]|1[0-2])/\d{4}$")
 
-# Placeholders the page prescribes for a debtor/cedent with no CNPJ / an exempt CPF.
 _NO_CNPJ_PLACEHOLDER = "99.999.999/9999-99"
 _NO_CPF_PLACEHOLDER = "999.999.999-99"
 
-# Monetary / quantity / percentage: "duas casas decimais".
 Money = Annotated[Decimal, BeforeValidator(truncate_to_scale(2)), Field(decimal_places=2)]
-# Unit values and quota quantities: "até 8 casas decimais".
 Quota8 = Annotated[Decimal, BeforeValidator(truncate_to_scale(8)), Field(decimal_places=8)]
-# Head-counts: "inteiro com até 14 dígitos".
 Count = Annotated[int, Field(ge=0, lt=10**14)]
 
-# Maturity / delinquency / prepayment buckets shared by the two COMPMT blocks.
 _BUCKETS = (
     "30",
     "31_60",
@@ -134,9 +128,6 @@ class _FidcBlock(BaseModel):
     model_config = ConfigDict(populate_by_name=True, extra="forbid")
 
 
-# --------------------------------------------------------------------------- CAB_INFORM
-
-
 class InfMensalFidcHeader(_FidcBlock):
     """CAB_INFORM — fund identification and, for open funds, the redemption terms."""
 
@@ -198,9 +189,6 @@ class InfMensalFidcHeader(_FidcBlock):
         if self.tp_condominio == "FECHADO" and any(t is not None for t in terms):
             raise ValueError("PR_ENTRE_*/TP_DIAS_* are restricted to open funds (ABERTO)")
         return self
-
-
-# ----------------------------------------------------------------------- APLIC_ATIVO
 
 
 class CedentCredExiste(_FidcBlock):
@@ -489,9 +477,6 @@ class AplicAtivo(_FidcBlock):
         return self
 
 
-# ---------------------------------------------------------------------- CART_SEGMT
-
-
 class SegmtComerc(_FidcBlock):
     """SEGMT_COMERC — commercial segment."""
 
@@ -688,9 +673,6 @@ class CartSegmt(_FidcBlock):
         return self
 
 
-# -------------------------------------------------------------- PASSIV / PATRLIQ
-
-
 class PassivValores(_FidcBlock):
     """PASSIV_VALORES — amounts payable."""
 
@@ -796,9 +778,6 @@ class Patrliq(_FidcBlock):
         return self
 
 
-# --------------------------------------------------------------------- COMPMT_DICRED
-
-
 class CompmtDicred(_FidcBlock):
     """COMPMT_DICRED_AQUIS / COMPMT_DICRED_SEM_AQUIS — portfolio behaviour by bucket.
 
@@ -861,9 +840,6 @@ class CompmtDicred(_FidcBlock):
                 [],
             )
         return self
-
-
-# ------------------------------------------------------------- NEGOC_DICRED_MES
 
 
 class QtVl(_FidcBlock):
@@ -940,9 +916,6 @@ class NegocDicredMes(_FidcBlock):
         return self
 
 
-# ------------------------------------------------------------------------ INFORM
-
-
 class DevSacado(_FidcBlock):
     """DEV_SACADOS — one of the largest debtors (sacados) of the fund."""
 
@@ -986,9 +959,6 @@ class InformSacados(_FidcBlock):
     """INFORM — debtors report."""
 
     lista_dev_sacados: ListaDevSacados
-
-
-# ---------------------------------------------------------- TAXA_NEGOC_DICRED_MES
 
 
 class Taxa(_FidcBlock):
@@ -1062,9 +1032,6 @@ class TaxaNegocDicredMes(_FidcBlock):
     taxa_negoc_dicred_mes_titpub_fed: TaxaTitpubFed
     taxa_negoc_dicred_mes_cdb: TaxaCdb
     taxa_negoc_dicred_mes_ativ_rf: TaxaAtivRf
-
-
-# ----------------------------------------------------------------- OUTRAS_INFORM
 
 
 class ClasseCotistas(_FidcBlock):
@@ -1295,9 +1262,6 @@ class OutrasInform(_FidcBlock):
             if breakdown is not None:
                 _require_sum(label, Decimal(total), [Decimal(breakdown.total())], [])
         return self
-
-
-# --------------------------------------------------------------- LISTA_INFORM / root
 
 
 class InfMensalFidcInform(_FidcBlock):

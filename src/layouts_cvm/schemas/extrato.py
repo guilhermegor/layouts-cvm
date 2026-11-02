@@ -40,10 +40,6 @@ from layouts_cvm._internal.utils.xml_fields import (
 from layouts_cvm.schemas._fields import validated_cnpj
 
 
-# Decimal scales: the page states 2 places for the minimum/maximum limits, the minimum
-# application and the private-credit limit, and "até seis" for the custody fee. Everything
-# else it calls a percentage or a value without a scale: percentages take 4 places (repository
-# policy, not a CVM figure). All truncate toward zero and refuse ``float``.
 _DIGITS = 18
 _PERCENT_MAX = Decimal(100)
 
@@ -68,21 +64,18 @@ Money2 = Annotated[
     BeforeValidator(strict_decimal(2)),
     Field(ge=Decimal(0), max_digits=_DIGITS, decimal_places=2),
 ]
-# A ratio with no stated ceiling (share of an index, coupon, leverage multiple).
 Ratio4 = Annotated[
     Decimal,
     BeforeValidator(strict_decimal(4)),
     Field(ge=Decimal(0), max_digits=_DIGITS, decimal_places=4),
 ]
 
-# "Valor inteiro" counts of days: no bound is stated; the ceiling rejects typos only.
 _DAYS_MAX = 9999
 DaysField = Annotated[int, Field(strict=True, ge=0, le=_DAYS_MAX)]
 
 DateField = Annotated[str, AfterValidator(check_br_date)]
 CnpjField = Annotated[str, AfterValidator(check_cnpj_shape), AfterValidator(validated_cnpj)]
 
-# Code tables (the page's tables A-E and the questionnaire).
 _XML_TEXT = AfterValidator(check_xml_text)
 MarketCode = Annotated[int, Field(strict=True, ge=1, le=4)]
 AnbimaCode = Annotated[int, Field(strict=True, ge=1, le=68)]
@@ -91,11 +84,9 @@ PolicyCode = Annotated[int, Field(strict=True, ge=1, le=4)]
 _INDEX_CODES = frozenset({*range(1, 36), 99})
 Yn = Literal["S", "N"]
 
-# "máximo N caracteres": non-blank, XML-safe, windows-1252-encodable, bounded.
 Text200 = Annotated[str, StringConstraints(min_length=1, max_length=200), _XML_TEXT]
 InfoText = Annotated[str, StringConstraints(min_length=5, max_length=400), _XML_TEXT]
 
-# Investors for whom the page lets the performance-fee detail be free text.
 _QUALIFIED = frozenset({"INVESTIDORES QUALIFICADOS", "INVESTIDORES PROFISSIONAIS"})
 _MAX_ROWS = 1000
 
@@ -363,7 +354,6 @@ class OperPatrimLiq(ExtratoBlock):
     )
 
     realiza_oper_patrim_liq: Yn
-    # Without a limit the page's tag list says to send the literal SL.
     qt_oper_patrim_liq: Ratio4 | Literal["SL"] | None = None
 
 

@@ -44,27 +44,22 @@ from layouts_cvm._internal.utils.xml_fields import (
 from layouts_cvm.schemas._fields import validated_cnpj
 
 
-# Decimal scale table. The page states no scale for these; the scales are the repository
-# policy, not a CVM figure. "Non-negative"/"bounded" carry the range the field's meaning implies.
 _MONEY_DIGITS = 18
 _PERCENT_DIGITS = 18
 _MONEY_SCALE = 2
 _PERCENT_SCALE = 4
 _PERCENT_MAX = Decimal(100)
 
-# Money that cannot be negative (minimums, taxes, fees, expenses).
 MoneyField = Annotated[
     Decimal,
     BeforeValidator(strict_decimal(_MONEY_SCALE)),
     Field(ge=Decimal(0), max_digits=_MONEY_DIGITS, decimal_places=_MONEY_SCALE),
 ]
-# Money that may be negative: PL_FUNDO (PL_NEGAT exists), AJUSTE_PERFOR, hypothetical returns.
 SignedMoneyField = Annotated[
     Decimal,
     BeforeValidator(strict_decimal(_MONEY_SCALE)),
     Field(max_digits=_MONEY_DIGITS, decimal_places=_MONEY_SCALE),
 ]
-# A share of the PL or of an amount: 0 to 100.
 PercentField = Annotated[
     Decimal,
     BeforeValidator(strict_decimal(_PERCENT_SCALE)),
@@ -72,33 +67,28 @@ PercentField = Annotated[
         ge=Decimal(0), le=_PERCENT_MAX, max_digits=_PERCENT_DIGITS, decimal_places=_PERCENT_SCALE
     ),
 ]
-# A ratio with no stated ceiling (ALAV, leverage limit over the PL): 0 or more.
 RatioField = Annotated[
     Decimal,
     BeforeValidator(strict_decimal(_PERCENT_SCALE)),
     Field(ge=Decimal(0), max_digits=_PERCENT_DIGITS, decimal_places=_PERCENT_SCALE),
 ]
-# A return or index variation: may be negative and exceed 100.
 SignedPercentField = Annotated[
     Decimal,
     BeforeValidator(strict_decimal(_PERCENT_SCALE)),
     Field(max_digits=_PERCENT_DIGITS, decimal_places=_PERCENT_SCALE),
 ]
 
-# The page's "short": a signed 16-bit integer. Every use below is a count, so non-negative.
 _SHORT_MAX = 32767
 ShortField = Annotated[int, Field(strict=True, ge=0, le=_SHORT_MAX)]
 YearField = Annotated[int, Field(strict=True, ge=1900, le=9999)]
 MonthField = Annotated[int, Field(strict=True, ge=1, le=12)]
 RiskField = Annotated[int, Field(strict=True, ge=1, le=5)]
 
-# Date shapes.
 CompetenceField = Annotated[str, AfterValidator(check_month_year)]
 DateField = Annotated[str, AfterValidator(check_br_date)]
 TimeField = Annotated[str, AfterValidator(check_hhmm)]
 PhoneField = Annotated[str, AfterValidator(check_long_digits)]
 
-# Identifier of a subclass: the page gives no format; the bound is this library's assumption.
 _SUBCLASS_CODE_MAX = 50
 SubclassCodeField = Annotated[
     str,
@@ -108,14 +98,12 @@ SubclassCodeField = Annotated[
 
 CnpjField = Annotated[str, AfterValidator(check_cnpj_shape), AfterValidator(validated_cnpj)]
 
-# Limits the page states.
 _MAX_INFORMS = 70
 _MAX_PORTFOLIO_ASSETS = 5
 _MAX_ANNUAL_ROWS = 5
 _MAX_MONTHLY_ROWS = 12
 
 
-# "string com até N casas": non-blank, XML-safe, windows-1252-encodable, at most N characters.
 _XML_TEXT = AfterValidator(check_xml_text)
 Text20 = Annotated[str, StringConstraints(min_length=1, max_length=20), _XML_TEXT]
 Text50 = Annotated[str, StringConstraints(min_length=1, max_length=50), _XML_TEXT]

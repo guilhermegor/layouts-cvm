@@ -26,7 +26,6 @@ from layouts_cvm import (
 VALID_CNPJ = "11222333000181"
 OTHER_CNPJ = "11444777000161"
 
-# NR_* tags of NR_CLIENT, in the page's sample order.
 NR_TAGS = [
     "NR_PF_PRIV_BANK",
     "NR_PF_VARJ",
@@ -43,7 +42,6 @@ NR_TAGS = [
     "NR_COTST_DISTR_FDO",
     "NR_OUTROS_N_RELAC",
 ]
-# PR_* tags of DISTR_PATRIM, in the page's sample order.
 PR_TAGS = [
     "PR_PF_PRIV_BANK",
     "PR_PF_VARJ",
@@ -60,7 +58,6 @@ PR_TAGS = [
     "PR_COTST_DISTR_FDO",
     "PR_OUTROS_N_RELAC",
 ]
-# Every tag of the page's sample, depth-first, for a row with all optional tags present.
 SAMPLE_TAG_ORDER = [
     "DOC_ARQ",
     "CAB_INFORM",
@@ -285,19 +282,19 @@ def test_export_to_path_matches_the_returned_string(tmp_path: Path) -> None:
 @pytest.mark.parametrize(
     "kwargs",
     [
-        {"cnpj": "11222333000180"},  # bad check digit
-        {"perc_pl_maior_cotst": "100.1"},  # above the page's maximum of 100
+        {"cnpj": "11222333000180"},
+        {"perc_pl_maior_cotst": "100.1"},
         {"perc_pl_conv_caixa": "100.1"},
-        {"mod_var_utiliz": "4"},  # only "1", "2", "3"
-        {"praz_med_cart_tit": "12345.0"},  # more than 4 integer digits
-        {"pr_princ_atv_oper_risc": "123456789.0"},  # more than 7 integer digits
-        {"var_perc_pl": "12345678901.0"},  # more than 10 integer digits
-        {"princ_fat_risc": "x" * 401},  # 400-character limit
-        {"res_delib": "x" * 4001},  # 4000-character limit
+        {"mod_var_utiliz": "4"},
+        {"praz_med_cart_tit": "12345.0"},
+        {"pr_princ_atv_oper_risc": "123456789.0"},
+        {"var_perc_pl": "12345678901.0"},
+        {"princ_fat_risc": "x" * 401},
+        {"res_delib": "x" * 4001},
         {"resm_teor_vt_profrd": "x" * 4001},
         {"just_sum_vt_profrd": "x" * 4001},
-        {"res_delib": "bad \x00 char"},  # control character
-        {"res_delib": "emoji \U0001f600"},  # not windows-1252 encodable
+        {"res_delib": "bad \x00 char"},
+        {"res_delib": "emoji \U0001f600"},
     ],
 )
 def test_row_rejects_values_outside_the_page(kwargs: dict[str, str]) -> None:
@@ -344,10 +341,10 @@ def test_row_requires_distr_patrim() -> None:
 @pytest.mark.parametrize(
     "kwargs",
     [
-        {"ativ_50_perc": "1"},  # 100% missing
-        {"ativ_100_perc": "1"},  # 50% missing
-        {},  # empty block
-        {"ativ_50_perc": "12345", "ativ_100_perc": "1"},  # more than 4 integer digits
+        {"ativ_50_perc": "1"},
+        {"ativ_100_perc": "1"},
+        {},
+        {"ativ_50_perc": "12345", "ativ_100_perc": "1"},
     ],
 )
 def test_trading_days_rejects_what_the_page_forbids(kwargs: dict[str, str]) -> None:

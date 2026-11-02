@@ -382,7 +382,7 @@ def test_export_non_cp1252_text_rejected_and_file_untouched(tmp_path: object) ->
 def test_export_failure_does_not_truncate_existing_file(tmp_path: object) -> None:
     """Even if unencodable text got past validation, the old file survives."""
     doc = _doc()
-    object.__setattr__(doc.header, "dt_gerac_arq", "\u2192")  # bypass validation on purpose
+    object.__setattr__(doc.header, "dt_gerac_arq", "\u2192")
     out = tmp_path / "cda.xml"
     out.write_bytes(b"previous export")
     with pytest.raises(UnicodeEncodeError):

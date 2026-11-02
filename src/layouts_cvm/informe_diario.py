@@ -59,8 +59,6 @@ class InformeDiario(SubmissionWriter[InformeDiarioDocument]):
             return None
         return xml_str
 
-    # XML building helpers, defined in top-down call order.
-
     def _build_xml_str(self, doc: InformeDiarioDocument, versao: str = "4.0") -> str:
         """Build the full CVM XML string from an InformeDiarioDocument.
 
@@ -103,10 +101,9 @@ class InformeDiario(SubmissionWriter[InformeDiarioDocument]):
         list[str]
                 Ordered XML lines for this informe.
         """
-        ind = "    "  # 4-space base indent inside DOC_ARQ
+        ind = "    "
         inner = f"{ind}    "
         lines: list[str] = [f"{ind}<INFORM>"]
-        # Exactly one identifier is present, enforced by the schema.
         if inform.cnpj_fdo is not None:
             lines.append(f"{inner}<CNPJ_FDO>{inform.cnpj_fdo}</CNPJ_FDO>")
         else:

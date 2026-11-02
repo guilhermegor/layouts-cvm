@@ -21,15 +21,11 @@ from layouts_cvm._internal.utils.typing import type_checker
 _DATE_BR_RE = re.compile(r"[0-9]{2}/[0-9]{2}/[0-9]{4}")
 _MONTH_YEAR_RE = re.compile(r"[0-9]{2}/[0-9]{4}")
 _HHMM_RE = re.compile(r"([01][0-9]|2[0-3]):[0-5][0-9]")
-# No zero filler, so the first digit is 1-9; 19 digits is the width of a signed 64-bit "long".
-# Bare or masked CNPJ (letters allowed for the 2026 alphanumeric form). The library's own
-# unmasking drops every non-alphanumeric character, so shape is checked before it runs.
 _CNPJ_SHAPE_RE = re.compile(
     r"[0-9A-Z]{12}[0-9]{2}|[0-9A-Z]{2}\.[0-9A-Z]{3}\.[0-9A-Z]{3}/[0-9A-Z]{4}-[0-9]{2}"
 )
 _LONG_DIGITS_RE = re.compile(r"[1-9][0-9]{0,18}")
 _LONG_MAX = 9223372036854775807
-# Earliest year a CVM filing can plausibly carry; rejects 0001-style typos.
 _MIN_YEAR = 1900
 _XML_TEXT_ENCODING = "windows-1252"
 _ALLOWED_CONTROLS = frozenset({"\n", "\t"})

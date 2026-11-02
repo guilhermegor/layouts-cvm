@@ -39,16 +39,13 @@ _MAX_DIGITS_VALUE = 10**18 - 1
 _MAX_PARTICIPANTS = 1000
 _TABLE_A_MIN = 1
 _TABLE_A_MAX = 30
-# "APENAS para aplicações com código entre 15 e 24 da Tabela A" (derivatives).
 _DERIVATIVE_MIN = 15
 _DERIVATIVE_MAX = 24
-# (is a derivative code, notional omitted) -> what is wrong; absent keys are valid.
 _NOTIONAL_PROBLEMS = {
     (True, True): "vl_nocion_aplic is required for Tabela A codes 15 to 24",
     (False, False): "vl_nocion_aplic must be omitted outside Tabela A codes 15 to 24",
 }
 
-# Flows, transfers and notionals cannot be negative; market value and net worth can.
 _AmountField = Annotated[
     int, BeforeValidator(whole_amount), Field(strict=True, ge=0, le=_MAX_DIGITS_VALUE)
 ]

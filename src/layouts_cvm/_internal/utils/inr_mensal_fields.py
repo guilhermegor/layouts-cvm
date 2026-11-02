@@ -20,11 +20,8 @@ from layouts_cvm._internal.utils.typing import type_checker
 _DATE_BR_RE = re.compile(r"[0-9]{2}/[0-9]{2}/[0-9]{4}")
 _MONTH_YEAR_RE = re.compile(r"[0-9]{2}/[0-9]{4}")
 _WHOLE_RE = re.compile(r"-?[0-9]+")
-# AAAAA.BBBBBB.CCCCCC.T-DV; "no zero filler" means no field starts with 0 (a 0 alone is not a
-# CVM code either). T is 0 (own account) or 1 (collective account); DV is one digit.
 _PARTICIPANT_RE = re.compile(r"[1-9][0-9]{0,4}\.[1-9][0-9]{0,5}\.[1-9][0-9]{0,5}\.[01]-[0-9]")
 _CVM_CODE_RE = re.compile(r"[1-9][0-9]{0,4}")
-# Earliest year a CVM filing can plausibly carry; rejects 0001-style typos.
 _MIN_YEAR = 1900
 
 
@@ -175,7 +172,6 @@ def _whole_from_decimal(value: Decimal) -> int:
     return int(value)
 
 
-# Keyed by exact type so ``bool`` (an ``int`` subclass) and ``float`` fall through to a refusal.
 _WHOLE_CONVERTERS: dict[type, Callable[[Any], int]] = {
     int: int,
     str: _whole_from_str,

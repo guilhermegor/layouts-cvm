@@ -22,7 +22,6 @@ from layouts_cvm import (
 VALID_CNPJ = "11222333000181"
 MASKED_CNPJ = "11.222.333/0001-81"
 
-# Typed from the spec page, in page order.
 HEADER_TAGS = ["COD_DOC", "VERSAO", "DT_COMPT", "DT_GERAC_ARQ"]
 INFORM_TAGS = [
     "CNPJ_PARTIC",

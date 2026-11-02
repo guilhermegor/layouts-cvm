@@ -28,7 +28,6 @@ from layouts_cvm import (
 )
 
 
-# A CNPJ whose check digits are valid under the repo's ASCII-48 mod-11 routine.
 VALID_CNPJ = "11222333000181"
 
 
@@ -81,7 +80,6 @@ def test_export_minimal_document_renders_expected_structure() -> None:
     assert "<CAB_INFORM>" in xml
     assert "<ROW_PERFIL>" in xml
     assert f"<CNPJ_FDO>{VALID_CNPJ}</CNPJ_FDO>" in xml
-    # Monetary fields render with a comma decimal separator at two places.
     assert "<TOTAL_RECURS_BR>0,00</TOTAL_RECURS_BR>" in xml
 
 
@@ -94,7 +92,6 @@ def test_export_truncates_excess_precision_round_down() -> None:
     assert "11,00" not in xml
 
 
-# CVM V4 Q13-15: "Numérico com quatro casas decimais" (field name, XML tag).
 SENSITIVITY_FIELDS = [
     ("var_diar_perc_patrim_fdo_var_n_taxa_anual", "VAR_DIAR_PERC_PATRIM_FDO_VAR_N_TAXA_ANUAL"),
     ("var_diar_perc_patrim_fdo_var_n_taxa_cambio", "VAR_DIAR_PERC_PATRIM_FDO_VAR_N_TAXA_CAMBIO"),
@@ -298,7 +295,6 @@ def test_export_full_row_renders_all_optional_blocks() -> None:
     assert "<LISTA_EMISSORES_TIT_CRED_PRIV>" in xml
     assert "<RESP_VED_REGUL_COBR_TAXA_PERFORM>" in xml
     assert "<MONTANTE_DISTRIB>100,50</MONTANTE_DISTRIB>" in xml
-    # The '<' in the vote summary is XML-escaped, never emitted raw.
     assert "voto resumido &lt;ok&gt;" in xml
 
 

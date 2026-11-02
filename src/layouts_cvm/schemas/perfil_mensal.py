@@ -30,17 +30,12 @@ from layouts_cvm.schemas._fields import (
 )
 
 
-# Decimal field types with the scale pinned to the CVM Perfil standard.
-# Fields where the standard states only the number of decimal places.
 OneDecimalField = Annotated[
     Decimal, BeforeValidator(truncate_to_scale(1)), Field(decimal_places=1)
 ]
 TwoDecimalField = Annotated[
     Decimal, BeforeValidator(truncate_to_scale(2)), Field(decimal_places=2)
 ]
-# Q13-15 sensitivity fields (VAR_DIAR_PERC_PATRIM_FDO_VAR_N_*, VAR_PATRIM_FDO_N_PRECO_ACOES):
-# "Numérico com quatro casas decimais", no integer-digit bound and no sign bound (the
-# scenarios are negative shocks), so VarPercentPlField's max_digits=14 does not apply.
 FourDecimalField = Annotated[
     Decimal, BeforeValidator(truncate_to_scale(4)), Field(decimal_places=4)
 ]
@@ -48,16 +43,12 @@ FiveDecimalField = Annotated[
     Decimal, BeforeValidator(truncate_to_scale(5)), Field(decimal_places=5)
 ]
 
-# Fields where the standard also bounds the integer-digit count.
-# VAR_PERC_PL: "valor com até 10 casas inteiras e 4 decimais".
 VarPercentPlField = Annotated[
     Decimal, BeforeValidator(truncate_to_scale(4)), Field(max_digits=14, decimal_places=4)
 ]
-# PRAZ_MED_CART_TIT: "valor com até 4 casas inteiras e 4 decimais".
 AvgTermField = Annotated[
     Decimal, BeforeValidator(truncate_to_scale(4)), Field(max_digits=8, decimal_places=4)
 ]
-# PR_* patrimony distribution: "até 3 casas inteiras e 1 decimal. Valor máximo 100".
 PercentField = Annotated[
     Decimal,
     BeforeValidator(truncate_to_scale(1)),
@@ -326,8 +317,6 @@ class PerfilMensalRow(BaseModel):
     tot_ativos_cred_priv: OneDecimalField
     ved_regul_cobr_taxa_perform: Literal["S", "N"] | None = None
     resp_ved_regul_cobr_taxa_perform: PerformanceFeeDetails | None = None
-    # MONTANTE_DISTRIB is absent from older Perfil versions; 2dp is inferred from its
-    # monetary nature and the serializer default, pending confirmation against the spec.
     montante_distrib: TwoDecimalField | None = None
     inf_compl_perfil: str | None = Field(default=None, max_length=500)
 

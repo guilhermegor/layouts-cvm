@@ -31,29 +31,24 @@ from layouts_cvm._internal.utils.xml_fields import (
 from layouts_cvm.schemas._fields import validated_cnpj
 
 
-# "decimal com até 12 algarismos na parte inteira e até 8 na parte decimal".
 _DECIMAL_SCALE = 8
 _DECIMAL_DIGITS = 20
 _PERCENT_MAX = Decimal(100)
 _INT_MAX = 999_999_999_999
 _MAX_INFORMS = 100
-_MAX_CATEGORIES = 15  # Tabela I has 15 codes; each may appear once per fund
-# The competence is the last month of a civil quadrimester.
+_MAX_CATEGORIES = 15
 _QUADRIMESTER_END_MONTHS = frozenset({"04", "08", "12"})
 
-# Quantities and capital: cannot be negative.
 AmountField = Annotated[
     Decimal,
     BeforeValidator(strict_decimal(_DECIMAL_SCALE)),
     Field(ge=Decimal(0), max_digits=_DECIMAL_DIGITS, decimal_places=_DECIMAL_SCALE),
 ]
-# Net asset value and quota value: a fund under water has a negative one.
 SignedAmountField = Annotated[
     Decimal,
     BeforeValidator(strict_decimal(_DECIMAL_SCALE)),
     Field(max_digits=_DECIMAL_DIGITS, decimal_places=_DECIMAL_SCALE),
 ]
-# A share of the subscribed quotas: 0 to 100.
 PercentField = Annotated[
     Decimal,
     BeforeValidator(strict_decimal(_DECIMAL_SCALE)),
@@ -64,7 +59,6 @@ PercentField = Annotated[
         decimal_places=_DECIMAL_SCALE,
     ),
 ]
-# "número inteiro" counts.
 CountField = Annotated[int, Field(strict=True, ge=0, le=_INT_MAX)]
 ClassNumberField = Annotated[int, Field(strict=True, ge=1, le=_INT_MAX)]
 
@@ -72,7 +66,6 @@ CompetenceField = Annotated[str, AfterValidator(check_month_year)]
 DateField = Annotated[str, AfterValidator(check_br_date)]
 CnpjField = Annotated[str, AfterValidator(check_cnpj_shape), AfterValidator(validated_cnpj)]
 
-# Tabela I — categoria de cotistas, written exactly as the table prints the codes.
 CategoryCode = Literal[
     "001",
     "002",

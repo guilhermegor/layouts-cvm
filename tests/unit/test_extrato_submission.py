@@ -18,7 +18,6 @@ from layouts_cvm import (
 _NS = "{urn:extr}"
 _CNPJ = "11222333000181"
 
-# Tag lists typed from the page's sample file, in its order.
 HEADER_TAGS = ["COD_DOC", "VERSAO", "DT_GERAC_ARQ"]
 ROW_TAGS = [
     "CNPJ_FDO",

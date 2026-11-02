@@ -31,14 +31,11 @@ from layouts_cvm.schemas._fields import validate_person_doc, validated_cnpj
 CnpjField = Annotated[str, AfterValidator(check_cnpj_shape), AfterValidator(validated_cnpj)]
 CompetenceField = Annotated[str, AfterValidator(check_month_year)]
 DateField = Annotated[str, AfterValidator(check_br_date)]
-# "CPF do cotista, sem pontos e traços": exactly 11 ASCII digits (\A..\z, no trailing newline),
-# then the check digits.
 CpfField = Annotated[
     str,
     Field(pattern=r"\A[0-9]{11}\z"),
     AfterValidator(partial(validate_person_doc, "PF")),
 ]
-# "Nome do cotista. Máximo de 200 caracteres."
 _NAME_MAX = 200
 NameField = Annotated[
     str,

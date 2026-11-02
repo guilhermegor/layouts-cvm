@@ -43,7 +43,6 @@ def atomic_write_bytes(path: str | Path, payload: bytes) -> None:
     """
     path_dest = Path(path)
     path_tmp = path_dest.with_name(f".{path_dest.name}.{secrets.token_hex(8)}.tmp")
-    # the kernel applies the umask to this 0o666 itself, so the process umask is never touched
     flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY | getattr(os, "O_BINARY", 0)
     fd = os.open(path_tmp, flags, 0o666)
     try:

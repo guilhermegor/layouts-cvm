@@ -39,13 +39,10 @@ from layouts_cvm.schemas._fields import (
 )
 
 
-# ``fullmatch`` + ``[0-9]``: ``$`` would accept a trailing newline and ``\d`` non-ASCII digits.
 _DATE_BR_RE = re.compile(r"[0-9]{2}/[0-9]{2}/[0-9]{4}")
 _COMPT_RE = re.compile(r"(0[1-9]|1[0-2])/(?!0000)[0-9]{4}")
 _SWAP_RE = re.compile(r"SWP[A-Z0-9]{3}")
-# C0 controls other than tab/LF/CR are not legal XML 1.0 characters.
 _XML_ILLEGAL_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
-# Codes and names are single-line tokens: tab/LF/CR would reach the XML verbatim.
 _LINE_BREAK_RE = re.compile(r"[\t\n\r]")
 
 _MAX_INT_15 = Decimal(10) ** 15
@@ -113,8 +110,6 @@ def _check_text(value: str) -> str:
 
 
 Text = Annotated[str, AfterValidator(_check_text)]
-# ``_reject_float`` is listed last because before-validators run in reverse order.
-# Money 15.2, quantity 15.6, patrimony 21.2, rate 3.6 (page's field descriptions).
 Money = Annotated[
     Decimal,
     BeforeValidator(truncate_to_scale(2)),
@@ -133,7 +128,6 @@ Quantity = Annotated[
     BeforeValidator(_reject_float),
     Field(gt=-_MAX_INT_15, lt=_MAX_INT_15),
 ]
-# Traded totals (sales/acquisitions) are non-negative, like their VL_* counterparts.
 TradedQuantity = Annotated[
     Decimal,
     BeforeValidator(truncate_to_scale(6)),
@@ -152,11 +146,8 @@ Rate = Annotated[
     BeforeValidator(_reject_float),
     Field(ge=0, lt=_MAX_INT_3),
 ]
-# VALOR_AT_EXT: the page says only "Campo numérico (float)" — no scale, no range. Kept exact
-# (``Decimal``, written as given); finite, since NaN/Infinity are not numbers an XML can carry.
 ForeignValue = Annotated[Decimal, BeforeValidator(_reject_float), Field(allow_inf_nan=False)]
 
-# Table D (indexers), Table F (negotiation type).
 INDEXERS = frozenset(
     {
         "ANB",
@@ -198,9 +189,6 @@ INDEXERS = frozenset(
     }
 )
 
-# Table A: application type -> (affiliated-company, sales, acquisitions, final quantity).
-# "S" required, "OP" optional, "N" forbidden; EMPR_LIGADA uses "S" = required, "NA" = n/a.
-# Market value (MERC_POS_FIM) is required for every type.
 _TABLE_A: dict[int, tuple[str, str, str, str]] = {
     37: ("S", "S", "S", "S"),
     39: ("S", "OP", "OP", "S"),
@@ -238,7 +226,6 @@ _TABLE_A: dict[int, tuple[str, str, str, str]] = {
 _FUTURES = frozenset({9, 46, *range(52, 75)})
 _LOAN = frozenset({1, 2, 6, 7, 11, 12, 13, 14, 21, 23, 24, 28, 29, 30, 40, 43, 44, 45, 47})
 _LOAN |= frozenset({48, 49, 81})
-# Table B: application type -> admissible asset types (``COD_TP_ATIV``).
 _TABLE_B: dict[int, frozenset[int]] = {
     37: frozenset({1, 2, 13}),
     39: frozenset({3, 4, 91, 92}),
@@ -277,7 +264,6 @@ _TABLE_B: dict[int, frozenset[int]] = {
 }
 
 _CODIF_UNCODED = frozenset({37, 39, 40, 42, 43, 102, 103, 143, 146, 151, 152, 198})
-# Blocks x application types ("Tabela Blocos de repetição x Tipos de Aplicações").
 BLOCK_APLIC_TYPES: dict[str, frozenset[int]] = {
     "TIT_PUB": frozenset({75, 147}),
     "COTAS": frozenset({197}),

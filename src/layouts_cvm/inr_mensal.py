@@ -20,7 +20,7 @@ _NAMESPACE = "urn:infmensal"
 _ENCODING = "windows-1252"
 _DECLARATION = f'<?xml version="1.0" encoding="{_ENCODING}"?>\n'
 _INDENT = "    "
-_MAX_BYTES = 10 * 1024 * 1024  # the page: "tamanho máximo do arquivo ... é de 10 MB"
+_MAX_BYTES = 10 * 1024 * 1024
 
 
 @type_checker
@@ -36,9 +36,7 @@ def _fill_text(element: ET.Element, value: object) -> None:
     element.text = str(value)
 
 
-# Keyed by "is it a nested model", so the dict is the branch.
 _FILLERS = {True: _fill_block, False: _fill_text}
-# Keyed by exact type: ``None`` is omitted, a list repeats its element, a scalar is one item.
 _ITEMS = {type(None): lambda _: [], list: lambda value: value}
 
 

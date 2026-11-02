@@ -21,7 +21,6 @@ _NAMESPACE = "urn:extr"
 _ENCODING = "windows-1252"
 _DECLARATION = f'<?xml version="1.0" encoding="{_ENCODING}"?>\n'
 _INDENT = "    "
-# The page: one file may carry several quota classes "desde que o tamanho não passe de 1 MB".
 _MAX_BYTES = 1_000_000
 
 

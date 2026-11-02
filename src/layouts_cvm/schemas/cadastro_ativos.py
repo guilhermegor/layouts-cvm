@@ -31,14 +31,10 @@ from layouts_cvm._internal.utils.xml_fields import check_br_date, check_cnpj_sha
 from layouts_cvm.schemas._fields import validated_cnpj
 
 
-# The page also allows an unmasked CNPJ with its leading zeros omitted ("Ex.: 100").
 _CNPJ_ZERO_STRIPPED_RE = re.compile(r"[0-9]{1,13}")
-# C0 controls other than tab/LF/CR are not legal XML 1.0; tab/LF/CR are banned in tokens here.
 _BAD_CHAR_RE = re.compile(r"[\x00-\x1f]")
 
-# Table 1 - Tipos de Ativos (codes 16 and 25-46 are not listed by the page).
 ASSET_TYPE_CODES = frozenset({*range(1, 16), *range(17, 25), 47, 48, 49})
-# Table 2 - Tipos de Empresas Emissoras (the page lists "01"; no leading zeros are allowed).
 ISSUER_TYPE_CODES = frozenset({0, 1, 45, 67})
 
 

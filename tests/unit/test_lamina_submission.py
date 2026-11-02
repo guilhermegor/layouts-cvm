@@ -19,7 +19,6 @@ NS = "{urn:lamina}"
 VALID_CNPJ = "11222333000181"
 OTHER_CNPJ = "11444777000161"
 
-# Top-level children of a fully populated INFORM, in the order of the page's sample file.
 INFORM_TAGS = [
     "CNPJ_FUNDO",
     "NOME_FANTASIA",
@@ -217,9 +216,6 @@ def _rejects(**overrides: object) -> None:
         _doc(_inform(**overrides))
 
 
-# --- document structure -------------------------------------------------------------------
-
-
 def test_export_declares_windows_1252_and_the_lamina_namespace() -> None:
     """The prolog and root match the page's sample."""
     xml = Lamina().export(_doc(_inform()))
@@ -302,9 +298,6 @@ def test_several_informs_are_written_in_order() -> None:
     doc = _doc(_inform(), _inform(cnpj_fundo=OTHER_CNPJ))
     cnpjs = [e.text for e in _root(doc).iter(f"{NS}CNPJ_FUNDO")]
     assert cnpjs == [VALID_CNPJ, OTHER_CNPJ]
-
-
-# --- one test per nested block ------------------------------------------------------------
 
 
 @pytest.mark.parametrize(
@@ -448,9 +441,6 @@ def test_monthly_return_table_xml() -> None:
     ]
 
 
-# --- encoding and file output -------------------------------------------------------------
-
-
 def test_text_is_xml_escaped() -> None:
     """Markup characters in free text are escaped and survive a parse round trip."""
     doc = _doc(_inform(nome_fantasia='A & B <C> "D"'))
@@ -490,9 +480,6 @@ def test_export_refuses_a_control_character_that_bypassed_validation(tmp_path: P
     with pytest.raises(ValueError, match="cannot be serialised"):
         Lamina().export(bad, output_path=str(target))
     assert target.read_bytes() == b"previous content"
-
-
-# --- validation: dates and times ----------------------------------------------------------
 
 
 @pytest.mark.parametrize(
@@ -555,9 +542,6 @@ def test_expense_period_must_not_end_before_it_starts() -> None:
 def test_start_of_operations_rejects_an_impossible_date() -> None:
     """INIC_FUNCIO is a real date."""
     _rejects(infor_tab_rent_anual={"inic_funcio": "30/02/2022"})
-
-
-# --- validation: decimals -----------------------------------------------------------------
 
 
 @pytest.mark.parametrize("field", ["ativo_ext", "inv_inicial", "perc_max", "alav", "valor_perm"])
@@ -661,9 +645,6 @@ def test_cost_example_money_that_cannot_be_negative_is_refused() -> None:
         _rejects(tab_simul_despesas={**sim, field: "-1"})
 
 
-# --- validation: integers and codes -------------------------------------------------------
-
-
 @pytest.mark.parametrize("bad", [-1, 32768, 1.0, "3", True])
 def test_shorts_are_strict_non_negative_16_bit_integers(bad: object) -> None:
     """PRAZO_PAGAM refuses negatives, overflow, floats, numeric strings and bool."""
@@ -746,9 +727,6 @@ def test_cnpj_is_stored_unmasked() -> None:
     assert dict(_pairs(_first_inform(doc)))["CNPJ_FUNDO"] == VALID_CNPJ
 
 
-# --- validation: text ---------------------------------------------------------------------
-
-
 @pytest.mark.parametrize(
     ("field", "limit"),
     [
@@ -809,9 +787,6 @@ def test_text_keeps_newlines_and_tabs() -> None:
     """Newline and tab are legal in free text and round-trip."""
     doc = _doc(_inform(desc_objet="linha 1\nlinha 2\tfim"))
     assert dict(_pairs(_first_inform(doc)))["DESC_OBJET"] == "linha 1\nlinha 2\tfim"
-
-
-# --- validation: structure and cross-field rules ------------------------------------------
 
 
 def test_exactly_one_fund_identifier_is_required() -> None:

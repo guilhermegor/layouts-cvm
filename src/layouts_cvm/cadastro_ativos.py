@@ -55,7 +55,6 @@ class CadastroAtivos(SubmissionWriter[CadastroAtivosDocument]):
             root, encoding="unicode"
         )
         if output_path is not None:
-            # Bytes first, so an unencodable char cannot truncate an existing file.
             atomic_write_bytes(output_path, xml_str.encode("windows-1252"))
             return None
         return xml_str

@@ -14,7 +14,6 @@ from layouts_cvm._internal.utils.atomic_write import atomic_write_bytes
 from layouts_cvm.schemas.cda import CdaDocument, CdaInform
 
 
-# Decimal places per tag, from the page's field descriptions.
 _PLACES: dict[str, int] = {
     "VL_PL": 2,
     "VL_VENDAS_NEGOC": 2,
@@ -27,9 +26,7 @@ _PLACES: dict[str, int] = {
     "TIT_POS_FIX_CUPOM": 6,
     "TIT_PRE_FIX_TAXA_CONTR": 6,
 }
-# Identifier tags: the page forbids leading-zero fillers in every field.
 _ID_TAGS = frozenset({"CNPJ_FDO", "CNPJ_EMIS", "CNPJ_INSTIT_FINANC", "NR_PF_PJ_EMIS"})
-# Child blocks that wrap fields of a sub-model, keyed by the pydantic field name.
 _WRAPPERS = frozenset(
     {
         "aplic",
@@ -87,7 +84,6 @@ class Cda(SubmissionWriter[CdaDocument]):
             root, encoding="unicode"
         )
         if output_path is not None:
-            # Bytes first, so an unencodable char cannot truncate an existing file.
             atomic_write_bytes(output_path, xml_str.encode("windows-1252"))
             return None
         return xml_str
@@ -142,7 +138,7 @@ class Cda(SubmissionWriter[CdaDocument]):
                 Value to render.
         """
         if isinstance(value, Decimal):
-            value = abs(value) if value == 0 else value  # truncation can leave -0.00
+            value = abs(value) if value == 0 else value
             places = _PLACES.get(tag)
             text = (f"{value:f}" if places is None else f"{value:.{places}f}").replace(".", ",")
         elif tag in _ID_TAGS:

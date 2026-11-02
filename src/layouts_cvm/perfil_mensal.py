@@ -64,8 +64,6 @@ class PerfilMensal(SubmissionWriter[PerfilMensalDocument]):
             return None
         return xml_str
 
-    # XML building helpers, defined in top-down call order.
-
     def _build_xml_str(self, doc: PerfilMensalDocument, versao: str = "4.0") -> str:
         """Build the full CVM XML string from a PerfilMensalDocument.
 
@@ -110,7 +108,7 @@ class PerfilMensal(SubmissionWriter[PerfilMensalDocument]):
         list[str]
                 Ordered XML lines for this row.
         """
-        ind = "        "  # 8-space base indent inside PERFIL_MENSAL
+        ind = "        "
         lines: list[str] = [
             f"{ind}<ROW_PERFIL>",
             f"{ind}    <CNPJ_FDO>{row.cnpj_fdo}</CNPJ_FDO>",
@@ -355,7 +353,6 @@ class PerfilMensal(SubmissionWriter[PerfilMensalDocument]):
         list[str]
                 XML lines for stress-scenario and DV01-style sensitivity fields.
         """
-        # Per the CVM V4 standard the stress field has 2 decimal places and Q13 to Q15 have 4.
         pairs: list[tuple[str, Decimal | None, int]] = [
             (
                 "VAR_DIAR_PERC_COTA_FDO_PIOR_CEN_ESTRESS",

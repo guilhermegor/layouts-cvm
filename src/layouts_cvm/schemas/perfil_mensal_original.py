@@ -40,22 +40,16 @@ from layouts_cvm.schemas._fields import truncate_to_scale, validated_cnpj
 from layouts_cvm.schemas.perfil_mensal import PercentField
 
 
-# The page states "até N casas inteiras e M decimais". ``Field(max_digits=...)`` cannot say that:
-# pydantic counts digits after dropping trailing zeros and has no separate integer bound, so
-# ``12345.0`` passes ``max_digits=8``. A magnitude bound (|x| < 10**N) states it exactly.
-# PR_PRINC_ATV_OPER_RISC: 7 integer digits, 1 decimal.
 _RiskAssetPercentField = Annotated[
     Decimal,
     BeforeValidator(truncate_to_scale(1)),
     Field(gt=Decimal("-1e7"), lt=Decimal("1e7"), decimal_places=1),
 ]
-# VAR_PERC_PL: 10 integer digits, 4 decimals.
 _VarPercentPlField = Annotated[
     Decimal,
     BeforeValidator(truncate_to_scale(4)),
     Field(gt=Decimal("-1e10"), lt=Decimal("1e10"), decimal_places=4),
 ]
-# ATIV_50_PERC, ATIV_100_PERC and PRAZ_MED_CART_TIT: 4 integer digits, 4 decimals.
 _TermField = Annotated[
     Decimal,
     BeforeValidator(truncate_to_scale(4)),
@@ -180,8 +174,6 @@ class PerfilMensalOriginalRow(_PerfilMensalOriginalBlock):
     perc_pl_maior_cotst: PercentField
     resm_teor_vt_profrd: _Text4000 | None = None
     just_sum_vt_profrd: _Text4000 | None = None
-    # Mandatory on the page except for fundos de investimento em cotas, which this model
-    # cannot tell apart, so the FIC exception is the only one honoured.
     princ_fat_risc: _Text400 | None = None
     desc_princ_atv_oper_risc: _Text400 | None = None
     pr_princ_atv_oper_risc: _RiskAssetPercentField | None = None

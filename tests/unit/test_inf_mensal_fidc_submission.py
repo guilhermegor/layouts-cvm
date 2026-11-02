@@ -17,11 +17,9 @@ import pytest
 from layouts_cvm import InfMensalFidc, InfMensalFidcDocument
 
 
-# Valid check digits under the repo's routines (same fixtures as the sibling writers).
 VALID_CNPJ = "11222333000181"
 VALID_CPF = "52998224725"
 
-# Direct children of LISTA_INFORM, in the order the page's template lists them.
 SPEC_LISTA_INFORM_ORDER = [
     "APLIC_ATIVO",
     "CART_SEGMT",
@@ -99,7 +97,7 @@ def test_export_minimal_document_has_root_namespace_and_header_in_spec_order() -
         "COTST_VINCUL",
     ]
     assert "<DT_COMPT>10/2020</DT_COMPT>" in xml
-    assert "PR_ENTRE_RESGATE" not in xml  # open-fund-only tag, absent for FECHADO
+    assert "PR_ENTRE_RESGATE" not in xml
 
 
 def test_export_lista_inform_children_follow_template_order() -> None:
@@ -115,7 +113,7 @@ def test_export_mandatory_empty_blocks_are_emitted_as_empty_tags() -> None:
     xml = _xml(_doc())
     assert "<NUM_COTISTAS_DESC></NUM_COTISTAS_DESC>" in xml
     assert "<DESEMP></DESEMP>" in xml
-    assert "<LISTA_CEDENT>" not in xml  # optional list omitted
+    assert "<LISTA_CEDENT>" not in xml
 
 
 def test_export_decimals_use_comma_and_spec_scales() -> None:
@@ -136,7 +134,7 @@ def test_export_decimals_use_comma_and_spec_scales() -> None:
     assert "<QT_COTAS>1234,12345678</QT_COTAS>" in xml
     assert "<VL_COTAS>1,50000000</VL_COTAS>" in xml
     assert "<QT_COTAS>2,12345678</QT_COTAS>" in xml
-    assert "<VL_COTAS>10,99</VL_COTAS>" in xml  # truncated, not rounded to 11,00
+    assert "<VL_COTAS>10,99</VL_COTAS>" in xml
     assert "<VL_DISPONIB>0,00</VL_DISPONIB>" in xml
 
 
@@ -171,7 +169,7 @@ def test_export_open_fund_emits_redemption_terms_and_liquidity() -> None:
     assert "<PR_ENTRE_RESGATE>30</PR_ENTRE_RESGATE>" in xml
     assert "<TP_DIAS_CONVER>1</TP_DIAS_CONVER>" in xml
     assert "<VL_ATIV_LIQDEZ>1,00</VL_ATIV_LIQDEZ>" in xml
-    assert "VL_ATIV_LIQDEZ_30" not in xml  # unfilled horizons are omitted
+    assert "VL_ATIV_LIQDEZ_30" not in xml
 
 
 def test_export_to_file_writes_windows_1252_and_returns_none(tmp_path: Path) -> None:
@@ -198,9 +196,6 @@ def test_sacado_with_placeholder_document_is_accepted() -> None:
         sac["nr_pf_pj_sacado_deved_1"] = "99.999.999/9999-99"
 
     assert "99.999.999/9999-99" in _xml(_doc(mutate))
-
-
-# ----------------------------------------------------------------- negative cases
 
 
 def test_invalid_fund_cnpj_is_rejected() -> None:

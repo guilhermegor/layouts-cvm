@@ -31,7 +31,6 @@ NS = "{urn:infmensal}"
 CODE = "12345.123456.654321.1-9"
 CODE2 = "12345.123456.654322.0-0"
 
-# Tag lists typed from the page's sample file.
 HEADER_TAGS = ["COD_DOC", "VERSAO", "CD_CVM", "DT_COMPT", "DT_GERAC_ARQ"]
 TRANSF_TAGS = [
     "VL_INVEST_CARTEIRA_HAVER_NRES",

@@ -23,18 +23,13 @@ from layouts_cvm._internal.utils.typing import type_checker
 from layouts_cvm.schemas._fields import validated_cnpj
 
 
-# fullmatch + [0-9]: ``$`` accepts a trailing newline and ``\d`` accepts non-ASCII digits.
 _DATE_BR_RE = re.compile(r"[0-9]{2}/[0-9]{2}/[0-9]{4}")
 _MONTH_YEAR_RE = re.compile(r"[0-9]{2}/[0-9]{4}")
-# Bare or masked CNPJ (letters allowed for the 2026 alphanumeric form). The library's unmasking
-# drops every non-alphanumeric character, so the shape is checked before it runs.
 _CNPJ_SHAPE_RE = re.compile(
     r"[0-9A-Z]{12}[0-9]{2}|[0-9A-Z]{2}\.[0-9A-Z]{3}\.[0-9A-Z]{3}/[0-9A-Z]{4}-[0-9]{2}"
 )
-# Earliest year a CVM filing can plausibly carry; rejects 0001-style typos.
 _MIN_YEAR = 1900
 
-# A request count: strict (no float/bool/str coercion) and never negative.
 _CountField = Annotated[int, Field(strict=True, ge=0)]
 
 

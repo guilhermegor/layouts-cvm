@@ -33,10 +33,9 @@ from layouts_cvm.schemas._fields import validated_cnpj
 
 _NET_WORTH_PLACES = 2
 _QUOTA_VALUE_PLACES = 12
-_INTEGER_DIGITS = 18  # the page states no width; 18 keeps every value inside a signed 64-bit long
+_INTEGER_DIGITS = 18
 _INT_MAX = 999_999_999_999
 _MAX_INFORMS = 100
-# The page: the month closes the civil quarter of the competence.
 _QUARTER_END_MONTHS = frozenset({"03", "06", "09", "12"})
 
 _NetWorth = Annotated[

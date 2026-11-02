@@ -21,7 +21,6 @@ from layouts_cvm._internal.utils.br_identifiers import (
 from layouts_cvm._internal.utils.typing import type_checker
 
 
-# Raw values a decimal before-validator may receive, before coercion to Decimal.
 DecimalInput = Decimal | str | int | float | None
 
 

@@ -19,7 +19,6 @@ from layouts_cvm import (
 )
 
 
-# A CNPJ whose check digits are valid under the repo's ASCII-48 mod-11 routine.
 VALID_CNPJ = "11222333000181"
 
 
@@ -57,7 +56,6 @@ def test_export_minimal_document_renders_expected_structure() -> None:
     assert "<COD_DOC>1</COD_DOC>" in xml
     assert "<INFORM>" in xml
     assert f"<CNPJ_FDO>{VALID_CNPJ}</CNPJ_FDO>" in xml
-    # Monetary fields render with a comma decimal separator at two places.
     assert "<PATRIM_LIQ>0,00</PATRIM_LIQ>" in xml
 
 

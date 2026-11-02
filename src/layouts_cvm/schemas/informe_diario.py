@@ -40,19 +40,14 @@ from layouts_cvm.schemas._fields import (
 )
 
 
-# Brazilian full-date format used by every date field in this standard.
 _DATE_BR_RE = re.compile(r"^\d{2}/\d{2}/\d{4}$")
 
-# Decimal field types with the scale pinned to the CVM Informe Diário standard.
-# Monetary values: "decimal com 2 casas".
 TwoDecimalField = Annotated[
     Decimal, BeforeValidator(truncate_to_scale(2)), Field(decimal_places=2)
 ]
-# VL_QUOTA: "decimal com até 12 casas".
 QuotaValueField = Annotated[
     Decimal, BeforeValidator(truncate_to_scale(12)), Field(decimal_places=12)
 ]
-# PR_COTST: shareholder participation percentage, "decimal com até 4 casas".
 ParticipationField = Annotated[
     Decimal,
     BeforeValidator(truncate_to_scale(4)),
