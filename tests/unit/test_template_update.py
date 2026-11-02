@@ -107,7 +107,7 @@ def _write(path_root: Path, str_rel: str, str_text: str) -> None:
     """
     path_file = path_root / str_rel
     path_file.parent.mkdir(parents=True, exist_ok=True)
-    path_file.write_text(str_text, encoding="utf-8")
+    path_file.write_text(str_text, encoding="utf-8", newline="\n")
 
 
 def _write_all(path_root: Path, dict_files: dict[str, str]) -> None:
@@ -379,7 +379,7 @@ def test_a_missing_checkout_skips_loudly(tmp_path: Path, capsys: pytest.CaptureF
 def test_a_dirty_checkout_is_refused(tmp_path: Path) -> None:
     """Theirs is read from the working tree, so uncommitted template edits must stop --apply."""
     path_project, path_bx, _ = _scenario(tmp_path, _BASE, _BASE, {"a.txt": "new\n"})
-    (path_bx / _COMMON / "a.txt").write_text("uncommitted\n", encoding="utf-8")
+    (path_bx / _COMMON / "a.txt").write_text("uncommitted\n", encoding="utf-8", newline="\n")
 
     assert _update(path_project, path_bx, "--apply") == 1
 
@@ -387,7 +387,7 @@ def test_a_dirty_checkout_is_refused(tmp_path: Path) -> None:
 def test_a_dirty_checkout_leaves_the_project_untouched(tmp_path: Path) -> None:
     """The refusal happens before any branch or file change."""
     path_project, path_bx, _ = _scenario(tmp_path, _BASE, _BASE, {"a.txt": "new\n"})
-    (path_bx / _COMMON / "a.txt").write_text("uncommitted\n", encoding="utf-8")
+    (path_bx / _COMMON / "a.txt").write_text("uncommitted\n", encoding="utf-8", newline="\n")
 
     _update(path_project, path_bx, "--apply")
 
@@ -420,7 +420,7 @@ def _conflict_then_resolve(path_tmp: Path) -> tuple[Path, Path, str]:
         path_tmp, _BASE, {"a.txt": "mine\n"}, {"a.txt": "new\n"}
     )
     _update(path_project, path_bx, "--apply")
-    (path_project / "a.txt").write_text("resolved\n", encoding="utf-8")
+    (path_project / "a.txt").write_text("resolved\n", encoding="utf-8", newline="\n")
     return path_project, path_bx, str_head
 
 
@@ -568,7 +568,7 @@ def test_orphans_survive_an_apply_on_a_stamp_without_scaffold_commit(
     path_project, path_bx = _removal_scenario(tmp_path, _REMOVAL_THEN, _REMOVAL_NOW)
     path_stamp = path_project / drift._PROVENANCE_FILENAME
     str_stamp = path_stamp.read_text()
-    path_stamp.write_text(re.sub(r"scaffold_commit: .*\n", "", str_stamp))
+    path_stamp.write_text(re.sub(r"scaffold_commit: .*\n", "", str_stamp), newline="\n")
     _update(path_project, path_bx, "--apply")
     capsys.readouterr()
 
@@ -585,7 +585,8 @@ def test_update_says_why_when_the_scaffold_commit_is_unknown_to_the_checkout(
     path_stamp = path_project / drift._PROVENANCE_FILENAME
     str_stamp = path_stamp.read_text()
     path_stamp.write_text(
-        re.sub(r"scaffold_commit: \w+", f"scaffold_commit: {'0' * 40}", str_stamp)
+        re.sub(r"scaffold_commit: \w+", f"scaffold_commit: {'0' * 40}", str_stamp),
+        newline="\n",
     )
     capsys.readouterr()
 
