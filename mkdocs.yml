@@ -14,7 +14,6 @@ nav:
       - Contributing: contributing.md
       - Releasing 1.0.0: releasing-1-0-0.md
       - Changelog: changelog.md
-      - Incidents: incidents.md
 
 theme:
   name: material
