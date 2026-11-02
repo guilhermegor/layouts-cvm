@@ -2374,15 +2374,18 @@ def test_ladder_marker_without_a_findings_line_is_rejected() -> None:
     assert _missing_with([dict_prose], _TUPLE_MARKERS) is not None
 
 
-def test_later_ladder_comment_with_findings_supersedes_an_earlier_clean_one() -> None:
-    """The latest qualifying marker decides: a re-run that found something blocks."""
+@pytest.mark.parametrize("int_step", [1, -1])
+def test_later_ladder_comment_with_findings_supersedes_an_earlier_clean_one(
+    int_step: int,
+) -> None:
+    """The latest qualifying marker decides, whatever order the comments arrive in."""
     dict_later = {
         **_marker_comment("OWNER"),
         "body": f"{_MARKER}\nReviewed head: {_HEAD}\n\n2 finding(s) across 3 reviewed file(s).",
         "createdAt": "2099-02-01T00:00:00Z",
     }
-    assert _missing_with([_marker_comment("OWNER"), dict_later], _TUPLE_MARKERS) is not None
-    assert _missing_with([dict_later, _marker_comment("OWNER")], _TUPLE_MARKERS) is not None
+    list_comments = [_marker_comment("OWNER"), dict_later][::int_step]
+    assert _missing_with(list_comments, _TUPLE_MARKERS) is not None
 
 
 @pytest.mark.parametrize("str_head_line", ["Reviewed head: " + "0" * 40, "no head line here"])
@@ -3422,11 +3425,16 @@ def test_find_missing_review_problem_carries_only_a_review_newer_than_the_base_c
     assert (str_problem is None) is bool_carries
 
 
-def test_query_asks_for_the_creation_time_of_both_retarget_events() -> None:
+@pytest.mark.parametrize(
+    "str_fragment",
+    [
+        "... on BaseRefChangedEvent { createdAt }",
+        "... on AutomaticBaseChangeSucceededEvent { createdAt }",
+    ],
+)
+def test_query_asks_for_the_creation_time_of_both_retarget_events(str_fragment: str) -> None:
     """The carry-forward needs ``createdAt`` on the manual and the automatic event alike."""
-    str_query = _load_gate()._QUERY
-    assert "... on BaseRefChangedEvent { createdAt }" in str_query
-    assert "... on AutomaticBaseChangeSucceededEvent { createdAt }" in str_query
+    assert str_fragment in _load_gate()._QUERY
 
 
 def test_review_carried_forward_long_review_list_makes_at_most_cap_plus_one_calls() -> None:
@@ -3483,11 +3491,12 @@ def test_fetch_pull_request_keeps_timeline_items_across_pages(
     assert dict_pr["timelineItems"]["nodes"]
 
 
-def test_query_reads_both_retarget_event_types() -> None:
+@pytest.mark.parametrize(
+    "str_event_type", ["BASE_REF_CHANGED_EVENT", "AUTOMATIC_BASE_CHANGE_SUCCEEDED_EVENT"]
+)
+def test_query_reads_both_retarget_event_types(str_event_type: str) -> None:
     """Manual and automatic retargets both change the base the review was written against."""
-    str_query = _load_gate()._QUERY
-    assert "BASE_REF_CHANGED_EVENT" in str_query
-    assert "AUTOMATIC_BASE_CHANGE_SUCCEEDED_EVENT" in str_query
+    assert str_event_type in _load_gate()._QUERY
 
 
 @pytest.mark.parametrize(
