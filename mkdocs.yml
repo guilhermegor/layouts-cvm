@@ -1,0 +1,84 @@
+site_name: layouts-cvm
+site_description: "Build, validate and serialise the files a fund sends to CVM, in CVM's own file layouts."
+repo_url: https://github.com/guilhermegor/layouts-cvm
+nav:
+  - Home: index.md
+  - Guide:
+      - Usage: usage.md
+      - Examples: examples.md
+  - Layouts:
+      - "Atualização do Cadastro de Ativos": cadastro_ativos.md
+      - "CDA — V4": cda.md
+      - "Extrato das Informações sobre o Fundo — V3": extrato.md
+      - "Informe de Fundo 157": inf_fundo_157.md
+      - "Informe Mensal FIDC — ICVM 576": inf_mensal_fidc.md
+      - "Informe Diário — V4": informe_diario.md
+      - "Informe Diário — V3": informe_diario_v3.md
+      - "Informe de Portabilidade": informe_portabilidade.md
+      - "Informe Quadrimestral — V2": informe_quadrimestral.md
+      - "Informe Trimestral — V1": informe_trimestral_v1.md
+      - "Informe Mensal de Investidor Não Residente": inr_mensal.md
+      - "Lâmina de Fundos — V3": lamina.md
+      - "Perfil Mensal — V4": perfil_mensal.md
+      - "Perfil Mensal — original": perfil_mensal_original.md
+  - API Reference:
+      - Overview: api/index.md
+      - Reference: api/reference.md
+  - Project:
+      - FAQ: faq.md
+      - Contributing: contributing.md
+      - Releasing 1.0.0: releasing-1-0-0.md
+      - Changelog: changelog.md
+      - Incidents: incidents.md
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+  language: en
+  logo: assets/logo.png
+  favicon: assets/logo.png
+  palette:
+    - scheme: default
+      primary: custom
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - scheme: slate
+      primary: custom
+      toggle:
+        icon: material/white-balance-sunny
+        name: Switch to light mode
+extra_css:
+  - stylesheets/brand.css
+extra:
+  version:
+    provider: mike
+
+markdown_extensions:
+  - admonition
+  - toc:
+      permalink: true
+  - tables
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.snippets:
+      base_path:
+        - .
+
+exclude_docs: |
+  superpowers/
+  CLAUDE.md
+  blueprintx-lessons.md
+  dotfiles-dev-lessons.md
+  checkpoints.md
+  blueprintx-lessons.md
+
+validation:
+  nav:
+    omitted_files: warn

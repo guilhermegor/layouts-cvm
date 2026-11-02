@@ -32,6 +32,26 @@ _ALLOWED_CONTROLS = frozenset({"\n", "\t"})
 
 
 @type_checker
+def require(condition: bool, message: str | Callable[[], str]) -> None:
+    """Raise ``ValueError`` unless ``condition`` holds.
+
+    Parameters
+    ----------
+    condition : bool
+        The fact the caller asserts.
+    message : str or Callable[[], str]
+        The error text, or a zero-argument callable building it only when the fact fails.
+
+    Raises
+    ------
+    ValueError
+        If ``condition`` is false.
+    """
+    if not condition:
+        raise ValueError(message() if callable(message) else message)
+
+
+@type_checker
 def parse_br_date(value: str) -> date:
     """Parse a ``DD/MM/AAAA`` string into a real calendar date.
 
@@ -50,11 +70,9 @@ def parse_br_date(value: str) -> date:
     ValueError
             If the shape is wrong, the date does not exist (``31/02``) or the year is before 1900.
     """
-    if not _DATE_BR_RE.fullmatch(value):
-        raise ValueError("date must follow DD/MM/AAAA")
+    require(bool(_DATE_BR_RE.fullmatch(value)), "date must follow DD/MM/AAAA")
     parsed = datetime.strptime(value, "%d/%m/%Y").date()  # noqa: DTZ007
-    if parsed.year < _MIN_YEAR:
-        raise ValueError(f"year must be >= {_MIN_YEAR}")
+    require(parsed.year >= _MIN_YEAR, f"year must be >= {_MIN_YEAR}")
     return parsed
 
 
@@ -95,11 +113,9 @@ def check_month_year(value: str) -> str:
     ValueError
             If the shape is wrong, the month is out of range or the year is before 1900.
     """
-    if not _MONTH_YEAR_RE.fullmatch(value):
-        raise ValueError("competence must follow MM/AAAA")
+    require(bool(_MONTH_YEAR_RE.fullmatch(value)), "competence must follow MM/AAAA")
     parsed = datetime.strptime(value, "%m/%Y").date()  # noqa: DTZ007
-    if parsed.year < _MIN_YEAR:
-        raise ValueError(f"year must be >= {_MIN_YEAR}")
+    require(parsed.year >= _MIN_YEAR, f"year must be >= {_MIN_YEAR}")
     return value
 
 
@@ -197,18 +213,54 @@ def check_xml_text(value: str) -> str:
     ValueError
             If the text is blank, holds a control character, or is not windows-1252 encodable.
     """
-    if not value.strip():
-        raise ValueError("text must not be blank")
-    for char in value:
-        if unicodedata.category(char) == "Cc" and char not in _ALLOWED_CONTROLS:
-            raise ValueError(f"control character U+{ord(char):04X} is not allowed")
+    require(bool(value.strip()), "text must not be blank")
+    list_controls = [
+        char
+        for char in value
+        if unicodedata.category(char) == "Cc" and char not in _ALLOWED_CONTROLS
+    ]
+    require(not list_controls, lambda: _control_message(list_controls[0]))
+    _require_encodable(value)
+    return value
+
+
+@type_checker
+def _control_message(char: str) -> str:
+    """Build the error text for a disallowed control character.
+
+    Parameters
+    ----------
+    char : str
+        The offending character.
+
+    Returns
+    -------
+    str
+        The message.
+    """
+    return f"control character U+{ord(char):04X} is not allowed"
+
+
+@type_checker
+def _require_encodable(value: str) -> None:
+    """Raise ``ValueError`` when ``value`` cannot be encoded as windows-1252.
+
+    Parameters
+    ----------
+    value : str
+        The text.
+
+    Raises
+    ------
+    ValueError
+        If a character has no windows-1252 encoding.
+    """
     try:
         value.encode(_XML_TEXT_ENCODING)
     except UnicodeEncodeError as exc:
         raise ValueError(
             f"character {value[exc.start]!r} is not encodable in windows-1252"
         ) from exc
-    return value
 
 
 @type_checker
@@ -251,15 +303,40 @@ def strict_decimal(places: int) -> Callable[[object], Decimal]:
         ValueError
                 If the value is a float, bool or unsupported type, or is not a finite decimal.
         """
-        if isinstance(value, bool) or not isinstance(value, Decimal | int | str):
-            raise ValueError(f"expected Decimal, int or str, got {type(value).__name__}")
-        try:
-            as_decimal = value if isinstance(value, Decimal) else Decimal(value)
-            if not as_decimal.is_finite():
-                raise ValueError("value must be finite")
-            truncated = as_decimal.quantize(quantum, rounding=ROUND_DOWN)
-        except InvalidOperation as exc:
-            raise ValueError(f"invalid decimal value: {value!r}") from exc
+        require(
+            not isinstance(value, bool) and isinstance(value, Decimal | int | str),
+            lambda: f"expected Decimal, int or str, got {type(value).__name__}",
+        )
+        truncated = _truncate_finite(value, quantum)
         return abs(truncated) if truncated == 0 else truncated
 
     return _coerce
+
+
+@type_checker
+def _truncate_finite(value: Decimal | int | str, quantum: Decimal) -> Decimal:
+    """Truncate a finite decimal-like ``value`` to ``quantum`` (ROUND_DOWN).
+
+    Parameters
+    ----------
+    value : Decimal or int or str
+        Raw input already known to be a supported type.
+    quantum : Decimal
+        The scale to truncate to.
+
+    Returns
+    -------
+    Decimal
+        The truncated value.
+
+    Raises
+    ------
+    ValueError
+        If the value is not a finite decimal.
+    """
+    try:
+        as_decimal = value if isinstance(value, Decimal) else Decimal(value)
+        require(as_decimal.is_finite(), "value must be finite")
+        return as_decimal.quantize(quantum, rounding=ROUND_DOWN)
+    except InvalidOperation as exc:
+        raise ValueError(f"invalid decimal value: {value!r}") from exc
