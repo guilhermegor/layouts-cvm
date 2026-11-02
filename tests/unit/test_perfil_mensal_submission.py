@@ -274,6 +274,7 @@ def _minimal_row_with_cnpj(cnpj: str) -> PerfilMensalRow:
 
 def _full_row() -> PerfilMensalRow:
     """Build a row populating every optional block, exercising all writer branches."""
+    fee = PerformanceFeeDetails(data_cota_fundo="01/01/2025", val_cota_fundo="1.23456")
     return PerfilMensalRow(
         cnpj_fdo=VALID_CNPJ,
         nr_client=_zero_client_count(),
@@ -328,9 +329,7 @@ def _full_row() -> PerfilMensalRow:
         ],
         tot_ativos_cred_priv="0",
         ved_regul_cobr_taxa_perform="S",
-        resp_ved_regul_cobr_taxa_perform=PerformanceFeeDetails(
-            data_cota_fundo="01/01/2025", val_cota_fundo="1.23456"
-        ),
+        resp_ved_regul_cobr_taxa_perform=fee,
         montante_distrib="100.50",
         inf_compl_perfil="info complementar",
     )

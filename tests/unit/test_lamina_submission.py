@@ -106,27 +106,33 @@ def _inform(**overrides: object) -> dict[str, object]:
     return base
 
 
-def _full_inform() -> dict[str, object]:
-    """Build an INFORM with every optional block and field filled."""
-    return _inform(
-        alav="200",
-        carencia={"dias_car": 30, "cond_car": "Sem resgate"},
-        infor_tx_entr={"tx_entr": "0.5", "cond_entr": "Sobre a aplicacao"},
-        infor_tx_saida={"dias_saida": 10, "tx_saida": "1", "cond_saida": "Antes de 10 dias"},
-        infor_despesas={
+def _full_inform_head() -> dict[str, object]:
+    """First half of the fully populated INFORM fields."""
+    return {
+        "alav": "200",
+        "carencia": {"dias_car": 30, "cond_car": "Sem resgate"},
+        "infor_tx_entr": {"tx_entr": "0.5", "cond_entr": "Sobre a aplicacao"},
+        "infor_tx_saida": {"dias_saida": 10, "tx_saida": "1", "cond_saida": "Antes de 10 dias"},
+        "infor_despesas": {
             "despesas": "0.75",
             "inic_periodo": "01/01/2024",
             "fim_periodo": "31/12/2024",
             "end_elet_adm": "www.adm.com.br",
         },
-        lista_comp_carteira={
+        "lista_comp_carteira": {
             "pl_fundo": "1000000.5",
             "comp_carteira": [
                 {"especie_ativo": "Titulos publicos", "perc_pl": "60"},
                 {"especie_ativo": "Operacoes compromissadas", "perc_pl": "40"},
             ],
         },
-        infor_tab_rent_anual={
+    }
+
+
+def _full_inform_tail() -> dict[str, object]:
+    """Second half of the fully populated INFORM fields."""
+    return {
+        "infor_tab_rent_anual": {
             "rent_5anos": "45.1234",
             "ind_refer": "CDI",
             "rent_ind_ref": "40",
@@ -134,7 +140,7 @@ def _full_inform() -> dict[str, object]:
             "inic_funcio": "15/03/2021",
             "antes_inic2": {"ano": [2019, 2020]},
         },
-        lista_tab_rent_anual={
+        "lista_tab_rent_anual": {
             "tab_rent_anual": [
                 {
                     "ano_rent": 2023,
@@ -146,7 +152,7 @@ def _full_inform() -> dict[str, object]:
                 {"ano_rent": 2024, "rent_liq": "10"},
             ]
         },
-        lista_tab_rent_mensal={
+        "lista_tab_rent_mensal": {
             "tab_rent_mensal": [
                 {
                     "mes": 1,
@@ -158,14 +164,14 @@ def _full_inform() -> dict[str, object]:
                 {"mes": 12, "rent_mens": "-0.1"},
             ]
         },
-        form_calc_rent="Cota liquida de despesas",
-        tab_var_desemp={
+        "form_calc_rent": "Cota liquida de despesas",
+        "tab_var_desemp": {
             "var_desemp": "5",
             "formula_rentab": "Indice mais spread",
             "cenario_gatilho": "Pior, medio e bom",
             "esclarec": "Explicacao",
         },
-        inform_exemplo_comp={
+        "inform_exemplo_comp": {
             "ano_ant": 2023,
             "ano_emiss": 2024,
             "valor_resg": "1000",
@@ -175,13 +181,18 @@ def _full_inform() -> dict[str, object]:
             "ajuste_perfor": "-3",
             "valor_despesas": "12.3",
         },
-        tab_simul_despesas={
+        "tab_simul_despesas": {
             "desp_prev3": "30",
             "desp_prev5": "50",
             "retor_brut3": "-4.5",
             "retor_brut5": "60",
         },
-    )
+    }
+
+
+def _full_inform() -> dict[str, object]:
+    """Build an INFORM with every optional block and field filled."""
+    return _inform(**_full_inform_head(), **_full_inform_tail())
 
 
 def _doc(*informs: dict[str, object], **header: object) -> LaminaDocument:
