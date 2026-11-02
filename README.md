@@ -1,7 +1,7 @@
 <!-- readme-archetype: library -->
 # layouts-cvm
 
-<p align="center"><img src="https://raw.githubusercontent.com/guilhermegor/layouts-cvm/main/assets/logo_lorem_ipsum.png" width="200" alt="layouts-cvm logo"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/guilhermegor/layouts-cvm/main/assets/cvm-logo.png" width="200" alt="Emblema da CVM"></p>
 
 [![Project Status: Active](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 ![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)
@@ -117,7 +117,7 @@ This project is licensed under MIT; see [LICENSE](LICENSE).
 <!-- slug: authors -->
 ## Authors
 
-- guilhermegor — [GitHub](https://github.com/guilhermegor) | [LinkedIn](https://www.linkedin.com/in/your-linkedin-handle)
+- Guilherme Rodrigues — [GitHub](https://github.com/guilhermegor) | [LinkedIn](https://www.linkedin.com/in/guilhermegor/)
 
 <!-- slug: useful-links -->
 ## Useful Links
@@ -128,5 +128,6 @@ This project is licensed under MIT; see [LICENSE](LICENSE).
 
 ---
 
-<sub>Generated from the lib-minimal template via BlueprintX.</sub>
-<!-- add any project disclaimer inside the sub tag above; for a library wrapping a third party, e.g. "Unofficial, community library. Not affiliated with or endorsed by ORG_NAME." -->
+<sub>Generated from the lib-minimal template via [BlueprintX](https://github.com/guilhermegor/blueprintx).
+Unofficial, community library. Not affiliated with or endorsed by the Comissão de Valores Mobiliários (CVM);
+the emblem is theirs.</sub>
