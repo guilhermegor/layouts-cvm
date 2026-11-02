@@ -89,6 +89,208 @@ InfoText = Annotated[str, StringConstraints(min_length=5, max_length=400), _XML_
 
 _QUALIFIED = frozenset({"INVESTIDORES QUALIFICADOS", "INVESTIDORES PROFISSIONAIS"})
 _MAX_ROWS = 1000
+_FEE_REQUIRED = ("taxa_performance", "tp_taxa_performance", "per_indice_referencia")
+
+_REQUIRED_MSG = "{name} is required when {flag} is {trigger}"
+_FORBIDDEN_MSG = "{name} must be omitted unless {flag} is {trigger}"
+# (triggered, present, forbid) -> message; absent keys are valid states.
+_GATE_ERRORS = {
+    (True, False, True): _REQUIRED_MSG,
+    (True, False, False): _REQUIRED_MSG,
+    (False, True, True): _FORBIDDEN_MSG,
+}
+
+
+def _check_dependent(
+    block: BaseModel, name: str, flag: str, trigger: str, triggered: bool, forbid: bool
+) -> None:
+    """Raise if one gated dependent is missing when required or present when forbidden.
+
+    Parameters
+    ----------
+    block : BaseModel
+        The block under validation.
+    name : str
+        The dependent field name.
+    flag : str
+        The gating field name.
+    trigger : str
+        The flag value that makes the dependent required.
+    triggered : bool
+        Whether the flag equals the trigger.
+    forbid : bool
+        Whether the dependent must be absent when not triggered.
+
+    Raises
+    ------
+    ValueError
+        If the dependent's presence contradicts the gate.
+    """
+    present = getattr(block, name) is not None
+    str_template = _GATE_ERRORS.get((triggered, present, forbid))
+    if str_template:
+        raise ValueError(
+            str_template.format(name=name.upper(), flag=flag.upper(), trigger=trigger)
+        )
+
+
+def _check_gate(
+    block: BaseModel, flag: str, trigger: str, dependents: tuple[str, ...], forbid: bool
+) -> None:
+    """Check every dependent of one gate.
+
+    Parameters
+    ----------
+    block : BaseModel
+        The block under validation.
+    flag : str
+        The gating field name.
+    trigger : str
+        The flag value that makes the dependents required.
+    dependents : tuple[str, ...]
+        The gated field names.
+    forbid : bool
+        Whether the dependents must be absent when not triggered.
+    """
+    triggered = getattr(block, flag) == trigger
+    for name in dependents:
+        _check_dependent(block, name, flag, trigger, triggered, forbid)
+
+
+def _check_percentage(amount: Decimal) -> None:
+    """Reject a percentage fee above 100.
+
+    Parameters
+    ----------
+    amount : Decimal
+        The fee value.
+
+    Raises
+    ------
+    ValueError
+        If the amount exceeds 100.
+    """
+    if amount > _PERCENT_MAX:
+        raise ValueError("a percentage fee must not exceed 100")
+
+
+def _check_reais(amount: Decimal) -> None:
+    """Reject an R$ fee with more than two decimal places.
+
+    Parameters
+    ----------
+    amount : Decimal
+        The fee value.
+
+    Raises
+    ------
+    ValueError
+        If the amount has more than two decimal places.
+    """
+    if amount != amount.quantize(Decimal("0.01")):
+        raise ValueError("an R$ fee takes at most two decimal places")
+
+
+def _accept_amount(amount: Decimal) -> None:
+    """Accept any amount (no rule for an undeclared kind).
+
+    Parameters
+    ----------
+    amount : Decimal
+        The fee value.
+    """
+
+
+_AMOUNT_CHECKS = {"1": _check_percentage, "2": _check_reais}
+
+
+def _is_min_field(name: str) -> bool:
+    """Tell whether a field name is a ``*_min`` bound.
+
+    Parameters
+    ----------
+    name : str
+        The field name.
+
+    Returns
+    -------
+    bool
+        True for a minimum bound.
+    """
+    return name.endswith("_min")
+
+
+def _check_pair(block: BaseModel, name: str) -> None:
+    """Require one minimum not to exceed its maximum.
+
+    Parameters
+    ----------
+    block : BaseModel
+        The block under validation.
+    name : str
+        The ``*_min`` field name.
+
+    Raises
+    ------
+    ValueError
+        If the minimum is above its maximum.
+    """
+    name_max = name[:-4] + "_max"
+    if getattr(block, name) > getattr(block, name_max):
+        raise ValueError(f"{name.upper()} must not exceed {name_max.upper()}")
+
+
+def _is_unset(calc: BaseModel, name: str) -> bool:
+    """Tell whether a field of the fee block is ``None``.
+
+    Parameters
+    ----------
+    calc : BaseModel
+        The fee block.
+    name : str
+        The field name.
+
+    Returns
+    -------
+    bool
+        True when unset.
+    """
+    return getattr(calc, name) is None
+
+
+def _check_fee_fields_present(calc: BaseModel) -> None:
+    """Require the mandatory fee fields.
+
+    Parameters
+    ----------
+    calc : BaseModel
+        The fee block.
+
+    Raises
+    ------
+    ValueError
+        If any mandatory field is missing.
+    """
+    list_missing = [n.upper() for n in _FEE_REQUIRED if _is_unset(calc, n)]
+    if list_missing:
+        raise ValueError(f"{', '.join(list_missing)} required for non-qualified investors")
+
+
+def _check_fee_info_empty(calc: BaseModel) -> None:
+    """Require ``INFO_ADICIONAL`` to be empty.
+
+    Parameters
+    ----------
+    calc : BaseModel
+        The fee block.
+
+    Raises
+    ------
+    ValueError
+        If ``INFO_ADICIONAL`` is set.
+    """
+    if not _is_unset(calc, "info_adicional"):
+        raise ValueError("INFO_ADICIONAL must be empty for non-qualified investors")
 
 
 class ExtratoBlock(BaseModel):
@@ -117,18 +319,8 @@ class ExtratoBlock(BaseModel):
         ValueError
                 If a dependent field is missing when required, or present when forbidden.
         """
-        for flag, trigger, dependents, forbid in self._GATES:
-            triggered = getattr(self, flag) == trigger
-            for name in dependents:
-                present = getattr(self, name) is not None
-                if triggered and not present:
-                    raise ValueError(
-                        f"{name.upper()} is required when {flag.upper()} is {trigger}"
-                    )
-                if forbid and not triggered and present:
-                    raise ValueError(
-                        f"{name.upper()} must be omitted unless {flag.upper()} is {trigger}"
-                    )
+        for tuple_gate in self._GATES:
+            _check_gate(self, *tuple_gate)
         return self
 
 
@@ -277,10 +469,7 @@ class _FixedFee(ExtratoBlock):
         """
         if amount is None:
             return
-        if kind == "1" and amount > _PERCENT_MAX:
-            raise ValueError("a percentage fee must not exceed 100")
-        if kind == "2" and amount != amount.quantize(Decimal("0.01")):
-            raise ValueError("an R$ fee takes at most two decimal places")
+        _AMOUNT_CHECKS.get(kind, _accept_amount)(amount)
 
 
 class TxIngresso(_FixedFee):
@@ -396,12 +585,8 @@ class _MinMaxBlock(ExtratoBlock):
         ValueError
                 If a minimum is above its maximum.
         """
-        for name in type(self).model_fields:
-            if not name.endswith("_min"):
-                continue
-            low, high = getattr(self, name), getattr(self, name[:-4] + "_max")
-            if low > high:
-                raise ValueError(f"{name.upper()} must not exceed {(name[:-4] + '_max').upper()}")
+        for name in filter(_is_min_field, type(self).model_fields):
+            _check_pair(self, name)
         return self
 
 
@@ -551,15 +736,8 @@ class ExtratoRow(ExtratoBlock):
         calc = self.tx_perfm.calc_tx_perfm
         if calc is None or self.publico_alvo in _QUALIFIED:
             return self
-        missing = [
-            name.upper()
-            for name in ("taxa_performance", "tp_taxa_performance", "per_indice_referencia")
-            if getattr(calc, name) is None
-        ]
-        if missing:
-            raise ValueError(f"{', '.join(missing)} required for non-qualified investors")
-        if calc.info_adicional is not None:
-            raise ValueError("INFO_ADICIONAL must be empty for non-qualified investors")
+        _check_fee_fields_present(calc)
+        _check_fee_info_empty(calc)
         return self
 
 
