@@ -19,9 +19,43 @@ from layouts_cvm._internal.utils.br_identifiers import (
     unmask_cpf,
 )
 from layouts_cvm._internal.utils.typing import type_checker
+from layouts_cvm._internal.utils.xml_fields import require
 
 
 DecimalInput = Decimal | str | int | float | None
+
+_PERSON_DOC_RULES = {
+    "PF": ("CPF", is_valid_cpf, unmask_cpf),
+    "PJ": ("CNPJ", is_valid_cnpj, unmask_cnpj),
+}
+
+
+@type_checker
+def _quantize(value: DecimalInput, quantum: Decimal) -> Decimal:
+    """Truncate one non-null value to ``quantum`` (ROUND_DOWN).
+
+    Parameters
+    ----------
+    value : DecimalInput
+        Raw value from XML parsing, CSV reload, or direct construction.
+    quantum : Decimal
+        The scale to truncate to.
+
+    Returns
+    -------
+    Decimal
+        The truncated value.
+
+    Raises
+    ------
+    ValueError
+        If the value cannot be interpreted as a decimal number.
+    """
+    try:
+        as_decimal = value if isinstance(value, Decimal) else Decimal(str(value))
+    except (InvalidOperation, ValueError) as exc:
+        raise ValueError(f"invalid decimal value: {value!r}") from exc
+    return as_decimal.quantize(quantum, rounding=ROUND_DOWN)
 
 
 @type_checker
@@ -67,13 +101,7 @@ def truncate_to_scale(decimal_places: int) -> Callable[[DecimalInput], Decimal |
         ValueError
                 If the value cannot be interpreted as a decimal number.
         """
-        if value is None:
-            return None
-        try:
-            as_decimal = value if isinstance(value, Decimal) else Decimal(str(value))
-        except (InvalidOperation, ValueError) as exc:
-            raise ValueError(f"invalid decimal value: {value!r}") from exc
-        return as_decimal.quantize(quantum, rounding=ROUND_DOWN)
+        return None if value is None else _quantize(value, quantum)
 
     return _truncate
 
@@ -97,8 +125,7 @@ def validated_cnpj(value: str) -> str:
     ValueError
             If the value is not a valid CNPJ (failing check digits).
     """
-    if not is_valid_cnpj(value):
-        raise ValueError(f"invalid CNPJ: {value!r}")
+    require(is_valid_cnpj(value), f"invalid CNPJ: {value!r}")
     return unmask_cnpj(value)
 
 
@@ -123,10 +150,7 @@ def validate_person_doc(tp_pessoa: str, value: str) -> str:
     ValueError
             If the document is not valid for the given person type.
     """
-    if tp_pessoa == "PF":
-        if not is_valid_cpf(value):
-            raise ValueError(f"invalid CPF for PF: {value!r}")
-        return unmask_cpf(value)
-    if not is_valid_cnpj(value):
-        raise ValueError(f"invalid CNPJ for PJ: {value!r}")
-    return unmask_cnpj(value)
+    kind = "PF" if tp_pessoa == "PF" else "PJ"
+    name, is_valid, unmask = _PERSON_DOC_RULES[kind]
+    require(is_valid(value), f"invalid {name} for {kind}: {value!r}")
+    return unmask(value)
