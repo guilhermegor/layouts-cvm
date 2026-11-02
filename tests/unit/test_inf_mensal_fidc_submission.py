@@ -473,3 +473,17 @@ def test_cpf_sacado_is_accepted() -> None:
         sac["nr_pf_pj_sacado_deved_1"] = VALID_CPF
 
     assert VALID_CPF in _xml(_doc(mutate))
+
+
+def _break_two_acquisition_sums(data: dict[str, Any]) -> None:
+    """Break items 23/24 value and items 25/26 quantity at once."""
+    negoc = data["lista_inform"]["negoc_dicred_mes"]
+    negoc["aquisicoes"]["qt_dicred_aquis"] = 3
+    negoc["aquisicoes"]["vl_dicred_aquis"] = 5
+    negoc["negoc_dicred_mes_aquis"]["qt_dicred_aquis"] = 3
+
+
+def test_items_23_to_29_report_the_first_failing_check_in_field_order() -> None:
+    """Items 25/26 quantity is reported before items 23/24 value, as the field loop orders them."""
+    with pytest.raises(ValidationError, match=r"NEGOC_DICRED_MES_AQUIS\.QT_DICRED_AQUIS"):
+        _doc(_break_two_acquisition_sums)

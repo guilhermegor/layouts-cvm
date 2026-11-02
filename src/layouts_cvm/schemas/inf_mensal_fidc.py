@@ -141,6 +141,7 @@ def _cpf_or_cnpj(value: str) -> str:
 CpfCnpj = Annotated[str, BeforeValidator(_cpf_or_cnpj)]
 
 
+@type_checker
 def _require_field_sums(
     str_block: str,
     str_items: str,
@@ -937,24 +938,25 @@ class NegocDicredMes(_FidcBlock):
         NegocDicredMes
                 The validated block.
         """
-        _require_field_sums(
-            "AQUISICOES",
-            "items 23/24",
-            ("qt_dicred_aquis", "vl_dicred_aquis"),
-            self.aquisicoes,
-            [self.negoc_dicred_mes_aquis, self.negoc_dicred_mes_sem_aquis],
-        )
-        _require_field_sums(
-            "NEGOC_DICRED_MES_AQUIS",
-            "items 25/26",
-            ("qt_dicred_aquis", "vl_dicred_aquis"),
-            self.negoc_dicred_mes_aquis,
-            [
-                self.negoc_dicred_mes_venc_adimpl,
-                self.negoc_dicred_mes_venc_inad,
-                self.negoc_dicred_mes_inad,
-            ],
-        )
+        for str_field in ("qt_dicred_aquis", "vl_dicred_aquis"):
+            _require_field_sums(
+                "AQUISICOES",
+                "items 23/24",
+                (str_field,),
+                self.aquisicoes,
+                [self.negoc_dicred_mes_aquis, self.negoc_dicred_mes_sem_aquis],
+            )
+            _require_field_sums(
+                "NEGOC_DICRED_MES_AQUIS",
+                "items 25/26",
+                (str_field,),
+                self.negoc_dicred_mes_aquis,
+                [
+                    self.negoc_dicred_mes_venc_adimpl,
+                    self.negoc_dicred_mes_venc_inad,
+                    self.negoc_dicred_mes_inad,
+                ],
+            )
         _require_field_sums(
             "DICRED_MES_ALIEN",
             "items 27-29",
@@ -1279,7 +1281,10 @@ class Garantia(_FidcBlock):
     prc_drt_cred_gnt_vnc: Money
 
 
-def _require_breakdown_sum(str_label: str, total: int, cls_breakdown: BaseModel | None) -> None:
+@type_checker
+def _require_breakdown_sum(
+    str_label: str, total: int, cls_breakdown: CotistasPorTipo | None
+) -> None:
     """Require an optional by-type breakdown to add up to its class total.
 
     Parameters
@@ -1288,7 +1293,7 @@ def _require_breakdown_sum(str_label: str, total: int, cls_breakdown: BaseModel 
             Label used in the error message.
     total : int
             The class total.
-    cls_breakdown : BaseModel | None
+    cls_breakdown : CotistasPorTipo | None
             The breakdown (exposing ``total()``), or None when absent.
 
     Raises
