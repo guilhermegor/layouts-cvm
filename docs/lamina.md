@@ -121,7 +121,7 @@ O que a biblioteca **não** garante, e o que a página deixa sem resposta:
 ### Arquivo XML mínimo
 
 ```python
-from filings_cvm.submission import Lamina, LaminaDocument
+from layouts_cvm import Lamina, LaminaDocument
 
 doc = LaminaDocument.model_validate({
     "header": {"dt_compt": "01/2025", "dt_gerac_arq": "15/01/2025"},

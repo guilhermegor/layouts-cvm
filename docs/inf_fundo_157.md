@@ -48,7 +48,7 @@ Não se aplica: o writer não faz I/O de rede.
 ## Exemplos
 
 ```python
-from filings_cvm.submission import InfFundo157, InfFundo157Document
+from layouts_cvm import InfFundo157, InfFundo157Document
 
 doc = InfFundo157Document.model_validate(
     {

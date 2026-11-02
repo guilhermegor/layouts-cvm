@@ -21,39 +21,38 @@ from __future__ import annotations
 from abc import abstractmethod
 from typing import Generic, TypeVar
 
+from layouts_cvm._internal.utils.typing import ABCTypeCheckerMeta
 from pydantic import BaseModel
-
-from filings_cvm._internal.utils.typing import ABCTypeCheckerMeta
 
 
 TDoc = TypeVar("TDoc", bound=BaseModel)
 
 
 class SubmissionWriter(Generic[TDoc], metaclass=ABCTypeCheckerMeta):
-	"""Contract for a submission (envio) writer: validated document → CVM file.
+    """Contract for a submission (envio) writer: validated document → CVM file.
 
-	Methods
-	-------
-	export(doc, output_path)
-		Serialise a validated document to a CVM-compliant file string, optionally
-		writing it to ``output_path``.
-	"""
+    Methods
+    -------
+    export(doc, output_path)
+            Serialise a validated document to a CVM-compliant file string, optionally
+            writing it to ``output_path``.
+    """
 
-	@abstractmethod
-	def export(self, doc: TDoc, output_path: str | None = None) -> str | None:
-		"""Serialise ``doc`` to a CVM-compliant file (string, or written to disk).
+    @abstractmethod
+    def export(self, doc: TDoc, output_path: str | None = None) -> str | None:
+        """Serialise ``doc`` to a CVM-compliant file (string, or written to disk).
 
-		Parameters
-		----------
-		doc : TDoc
-			Fully validated document model for the standard.
-		output_path : str, optional
-			Destination file path. When given, the file is written and ``None`` is
-			returned; otherwise the serialised string is returned. By default ``None``.
+        Parameters
+        ----------
+        doc : TDoc
+                Fully validated document model for the standard.
+        output_path : str, optional
+                Destination file path. When given, the file is written and ``None`` is
+                returned; otherwise the serialised string is returned. By default ``None``.
 
-		Returns
-		-------
-		str or None
-			The serialised content when ``output_path`` is ``None``, else ``None``.
-		"""
-		raise NotImplementedError
+        Returns
+        -------
+        str or None
+                The serialised content when ``output_path`` is ``None``, else ``None``.
+        """
+        raise NotImplementedError

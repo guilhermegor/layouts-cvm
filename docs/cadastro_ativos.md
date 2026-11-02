@@ -40,7 +40,7 @@ usa namespace, tem `COD_DOC=2` e é gravado em `windows-1252`.
 ## Exemplos
 
 ```python
-from filings_cvm.submission import (
+from layouts_cvm import (
     CadastroAtivos, CadastroAtivosDocument, CadastroAtivosHeader, CadastroAtivosRow,
 )
 

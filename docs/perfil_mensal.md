@@ -41,7 +41,7 @@ performance, etc.) e a lista completa de modelos estão na [Referência da API](
 O menor documento válido: um cabeçalho e uma linha com apenas os campos obrigatórios.
 
 ```python
-from filings_cvm.submission import (
+from layouts_cvm import (
     ClientCount,
     DocumentHeader,
     PerfilMensal,
@@ -136,7 +136,7 @@ cedo, antes de gerar qualquer XML.
 
 ```python
 from pydantic import ValidationError
-from filings_cvm.submission import PerfilMensalRow
+from layouts_cvm import PerfilMensalRow
 
 try:
     PerfilMensalRow(

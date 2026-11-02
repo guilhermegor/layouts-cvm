@@ -54,7 +54,7 @@ Escalas e cardinalidades, como a página as declara:
 ## Exemplos
 
 ```python
-from filings_cvm.submission import (
+from layouts_cvm import (
     PerfilMensalOriginal,
     PerfilMensalOriginalClientCount,
     PerfilMensalOriginalDocument,

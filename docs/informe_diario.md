@@ -42,7 +42,7 @@ levanta `ValidationError`.
 Um cabeçalho e um `INFORM` com os campos obrigatórios.
 
 ```python
-from filings_cvm.submission import (
+from layouts_cvm import (
     InformeDiario,
     InformeDiarioDocument,
     InformeDiarioHeader,
@@ -76,7 +76,7 @@ InformeDiario().export(doc, output_path="informe_20250115.xml")
 O bloco `LISTA_COTST_SIGNIF` é opcional; `pr_cotst` sai com até 4 casas e vírgula decimal.
 
 ```python
-from filings_cvm.submission import InformeDiarioInform, SignificantShareholder
+from layouts_cvm import InformeDiarioInform, SignificantShareholder
 
 inform = InformeDiarioInform(
     cnpj_fdo="11222333000181",
@@ -100,7 +100,7 @@ Informar os dois — ou nenhum — falha cedo na construção do modelo.
 
 ```python
 from pydantic import ValidationError
-from filings_cvm.submission import InformeDiarioInform
+from layouts_cvm import InformeDiarioInform
 
 try:
     InformeDiarioInform(

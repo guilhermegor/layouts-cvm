@@ -65,7 +65,7 @@ serializador de elementos é compartilhado com o writer da V2.
 ## Exemplos
 
 ```python
-from filings_cvm.submission import InformeTrimestralV1, InformeTrimestralV1Document
+from layouts_cvm import InformeTrimestralV1, InformeTrimestralV1Document
 
 doc = InformeTrimestralV1Document(
     header={"dt_compt": "06/2017", "dt_gerac_arq": "15/07/2017"},

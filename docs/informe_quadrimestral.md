@@ -66,7 +66,7 @@ e percentuais não podem ser negativos; percentuais ficam entre 0 e 100. `vl_pl_
 ### Arquivo XML mínimo
 
 ```python
-from filings_cvm.submission import InformeQuadrimestral, InformeQuadrimestralDocument
+from layouts_cvm import InformeQuadrimestral, InformeQuadrimestralDocument
 
 doc = InformeQuadrimestralDocument(
     header={"dt_compt": "04/2026", "dt_gerac_arq": "15/05/2026"},

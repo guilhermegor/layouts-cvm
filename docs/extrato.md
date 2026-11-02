@@ -77,7 +77,7 @@ arquivo já existente.
 ## Exemplos
 
 ```python
-from filings_cvm.submission import Extrato, ExtratoDocument, ExtratoHeader, ExtratoRow
+from layouts_cvm import Extrato, ExtratoDocument, ExtratoHeader, ExtratoRow
 
 doc = ExtratoDocument(
     header=ExtratoHeader(dt_gerac_arq="31/10/2026"),
