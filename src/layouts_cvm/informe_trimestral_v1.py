@@ -9,69 +9,11 @@ only the schema differs. Pure logic plus file I/O at the edges — no network.
 from xml.etree import ElementTree as ET  # noqa: S405  # builds XML, never parses untrusted input
 
 from layouts_cvm._internal.config.ports.submission_writer import SubmissionWriter
-from layouts_cvm._internal.utils.atomic_write import atomic_write_bytes
-from layouts_cvm._internal.utils.typing import type_checker
-from layouts_cvm.informe_quadrimestral import (
-    _DECLARATION,
-    _ENCODING,
-    _INDENT,
-    _NAMESPACE,
-    _append,
-)
+from layouts_cvm._internal.utils.xml_writer import append_field, deliver, render_xml
+from layouts_cvm.informe_quadrimestral import _NAMESPACE
 from layouts_cvm.schemas.informe_trimestral_v1 import (
     InformeTrimestralV1Document,
 )
-
-
-@type_checker
-def _render(doc: InformeTrimestralV1Document) -> str:
-    """Render the document as XML text, declaration included.
-
-    Parameters
-    ----------
-    doc : InformeTrimestralV1Document
-            Fully validated document model.
-
-    Returns
-    -------
-    str
-            The XML text.
-    """
-    root = ET.Element("DOC_ARQ", {"xmlns": _NAMESPACE})
-    _append(root, "cab_inform", doc.header)
-    informs = ET.SubElement(root, "LISTA_INFORM")
-    for inform in doc.informs:
-        _append(informs, "inform", inform)
-    ET.indent(root, space=_INDENT)
-    return _DECLARATION + ET.tostring(root, encoding="unicode") + "\n"
-
-
-@type_checker
-def _encode(xml_str: str) -> bytes:
-    """Encode the XML and check it is well-formed, before any destination is opened.
-
-    Parameters
-    ----------
-    xml_str : str
-            The XML text.
-
-    Returns
-    -------
-    bytes
-            The windows-1252 payload.
-
-    Raises
-    ------
-    ValueError
-            If the text cannot be encoded or is not well-formed XML (only possible when validation
-            was bypassed, e.g. ``model_construct``).
-    """
-    try:
-        payload = xml_str.encode(_ENCODING)
-        ET.fromstring(payload)  # noqa: S314  # well-formedness self-check of our own output
-    except (UnicodeEncodeError, ET.ParseError) as exc:
-        raise ValueError(f"document cannot be serialised as {_ENCODING} XML: {exc}") from exc
-    return payload
 
 
 class InformeTrimestralV1(SubmissionWriter[InformeTrimestralV1Document]):
@@ -103,9 +45,10 @@ class InformeTrimestralV1(SubmissionWriter[InformeTrimestralV1Document]):
         Optional[str]
                 The XML text when ``output_path`` is None, else None.
         """
-        xml_str = _render(doc)
-        payload = _encode(xml_str)
-        if output_path is None:
-            return xml_str
-        atomic_write_bytes(output_path, payload)
-        return None
+        root = ET.Element("DOC_ARQ", {"xmlns": _NAMESPACE})
+        append_field(root, "cab_inform", doc.header)
+        informs = ET.SubElement(root, "LISTA_INFORM")
+        for inform in doc.informs:
+            append_field(informs, "inform", inform)
+        xml_str, payload = render_xml(root)
+        return deliver(xml_str, payload, output_path)

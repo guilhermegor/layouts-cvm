@@ -6,68 +6,16 @@ fields in XML order and named after their tag, so the serialiser is one recursiv
 Pure logic plus file I/O at the edges — no network.
 """
 
-from decimal import Decimal
 from xml.etree import ElementTree as ET  # noqa: S405  # builds XML, never parses untrusted input
 
-from pydantic import BaseModel
-
 from layouts_cvm._internal.config.ports.submission_writer import SubmissionWriter
-from layouts_cvm._internal.utils.atomic_write import atomic_write_bytes
-from layouts_cvm._internal.utils.typing import type_checker
+from layouts_cvm._internal.utils.xml_fields import require
+from layouts_cvm._internal.utils.xml_writer import append_field, deliver, render_xml
 from layouts_cvm.schemas.extrato import ExtratoDocument
 
 
 _NAMESPACE = "urn:extr"
-_ENCODING = "windows-1252"
-_DECLARATION = f'<?xml version="1.0" encoding="{_ENCODING}"?>\n'
-_INDENT = "    "
 _MAX_BYTES = 1_000_000
-
-
-@type_checker
-def _scalar_text(value: Decimal | int | str) -> str:
-    """Render one scalar the way the page requires: comma decimal separator, no filler zeros.
-
-    Parameters
-    ----------
-    value : Decimal | int | str
-            The field value, already scaled by the schema.
-
-    Returns
-    -------
-    str
-            The element text.
-    """
-    if isinstance(value, Decimal):
-        return format(value, "f").replace(".", ",")
-    return str(value)
-
-
-@type_checker
-def _append(parent: ET.Element, name: str, value: object) -> None:
-    """Append one field to ``parent`` as an element, or as repeated elements for a list.
-
-    Parameters
-    ----------
-    parent : ET.Element
-            The enclosing block.
-    name : str
-            The schema field name; its upper case is the XML tag.
-    value : object
-            ``None`` (omitted), a nested model, a list of either, or a scalar.
-    """
-    if value is None:
-        return
-    if isinstance(value, list):
-        for item in value:
-            _append(parent, name, item)
-        return
-    element = ET.SubElement(parent, name.upper())
-    if isinstance(value, BaseModel):
-        for field in type(value).model_fields:
-            _append(element, field, getattr(value, field))
-        return
-    element.text = _scalar_text(value)
 
 
 class Extrato(SubmissionWriter[ExtratoDocument]):
@@ -109,20 +57,13 @@ class Extrato(SubmissionWriter[ExtratoDocument]):
                 file exceeds the page's 1 MB limit.
         """
         root = ET.Element("DOC_ARQ", {"xmlns": _NAMESPACE})
-        _append(root, "cab_inform", doc.header)
+        append_field(root, "cab_inform", doc.header)
         funds = ET.SubElement(root, "EXTRATO_FUNDO")
         for row in doc.rows:
-            _append(funds, "row_extrato", row)
-        ET.indent(root, space=_INDENT)
-        xml_str = _DECLARATION + ET.tostring(root, encoding="unicode") + "\n"
-        try:
-            payload = xml_str.encode(_ENCODING)
-            ET.fromstring(payload)  # noqa: S314  # well-formedness self-check of our own output
-        except (UnicodeEncodeError, ET.ParseError) as exc:
-            raise ValueError(f"document cannot be serialised as {_ENCODING} XML: {exc}") from exc
-        if len(payload) > _MAX_BYTES:
-            raise ValueError(f"file is {len(payload)} bytes; the page allows at most 1 MB")
-        if output_path is None:
-            return xml_str
-        atomic_write_bytes(output_path, payload)
-        return None
+            append_field(funds, "row_extrato", row)
+        xml_str, payload = render_xml(root)
+        require(
+            len(payload) <= _MAX_BYTES,
+            lambda: f"file is {len(payload)} bytes; the page allows at most 1 MB",
+        )
+        return deliver(xml_str, payload, output_path)

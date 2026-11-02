@@ -21,9 +21,8 @@ from __future__ import annotations
 from abc import abstractmethod
 from typing import Generic, TypeVar
 
-from pydantic import BaseModel
-
 from layouts_cvm._internal.utils.typing import ABCTypeCheckerMeta
+from pydantic import BaseModel
 
 
 TDoc = TypeVar("TDoc", bound=BaseModel)
