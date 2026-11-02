@@ -54,6 +54,15 @@ from layouts_cvm.schemas.cda import (
     SignedMoney,
     TradedQuantity,
 )
+from layouts_cvm.schemas.cda_v3 import (
+    CdaV3Aplic,
+    CdaV3Cotas,
+    CdaV3DepPrazoTitIf,
+    CdaV3Document,
+    CdaV3Header,
+    CdaV3Inform,
+    CdaV3InvExt,
+)
 from layouts_cvm.schemas.extrato import (
     AnbimaCode,
     AtivExter,
@@ -334,6 +343,13 @@ __all__ = [
     "CdaSwapPosFim",
     "CdaTitAgroCredPriv",
     "CdaTitPub",
+    "CdaV3Aplic",
+    "CdaV3Cotas",
+    "CdaV3DepPrazoTitIf",
+    "CdaV3Document",
+    "CdaV3Header",
+    "CdaV3Inform",
+    "CdaV3InvExt",
     "Cedent",
     "CedentCredExiste",
     "ClassNumberField",
