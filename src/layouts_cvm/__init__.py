@@ -35,6 +35,7 @@ from layouts_cvm.informe_quadrimestral import InformeQuadrimestral
 from layouts_cvm.informe_trimestral_v1 import InformeTrimestralV1
 from layouts_cvm.inr_mensal import InrMensal
 from layouts_cvm.lamina import Lamina
+from layouts_cvm.lamina_v2 import LaminaV2
 from layouts_cvm.main import main
 from layouts_cvm.perfil_mensal import (
     PerfilMensal,
@@ -215,6 +216,13 @@ from layouts_cvm.schemas.lamina import (
     LaminaTaxaEntrada,
     LaminaTaxaSaida,
 )
+from layouts_cvm.schemas.lamina_v2 import (
+    LaminaV2Document,
+    LaminaV2Header,
+    LaminaV2Inform,
+    LaminaV2ListaTabRentMensal,
+    LaminaV2TabRentMensal,
+)
 from layouts_cvm.schemas.perfil_mensal import (
     ClientCount,
     DocumentHeader,
@@ -370,6 +378,12 @@ __all__ = [
     "LaminaTaxaAdministracao",
     "LaminaTaxaEntrada",
     "LaminaTaxaSaida",
+    "LaminaV2",
+    "LaminaV2Document",
+    "LaminaV2Header",
+    "LaminaV2Inform",
+    "LaminaV2ListaTabRentMensal",
+    "LaminaV2TabRentMensal",
     "Liquidez",
     "ListaCedent",
     "ListaCedentCredExiste",
