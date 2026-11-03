@@ -5,9 +5,12 @@ models. The V3 and V4 layouts share the tag order and decimal scales, so this wr
 delegates to the V4 writer's public ``export`` instead of copying its builder.
 """
 
+from collections.abc import Mapping
+
 from layouts_cvm._internal.config.ports.submission_writer import SubmissionWriter
+from layouts_cvm._internal.config.schemas.informe_diario_v3 import InformeDiarioV3Document
+from layouts_cvm._internal.utils.xml_writer import coerce_document
 from layouts_cvm.informe_diario import InformeDiario
-from layouts_cvm.schemas.informe_diario_v3 import InformeDiarioV3Document
 
 
 class InformeDiarioV3(SubmissionWriter[InformeDiarioV3Document]):
@@ -21,15 +24,15 @@ class InformeDiarioV3(SubmissionWriter[InformeDiarioV3Document]):
 
     def export(
         self,
-        doc: InformeDiarioV3Document,
+        doc: InformeDiarioV3Document | Mapping[str, object],
         output_path: str | None = None,
     ) -> str | None:
         """Serialize a validated InformeDiarioV3Document to CVM-compliant XML.
 
         Parameters
         ----------
-        doc : InformeDiarioV3Document
-                Fully validated V3 document model.
+        doc : InformeDiarioV3Document or Mapping
+                Validated document model, or plain data to validate into one.
         output_path : Optional[str]
                 Destination file path, written atomically as windows-1252. If given, None
                 is returned; otherwise the XML string is returned, by default None.
@@ -39,4 +42,5 @@ class InformeDiarioV3(SubmissionWriter[InformeDiarioV3Document]):
         Optional[str]
                 XML string when output_path is None, else None.
         """
-        return InformeDiario().export(doc, output_path, versao="3.0")
+        document = coerce_document(InformeDiarioV3Document, doc)
+        return InformeDiario().export(document, output_path, versao="3.0")

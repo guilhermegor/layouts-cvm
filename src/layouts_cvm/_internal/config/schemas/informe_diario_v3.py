@@ -2,7 +2,7 @@
 
 V3 (valid from 2015-10-01, ICVM 555/512) is described by the CVM page
 (https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNetV3.asp).
-Measured against the V4 schema in :mod:`layouts_cvm.schemas.informe_diario`
+Measured against the V4 schema in :mod:`layouts_cvm._internal.config.schemas.informe_diario`
 the page differs in exactly two ways:
 
 * ``VERSAO`` is ``3.0`` (``COD_DOC`` stays ``1``, namespace ``urn:infdiario``).
@@ -18,7 +18,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
 
-from layouts_cvm.schemas.informe_diario import (
+from layouts_cvm._internal.config.schemas.informe_diario import (
     InformeDiarioDocument,
     InformeDiarioHeader,
     InformeDiarioInform,

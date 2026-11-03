@@ -40,7 +40,7 @@ src/<project_name>/
         config/            # ALL private structural declarations (one config/CLAUDE.md maps them)
             contracts/     # FileContract declarations (one per input source)
             ports/         # private behavioural ABCs (hexagonal ports; ABCTypeCheckerMeta) — opt-in
-            # schemas/     # (opt-in) Pydantic models mirroring an external standard
+            schemas/       # Pydantic document models, one per CVM standard — private, never in __all__
 tests/
     unit/  integration/  performance/
 ```

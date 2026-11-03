@@ -10,23 +10,24 @@ import re
 from pydantic import ValidationError
 import pytest
 
-from layouts_cvm import (
+from layouts_cvm import PerfilMensal, PerfilMensalV3
+from layouts_cvm._internal.config.schemas.perfil_mensal import (
     ClientCount,
     NominalRiskBlock,
     NominalRiskFactor,
     OtcOperation,
-    PerfilMensal,
     PerfilMensalDocument,
-    PerfilMensalV3,
-    PerfilMensalV3Document,
-    PerfilMensalV3Header,
-    PerfilMensalV3PatrimonyDistribution,
-    PerfilMensalV3Row,
     PerformanceFeeDetails,
     PrimitiveRiskFactor,
     PrivateCreditIssuer,
     VarOutros,
     VarPercValCota,
+)
+from layouts_cvm._internal.config.schemas.perfil_mensal_v3 import (
+    PerfilMensalV3Document,
+    PerfilMensalV3Header,
+    PerfilMensalV3PatrimonyDistribution,
+    PerfilMensalV3Row,
 )
 
 

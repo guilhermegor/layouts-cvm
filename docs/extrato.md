@@ -76,7 +76,8 @@ arquivo já existente.
 ## Exemplos
 
 ```python
-from layouts_cvm import Extrato, ExtratoDocument, ExtratoHeader, ExtratoRow
+from layouts_cvm import Extrato
+from layouts_cvm._internal.config.schemas.extrato import ExtratoDocument, ExtratoHeader, ExtratoRow
 
 doc = ExtratoDocument(
     header=ExtratoHeader(dt_gerac_arq="31/10/2026"),

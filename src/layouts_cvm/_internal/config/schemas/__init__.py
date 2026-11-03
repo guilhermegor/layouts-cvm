@@ -6,13 +6,13 @@ standard. Ships in the wheel under ``_internal``; the public API is curated by t
 ``submission``/``ingestion`` packages, which re-export the names consumers need.
 """
 
-from layouts_cvm.schemas._fields import (
+from layouts_cvm._internal.config.schemas._fields import (
     DecimalInput,
     truncate_to_scale,
     validate_person_doc,
     validated_cnpj,
 )
-from layouts_cvm.schemas.cadastro_ativos import (
+from layouts_cvm._internal.config.schemas.cadastro_ativos import (
     ASSET_TYPE_CODES,
     ISSUER_TYPE_CODES,
     CadastroAtivosDocument,
@@ -21,7 +21,7 @@ from layouts_cvm.schemas.cadastro_ativos import (
     DateBr,
     Text,
 )
-from layouts_cvm.schemas.cda import (
+from layouts_cvm._internal.config.schemas.cda import (
     BLOCK_APLIC_TYPES,
     INDEXERS,
     BrDate,
@@ -54,7 +54,7 @@ from layouts_cvm.schemas.cda import (
     SignedMoney,
     TradedQuantity,
 )
-from layouts_cvm.schemas.cda_v3 import (
+from layouts_cvm._internal.config.schemas.cda_v3 import (
     CdaV3Aplic,
     CdaV3Cotas,
     CdaV3DepPrazoTitIf,
@@ -63,7 +63,7 @@ from layouts_cvm.schemas.cda_v3 import (
     CdaV3Inform,
     CdaV3InvExt,
 )
-from layouts_cvm.schemas.extrato import (
+from layouts_cvm._internal.config.schemas.extrato import (
     AnbimaCode,
     AtivExter,
     CalcTxPerfm,
@@ -101,7 +101,7 @@ from layouts_cvm.schemas.extrato import (
     ValorCota,
     Yn,
 )
-from layouts_cvm.schemas.inf_fundo_157 import (
+from layouts_cvm._internal.config.schemas.inf_fundo_157 import (
     CompetenceField,
     CpfField,
     InfFundo157Block,
@@ -110,7 +110,7 @@ from layouts_cvm.schemas.inf_fundo_157 import (
     InfFundo157Header,
     NameField,
 )
-from layouts_cvm.schemas.inf_mensal_fidc import (
+from layouts_cvm._internal.config.schemas.inf_mensal_fidc import (
     Alienacao,
     Amort,
     Amortizacao,
@@ -173,7 +173,7 @@ from layouts_cvm.schemas.inf_mensal_fidc import (
     TaxaValorMobili,
     ValoresMob,
 )
-from layouts_cvm.schemas.informe_diario import (
+from layouts_cvm._internal.config.schemas.informe_diario import (
     InformeDiarioDocument,
     InformeDiarioHeader,
     InformeDiarioInform,
@@ -182,22 +182,22 @@ from layouts_cvm.schemas.informe_diario import (
     SignificantShareholder,
     TwoDecimalField,
 )
-from layouts_cvm.schemas.informe_diario_v2 import (
+from layouts_cvm._internal.config.schemas.informe_diario_v2 import (
     InformeDiarioV2Document,
     InformeDiarioV2Header,
     InformeDiarioV2Inform,
 )
-from layouts_cvm.schemas.informe_diario_v3 import (
+from layouts_cvm._internal.config.schemas.informe_diario_v3 import (
     InformeDiarioV3Document,
     InformeDiarioV3Header,
     InformeDiarioV3Inform,
 )
-from layouts_cvm.schemas.informe_portabilidade import (
+from layouts_cvm._internal.config.schemas.informe_portabilidade import (
     InformePortabilidadeDocument,
     PortabilidadeHeader,
     PortabilidadeInform,
 )
-from layouts_cvm.schemas.informe_quadrimestral import (
+from layouts_cvm._internal.config.schemas.informe_quadrimestral import (
     AmountField,
     CategoryCode,
     ClasseCotas,
@@ -214,12 +214,12 @@ from layouts_cvm.schemas.informe_quadrimestral import (
     SignedAmountField,
     YesNo,
 )
-from layouts_cvm.schemas.informe_trimestral_v1 import (
+from layouts_cvm._internal.config.schemas.informe_trimestral_v1 import (
     InformeTrimestralV1Document,
     InformeTrimestralV1Header,
     InformeTrimestralV1Inform,
 )
-from layouts_cvm.schemas.inr_mensal import (
+from layouts_cvm._internal.config.schemas.inr_mensal import (
     Aplicacoes,
     EntradaSaida,
     InrMensalDocument,
@@ -234,7 +234,7 @@ from layouts_cvm.schemas.inr_mensal import (
     RecursosRecebOutroInvest,
     TransfRecursos,
 )
-from layouts_cvm.schemas.lamina import (
+from layouts_cvm._internal.config.schemas.lamina import (
     LaminaAntesInic2,
     LaminaBlock,
     LaminaCarencia,
@@ -276,14 +276,14 @@ from layouts_cvm.schemas.lamina import (
     TimeField,
     YearField,
 )
-from layouts_cvm.schemas.lamina_v2 import (
+from layouts_cvm._internal.config.schemas.lamina_v2 import (
     LaminaV2Document,
     LaminaV2Header,
     LaminaV2Inform,
     LaminaV2ListaTabRentMensal,
     LaminaV2TabRentMensal,
 )
-from layouts_cvm.schemas.perfil_mensal import (
+from layouts_cvm._internal.config.schemas.perfil_mensal import (
     AvgTermField,
     ClientCount,
     DocumentHeader,
@@ -303,7 +303,7 @@ from layouts_cvm.schemas.perfil_mensal import (
     VarPercentPlField,
     VarPercValCota,
 )
-from layouts_cvm.schemas.perfil_mensal_original import (
+from layouts_cvm._internal.config.schemas.perfil_mensal_original import (
     PerfilMensalOriginalClientCount,
     PerfilMensalOriginalDocument,
     PerfilMensalOriginalHeader,
@@ -311,7 +311,7 @@ from layouts_cvm.schemas.perfil_mensal_original import (
     PerfilMensalOriginalRow,
     PerfilMensalOriginalTradingDays,
 )
-from layouts_cvm.schemas.perfil_mensal_v3 import (
+from layouts_cvm._internal.config.schemas.perfil_mensal_v3 import (
     PerfilMensalV3Document,
     PerfilMensalV3Header,
     PerfilMensalV3PatrimonyDistribution,

@@ -5,17 +5,19 @@ the *sending* half of the standard; parsing CVM files back into models lives in 
 ``ingestion`` section. Pure logic plus file I/O at the edges — no network.
 """
 
+from collections.abc import Mapping
 from decimal import Decimal
 from functools import partial
 from itertools import chain
 
 from layouts_cvm._internal.config.ports.submission_writer import SubmissionWriter
-from layouts_cvm._internal.utils.atomic_write import atomic_write_bytes
-from layouts_cvm.schemas.informe_diario import (
+from layouts_cvm._internal.config.schemas.informe_diario import (
     InformeDiarioDocument,
     InformeDiarioInform,
     SignificantShareholder,
 )
+from layouts_cvm._internal.utils.atomic_write import atomic_write_bytes
+from layouts_cvm._internal.utils.xml_writer import coerce_document
 
 
 class InformeDiario(SubmissionWriter[InformeDiarioDocument]):
@@ -31,7 +33,7 @@ class InformeDiario(SubmissionWriter[InformeDiarioDocument]):
 
     def export(
         self,
-        doc: InformeDiarioDocument,
+        doc: InformeDiarioDocument | Mapping[str, object],
         output_path: str | None = None,
         versao: str = "4.0",
     ) -> str | None:
@@ -42,8 +44,8 @@ class InformeDiario(SubmissionWriter[InformeDiarioDocument]):
 
         Parameters
         ----------
-        doc : InformeDiarioDocument
-                Fully validated document model.
+        doc : InformeDiarioDocument or Mapping
+                Validated document model, or plain data to validate into one.
         output_path : Optional[str]
                 Destination file path. If provided, the file is written and None is
                 returned; otherwise the XML string is returned, by default None.
@@ -55,7 +57,8 @@ class InformeDiario(SubmissionWriter[InformeDiarioDocument]):
         Optional[str]
                 XML string when output_path is None, else None.
         """
-        xml_str = self._build_xml_str(doc, versao=versao)
+        document = coerce_document(InformeDiarioDocument, doc)
+        xml_str = self._build_xml_str(document, versao=versao)
         if output_path is not None:
             atomic_write_bytes(output_path, xml_str.encode("windows-1252"))
             return None

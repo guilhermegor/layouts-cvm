@@ -12,7 +12,8 @@ from xml.etree import ElementTree as ET  # noqa: S405
 from pydantic import ValidationError
 import pytest
 
-from layouts_cvm import Lamina, LaminaV2, LaminaV2Document
+from layouts_cvm import Lamina, LaminaV2
+from layouts_cvm._internal.config.schemas.lamina_v2 import LaminaV2Document
 
 
 NS = "{urn:lamina}"

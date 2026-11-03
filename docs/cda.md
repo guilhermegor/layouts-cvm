@@ -78,9 +78,8 @@ implícito: 197, 74 e 189), portanto `cod_tp_aplic` deve ficar vazio neles.
 ### Um fundo com uma posição em ações
 
 ```python
-from layouts_cvm import (
-    Cda, CdaAplic, CdaDemaisCodif, CdaDocument, CdaHeader, CdaInform, CdaNegoc, CdaPosFim,
-)
+from layouts_cvm import Cda
+from layouts_cvm._internal.config.schemas.cda import CdaAplic, CdaDemaisCodif, CdaDocument, CdaHeader, CdaInform, CdaNegoc, CdaPosFim
 
 aplic = CdaAplic(
     cod_tp_aplic=37,

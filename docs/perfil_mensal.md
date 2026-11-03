@@ -41,13 +41,8 @@ performance, etc.) e a lista completa de modelos estão na [Referência da API](
 O menor documento válido: um cabeçalho e uma linha com apenas os campos obrigatórios.
 
 ```python
-from layouts_cvm import (
-    ClientCount,
-    DocumentHeader,
-    PerfilMensal,
-    PerfilMensalDocument,
-    PerfilMensalRow,
-)
+from layouts_cvm import PerfilMensal
+from layouts_cvm._internal.config.schemas.perfil_mensal import ClientCount, DocumentHeader, PerfilMensalDocument, PerfilMensalRow
 
 clientes = ClientCount(
     nr_pf_priv_bank=0, nr_pf_varj=0,
@@ -136,7 +131,7 @@ cedo, antes de gerar qualquer XML.
 
 ```python
 from pydantic import ValidationError
-from layouts_cvm import PerfilMensalRow
+from layouts_cvm._internal.config.schemas.perfil_mensal import PerfilMensalRow
 
 try:
     PerfilMensalRow(

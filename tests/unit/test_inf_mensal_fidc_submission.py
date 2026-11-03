@@ -14,7 +14,8 @@ from typing import Any, Literal, Union, get_args, get_origin
 from pydantic import BaseModel, ValidationError
 import pytest
 
-from layouts_cvm import InfMensalFidc, InfMensalFidcDocument
+from layouts_cvm import InfMensalFidc
+from layouts_cvm._internal.config.schemas.inf_mensal_fidc import InfMensalFidcDocument
 
 
 VALID_CNPJ = "11222333000181"

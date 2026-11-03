@@ -54,14 +54,8 @@ Escalas e cardinalidades, como a página as declara:
 ## Exemplos
 
 ```python
-from layouts_cvm import (
-    PerfilMensalOriginal,
-    PerfilMensalOriginalClientCount,
-    PerfilMensalOriginalDocument,
-    PerfilMensalOriginalHeader,
-    PerfilMensalOriginalPatrimonyDistribution,
-    PerfilMensalOriginalRow,
-)
+from layouts_cvm import PerfilMensalOriginal
+from layouts_cvm._internal.config.schemas.perfil_mensal_original import PerfilMensalOriginalClientCount, PerfilMensalOriginalDocument, PerfilMensalOriginalHeader, PerfilMensalOriginalPatrimonyDistribution, PerfilMensalOriginalRow
 
 clientes = PerfilMensalOriginalClientCount(
     **dict.fromkeys(PerfilMensalOriginalClientCount.model_fields, 0)

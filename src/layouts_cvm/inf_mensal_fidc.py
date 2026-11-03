@@ -6,16 +6,15 @@ so the writer carries no per-field code: the schema is the single source of the 
 Pure logic plus file I/O at the edges — no network.
 """
 
+from collections.abc import Mapping
 from decimal import Decimal
 from typing import get_args
 from xml.sax.saxutils import escape
 
-from pydantic import BaseModel
-from pydantic.fields import FieldInfo
-
 from layouts_cvm._internal.config.ports.submission_writer import SubmissionWriter
+from layouts_cvm._internal.config.schemas.inf_mensal_fidc import InfMensalFidcDocument
 from layouts_cvm._internal.utils.atomic_write import atomic_write_bytes
-from layouts_cvm.schemas.inf_mensal_fidc import InfMensalFidcDocument
+from layouts_cvm._internal.utils.xml_writer import DocModel, FieldMeta, coerce_document
 
 
 _INDENT = "    "
@@ -30,7 +29,9 @@ class InfMensalFidc(SubmissionWriter[InfMensalFidcDocument]):
             Serialize a validated document to a CVM-compliant XML string.
     """
 
-    def export(self, doc: InfMensalFidcDocument, output_path: str | None = None) -> str | None:
+    def export(
+        self, doc: InfMensalFidcDocument | Mapping[str, object], output_path: str | None = None
+    ) -> str | None:
         """Serialize a validated InfMensalFidcDocument to a CVM-compliant XML string.
 
         Produces UTF-8 text internally; when output_path is given the file is
@@ -38,8 +39,8 @@ class InfMensalFidc(SubmissionWriter[InfMensalFidcDocument]):
 
         Parameters
         ----------
-        doc : InfMensalFidcDocument
-                Fully validated document model.
+        doc : InfMensalFidcDocument or Mapping
+                Validated document model, or plain data to validate into one.
         output_path : Optional[str]
                 Destination file path. If provided, the file is written and None is
                 returned; otherwise the XML string is returned, by default None.
@@ -49,8 +50,9 @@ class InfMensalFidc(SubmissionWriter[InfMensalFidcDocument]):
         Optional[str]
                 XML string when output_path is None, else None.
         """
+        document = coerce_document(InfMensalFidcDocument, doc)
         lines = ['<?xml version="1.0" encoding="windows-1252"?>', '<DOC_ARQ xmlns="urn:fidc">']
-        lines.extend(self._block_lines(doc, 1))
+        lines.extend(self._block_lines(document, 1))
         lines.append("</DOC_ARQ>")
         xml_str = "\n".join(lines)
         if output_path is not None:
@@ -58,12 +60,12 @@ class InfMensalFidc(SubmissionWriter[InfMensalFidcDocument]):
             return None
         return xml_str
 
-    def _block_lines(self, block: BaseModel, depth: int) -> list[str]:
+    def _block_lines(self, block: DocModel, depth: int) -> list[str]:
         """Emit the child elements of a block, in schema field order.
 
         Parameters
         ----------
-        block : BaseModel
+        block : DocModel
                 The block whose fields are emitted.
         depth : int
                 Indentation depth of the children.
@@ -79,12 +81,12 @@ class InfMensalFidc(SubmissionWriter[InfMensalFidcDocument]):
             for line in self._element_lines(tag, item, scale, depth)
         ]
 
-    def _items(self, block: BaseModel) -> list[tuple[str, object, int]]:
+    def _items(self, block: DocModel) -> list[tuple[str, object, int]]:
         """List ``(tag, item, scale)`` for every set field of a block, lists flattened.
 
         Parameters
         ----------
-        block : BaseModel
+        block : DocModel
             The block whose fields are listed.
 
         Returns
@@ -123,7 +125,7 @@ class InfMensalFidc(SubmissionWriter[InfMensalFidcDocument]):
         tag : str
                 Element name.
         item : object
-                A block (``BaseModel``) or a leaf (``Decimal``, ``int``, ``str``).
+                A block (``DocModel``) or a leaf (``Decimal``, ``int``, ``str``).
         scale : int
                 Decimal places for a ``Decimal`` leaf.
         depth : int
@@ -135,7 +137,7 @@ class InfMensalFidc(SubmissionWriter[InfMensalFidcDocument]):
                 XML lines for the element.
         """
         pad = _INDENT * depth
-        if isinstance(item, BaseModel):
+        if isinstance(item, DocModel):
             return self._wrap(tag, self._block_lines(item, depth + 1), pad)
         text = self._fmt_decimal(item, scale) if isinstance(item, Decimal) else escape(str(item))
         return [f"{pad}<{tag}>{text}</{tag}>"]
@@ -165,15 +167,15 @@ class InfMensalFidc(SubmissionWriter[InfMensalFidcDocument]):
         )
 
     @staticmethod
-    def _scale(info: FieldInfo) -> int:
+    def _scale(info: FieldMeta) -> int:
         """Find the ``decimal_places`` a field was declared with.
 
         ``Money | None`` keeps its constraints inside the union member (as a nested
-        ``FieldInfo``), not on the field, so those are searched too.
+        ``FieldMeta``), not on the field, so those are searched too.
 
         Parameters
         ----------
-        info : FieldInfo
+        info : FieldMeta
                 The field's declaration.
 
         Returns
@@ -187,7 +189,7 @@ class InfMensalFidc(SubmissionWriter[InfMensalFidcDocument]):
                 inner
                 for member in get_args(info.annotation)
                 for meta in getattr(member, "__metadata__", ())
-                for inner in (meta.metadata if isinstance(meta, FieldInfo) else [meta])
+                for inner in (meta.metadata if isinstance(meta, FieldMeta) else [meta])
             ],
         ]
         return next((m.decimal_places for m in metadata if hasattr(m, "decimal_places")), 0)

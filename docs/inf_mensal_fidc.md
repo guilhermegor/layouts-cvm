@@ -51,7 +51,8 @@ O documento completo tem centenas de tags obrigatórias; monte-o a partir de um 
 valide com `model_validate`. <!-- codespell:ignore valide -->
 
 ```python
-from layouts_cvm import InfMensalFidc, InfMensalFidcDocument
+from layouts_cvm import InfMensalFidc
+from layouts_cvm._internal.config.schemas.inf_mensal_fidc import InfMensalFidcDocument
 
 doc = InfMensalFidcDocument.model_validate(payload)  # payload: dict com todos os blocos
 InfMensalFidc().export(doc, output_path="inf_mensal_fidc_202010.xml")

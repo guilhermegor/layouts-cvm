@@ -81,12 +81,15 @@ does the same.
 ### Usage
 
 ```python
-from layouts_cvm import InformeDiario, InformeDiarioDocument
+from layouts_cvm import InformeDiario
 
-doc = InformeDiarioDocument.model_validate(dict_payload)
-xml = InformeDiario().export(doc)                      # returns the XML text
-InformeDiario().export(doc, "informe_diario.xml")      # or writes it, atomically
+xml = InformeDiario().export(dict_payload)                  # returns the XML text
+InformeDiario().export(dict_payload, "informe_diario.xml")  # or writes it, atomically
 ```
+
+`dict_payload` is plain data: the writer validates it against the layout's document model
+before serialising. The document models are private (`layouts_cvm._internal`) and not part of
+the public API.
 
 Each layout has its own page under the Layouts section of the documentation.
 
@@ -125,7 +128,9 @@ Once the first release's docs deploy has created the `gh-pages` branch, run
 ## Public API
 
 The public surface is whatever the package `__init__.py` lists in `__all__`; everything
-under `_internal/` is private.
+under `_internal/` is private. That surface is the writers: the document models live in
+`_internal/config/schemas/` and a writer takes plain data (or a built model). The
+`check-public-all-not-internal` gate fails if `__all__` ever exports a name defined there.
 
 <!-- slug: publishing -->
 ## Publishing

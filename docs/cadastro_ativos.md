@@ -40,9 +40,8 @@ usa namespace, tem `COD_DOC=2` e é gravado em `windows-1252`.
 ## Exemplos
 
 ```python
-from layouts_cvm import (
-    CadastroAtivos, CadastroAtivosDocument, CadastroAtivosHeader, CadastroAtivosRow,
-)
+from layouts_cvm import CadastroAtivos
+from layouts_cvm._internal.config.schemas.cadastro_ativos import CadastroAtivosDocument, CadastroAtivosHeader, CadastroAtivosRow
 
 doc = CadastroAtivosDocument(
     header=CadastroAtivosHeader(cnpj_merc="11.222.333/0001-81", dt_gerac_arq="05/04/2024"),

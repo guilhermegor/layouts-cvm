@@ -13,7 +13,8 @@ from xml.etree import ElementTree as ET  # noqa: S405
 from pydantic import ValidationError
 import pytest
 
-from layouts_cvm import (
+from layouts_cvm import CdaV3
+from layouts_cvm._internal.config.schemas.cda import (
     CdaAplic,
     CdaAtivoExt,
     CdaBankEmitter,
@@ -32,7 +33,8 @@ from layouts_cvm import (
     CdaSwapPosFim,
     CdaTitAgroCredPriv,
     CdaTitPub,
-    CdaV3,
+)
+from layouts_cvm._internal.config.schemas.cda_v3 import (
     CdaV3Aplic,
     CdaV3Cotas,
     CdaV3DepPrazoTitIf,

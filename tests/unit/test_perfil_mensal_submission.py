@@ -10,14 +10,14 @@ from pathlib import Path
 from pydantic import ValidationError
 import pytest
 
-from layouts_cvm import (
+from layouts_cvm import PerfilMensal
+from layouts_cvm._internal.config.schemas.perfil_mensal import (
     ClientCount,
     DocumentHeader,
     NominalRiskBlock,
     NominalRiskFactor,
     OtcOperation,
     PatrimonyDistribution,
-    PerfilMensal,
     PerfilMensalDocument,
     PerfilMensalRow,
     PerformanceFeeDetails,
