@@ -17,7 +17,7 @@ from __future__ import annotations
 
 from datetime import datetime
 import re
-from typing import Annotated, Literal, Self
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
@@ -138,12 +138,12 @@ class Ativo(BaseModel):
         return v
 
     @model_validator(mode="after")
-    def _check_contract_span(self) -> Self:
+    def _check_contract_span(self) -> Ativo:
         """Reject a contract that ends before it starts.
 
         Returns
         -------
-        Self
+        Ativo
                 The validated model.
 
         Raises
