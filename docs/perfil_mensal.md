@@ -114,11 +114,11 @@ doc = dict(
     header=dict(dt_compt="01/2025", dt_gerac_arq="15/01/2025"),
     rows=[
         dict(cnpj_fdo="11222333000181", nr_client=clientes,
-                        total_recurs_exter="0", total_recurs_br="0",
-                        tot_ativos_p_relac="0", tot_ativos_cred_priv="0"),
+             total_recurs_exter="0", total_recurs_br="0",
+             tot_ativos_p_relac="0", tot_ativos_cred_priv="0"),
         dict(cnpj_fdo="11444777000161", nr_client=clientes,
-                        total_recurs_exter="0", total_recurs_br="0",
-                        tot_ativos_p_relac="0", tot_ativos_cred_priv="0"),
+             total_recurs_exter="0", total_recurs_br="0",
+             tot_ativos_p_relac="0", tot_ativos_cred_priv="0"),
     ],
 )
 ```

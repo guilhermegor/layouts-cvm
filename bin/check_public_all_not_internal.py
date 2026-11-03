@@ -17,7 +17,7 @@ import sys
 from check_all_exports import declared_all
 
 
-_SRC = pathlib.Path("src")
+_SRC = pathlib.Path(__file__).resolve().parents[1] / "src"
 _INTERNAL = "_internal"
 
 

@@ -82,7 +82,7 @@ defined under `_internal/`.
 
 ## `schemas/` vs `contracts/` — the boundary people get wrong
 
-If you add `schemas/` (opt-in), keep the distinction sharp: a **schema** is a Pydantic model
+Keep the distinction sharp: a **schema** is a Pydantic model
 that mirrors an external **standard** (e.g. the submission XML your library emits) — **schema ↔
 structured document**. A **`FileContract`** describes a flat **tabular dump** an ingestion
 reader consumes (an open-data CSV of the *same* standard) — **`FileContract` ↔ flat table**. So a
