@@ -1,19 +1,36 @@
-"""The README gate reads only the layout table, never another table's second column."""
+"""The README gate's parse paths: the ``__all__`` shape and the import's package."""
 
+import ast
 from pathlib import Path
 import runpy
 
+import pytest
 
-_PATH_GATE = Path(__file__).parents[2] / "bin" / "check_readme_layouts.py"
+
+_DICT_GATE = runpy.run_path(str(Path(__file__).parents[2] / "bin" / "check_readme_layouts.py"))
 
 
-def test_read_readme_writers_ignores_other_tables(tmp_path: Path) -> None:
-    """A writer named in a different table must not count as a layout row."""
-    path_readme = tmp_path / "README.md"
-    path_readme.write_text(
-        "| Layout | Writer | Spec |\n|---|---|---|\n| A | `Alpha` | x |\n\n"
-        "| Other | Name |\n|---|---|\n| B | `Beta` |\n",
-        encoding="utf-8",
+def test_read_all_names_reads_an_annotated_literal_list() -> None:
+    """An annotated top-level ``__all__`` list of literals is read."""
+    cls_tree = ast.parse('__all__: list[str] = ["A", "B"]')
+
+    assert _DICT_GATE["read_all_names"](cls_tree) == {"A", "B"}
+
+
+@pytest.mark.parametrize(
+    "str_src",
+    ['__all__ = ["A"] + ["B"]', '__all__ = ["A", name]', "x = 1"],
+)
+def test_read_all_names_rejects_any_other_shape(str_src: str) -> None:
+    """A computed, non-literal or missing ``__all__`` fails instead of guessing."""
+    with pytest.raises(ValueError, match="__all__"):
+        _DICT_GATE["read_all_names"](ast.parse(str_src))
+
+
+def test_read_top_level_imports_keeps_only_absolute_imports_of_the_package() -> None:
+    """Another package and relative imports are not writers."""
+    cls_tree = ast.parse(
+        "from pkg.a import A\nfrom other.b import B\nfrom .c import C\nfrom pkg.d.e import D\n"
     )
-    dict_gate = runpy.run_path(str(_PATH_GATE))
-    assert dict_gate["read_readme_writers"](path_readme) == {"Alpha"}
+
+    assert _DICT_GATE["read_top_level_imports"](cls_tree, "pkg") == {"A"}

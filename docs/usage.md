@@ -29,6 +29,24 @@ come from the [CVM catalog](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXM
 ```python
 from layouts_cvm import InformeDiario
 
+dict_payload = {
+    "header": {"dt_compt": "15/01/2025", "dt_gerac_arq": "15/01/2025"},
+    "informs": [
+        {
+            "cnpj_fdo": "11222333000181",
+            "data_prox_pl": "16/01/2025",
+            "vl_total": "0",
+            "vl_quota": "0",
+            "patrim_liq": "0",
+            "captc_dia": "0",
+            "resg_dia": "0",
+            "vl_total_sai": "0",
+            "vl_total_atv": "0",
+            "nr_cotst": 0,
+        }
+    ],
+}
+
 xml = InformeDiario().export(dict_payload)
 InformeDiario().export(dict_payload, "informe_diario.xml")
 ```

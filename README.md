@@ -29,7 +29,7 @@ Build, validate and serialise the files a fund sends to CVM, in CVM's own file l
 
 - **Direction: submission only** (build, then send to CVM). Reading CVM files back is out of
   scope today.
-- **Coverage:** 18 of the catalog's standards are implemented. The rest are tracked as open
+- **Coverage:** the layouts in the table below are implemented. The rest are tracked as open
   [writer issues](https://github.com/guilhermegor/layouts-cvm/issues?q=is%3Aissue+is%3Aopen+writer),
   so they are planned, not forgotten.
 - **Decimals are truncated, never rounded** (`ROUND_DOWN`): a value with more digits than the
@@ -40,7 +40,7 @@ Build, validate and serialise the files a fund sends to CVM, in CVM's own file l
 <!-- slug: features -->
 ## Features
 
-- Pydantic models for 18 CVM XML layouts, validated before anything is serialised.
+- Pydantic models for every CVM XML layout listed below, validated before anything is serialised.
 - One writer per layout (`export(doc, output_path=None)`), producing windows-1252 XML.
 - Byte-identical to the original `filings-cvm` writers, pinned by a golden-file test.
 - Runtime dependencies: `pydantic` and `beartype`. No network.

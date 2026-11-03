@@ -2665,6 +2665,8 @@ def _run_readme_layouts_gate(
             str(_bin_script("check_readme_layouts.py")),
             "--init",
             str(path_init),
+            "--package",
+            "pkg",
             "--readme",
             str(path_readme),
         ],
@@ -2704,3 +2706,11 @@ def test_readme_layouts_gate_ignores_a_writer_in_an_unrelated_table(tmp_path: Pa
 
     assert cls_result.returncode == 1
     assert "'Beta' is exported but has no table row" in cls_result.stderr
+
+
+def test_readme_layouts_gate_fires_on_a_duplicate_row(tmp_path: Path) -> None:
+    """A writer listed twice fails the gate even though the set of names agrees."""
+    cls_result = _run_readme_layouts_gate(tmp_path, ["Alpha", "Beta", "Beta"])
+
+    assert cls_result.returncode == 1
+    assert "'Beta' is listed more than once" in cls_result.stderr
