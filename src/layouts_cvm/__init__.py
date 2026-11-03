@@ -20,6 +20,7 @@ from layouts_cvm.cadastro_ativos import (
 from layouts_cvm.cda import (
     Cda,
 )
+from layouts_cvm.cda_v3 import CdaV3
 from layouts_cvm.extrato import Extrato
 from layouts_cvm.inf_fundo_157 import InfFundo157
 from layouts_cvm.inf_mensal_fidc import (
@@ -35,11 +36,13 @@ from layouts_cvm.informe_quadrimestral import InformeQuadrimestral
 from layouts_cvm.informe_trimestral_v1 import InformeTrimestralV1
 from layouts_cvm.inr_mensal import InrMensal
 from layouts_cvm.lamina import Lamina
+from layouts_cvm.lamina_v2 import LaminaV2
 from layouts_cvm.main import main
 from layouts_cvm.perfil_mensal import (
     PerfilMensal,
 )
 from layouts_cvm.perfil_mensal_original import PerfilMensalOriginal
+from layouts_cvm.perfil_mensal_v3 import PerfilMensalV3
 from layouts_cvm.schemas.cadastro_ativos import (
     CadastroAtivosDocument,
     CadastroAtivosHeader,
@@ -67,6 +70,15 @@ from layouts_cvm.schemas.cda import (
     CdaSwapPosFim,
     CdaTitAgroCredPriv,
     CdaTitPub,
+)
+from layouts_cvm.schemas.cda_v3 import (
+    CdaV3Aplic,
+    CdaV3Cotas,
+    CdaV3DepPrazoTitIf,
+    CdaV3Document,
+    CdaV3Header,
+    CdaV3Inform,
+    CdaV3InvExt,
 )
 from layouts_cvm.schemas.extrato import (
     ExtratoDocument,
@@ -210,6 +222,13 @@ from layouts_cvm.schemas.lamina import (
     LaminaTaxaEntrada,
     LaminaTaxaSaida,
 )
+from layouts_cvm.schemas.lamina_v2 import (
+    LaminaV2Document,
+    LaminaV2Header,
+    LaminaV2Inform,
+    LaminaV2ListaTabRentMensal,
+    LaminaV2TabRentMensal,
+)
 from layouts_cvm.schemas.perfil_mensal import (
     ClientCount,
     DocumentHeader,
@@ -232,6 +251,12 @@ from layouts_cvm.schemas.perfil_mensal_original import (
     PerfilMensalOriginalPatrimonyDistribution,
     PerfilMensalOriginalRow,
     PerfilMensalOriginalTradingDays,
+)
+from layouts_cvm.schemas.perfil_mensal_v3 import (
+    PerfilMensalV3Document,
+    PerfilMensalV3Header,
+    PerfilMensalV3PatrimonyDistribution,
+    PerfilMensalV3Row,
 )
 
 
@@ -278,6 +303,14 @@ __all__ = [
     "CdaSwapPosFim",
     "CdaTitAgroCredPriv",
     "CdaTitPub",
+    "CdaV3",
+    "CdaV3Aplic",
+    "CdaV3Cotas",
+    "CdaV3DepPrazoTitIf",
+    "CdaV3Document",
+    "CdaV3Header",
+    "CdaV3Inform",
+    "CdaV3InvExt",
     "Cedent",
     "CedentCredExiste",
     "ClasseCotas",
@@ -355,6 +388,12 @@ __all__ = [
     "LaminaTaxaAdministracao",
     "LaminaTaxaEntrada",
     "LaminaTaxaSaida",
+    "LaminaV2",
+    "LaminaV2Document",
+    "LaminaV2Header",
+    "LaminaV2Inform",
+    "LaminaV2ListaTabRentMensal",
+    "LaminaV2TabRentMensal",
     "Liquidez",
     "ListaCedent",
     "ListaCedentCredExiste",
@@ -387,6 +426,11 @@ __all__ = [
     "PerfilMensalOriginalRow",
     "PerfilMensalOriginalTradingDays",
     "PerfilMensalRow",
+    "PerfilMensalV3",
+    "PerfilMensalV3Document",
+    "PerfilMensalV3Header",
+    "PerfilMensalV3PatrimonyDistribution",
+    "PerfilMensalV3Row",
     "PerformanceFeeDetails",
     "PortabilidadeHeader",
     "PortabilidadeInform",

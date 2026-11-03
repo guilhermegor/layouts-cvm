@@ -54,6 +54,15 @@ from layouts_cvm.schemas.cda import (
     SignedMoney,
     TradedQuantity,
 )
+from layouts_cvm.schemas.cda_v3 import (
+    CdaV3Aplic,
+    CdaV3Cotas,
+    CdaV3DepPrazoTitIf,
+    CdaV3Document,
+    CdaV3Header,
+    CdaV3Inform,
+    CdaV3InvExt,
+)
 from layouts_cvm.schemas.extrato import (
     AnbimaCode,
     AtivExter,
@@ -267,6 +276,13 @@ from layouts_cvm.schemas.lamina import (
     TimeField,
     YearField,
 )
+from layouts_cvm.schemas.lamina_v2 import (
+    LaminaV2Document,
+    LaminaV2Header,
+    LaminaV2Inform,
+    LaminaV2ListaTabRentMensal,
+    LaminaV2TabRentMensal,
+)
 from layouts_cvm.schemas.perfil_mensal import (
     AvgTermField,
     ClientCount,
@@ -294,6 +310,12 @@ from layouts_cvm.schemas.perfil_mensal_original import (
     PerfilMensalOriginalPatrimonyDistribution,
     PerfilMensalOriginalRow,
     PerfilMensalOriginalTradingDays,
+)
+from layouts_cvm.schemas.perfil_mensal_v3 import (
+    PerfilMensalV3Document,
+    PerfilMensalV3Header,
+    PerfilMensalV3PatrimonyDistribution,
+    PerfilMensalV3Row,
 )
 
 
@@ -339,6 +361,13 @@ __all__ = [
     "CdaSwapPosFim",
     "CdaTitAgroCredPriv",
     "CdaTitPub",
+    "CdaV3Aplic",
+    "CdaV3Cotas",
+    "CdaV3DepPrazoTitIf",
+    "CdaV3Document",
+    "CdaV3Header",
+    "CdaV3Inform",
+    "CdaV3InvExt",
     "Cedent",
     "CedentCredExiste",
     "ClassNumberField",
@@ -431,6 +460,11 @@ __all__ = [
     "LaminaTaxaAdministracao",
     "LaminaTaxaEntrada",
     "LaminaTaxaSaida",
+    "LaminaV2Document",
+    "LaminaV2Header",
+    "LaminaV2Inform",
+    "LaminaV2ListaTabRentMensal",
+    "LaminaV2TabRentMensal",
     "Liquidez",
     "ListaCedent",
     "ListaCedentCredExiste",
@@ -476,6 +510,10 @@ __all__ = [
     "PerfilMensalOriginalRow",
     "PerfilMensalOriginalTradingDays",
     "PerfilMensalRow",
+    "PerfilMensalV3Document",
+    "PerfilMensalV3Header",
+    "PerfilMensalV3PatrimonyDistribution",
+    "PerfilMensalV3Row",
     "PerformanceFeeDetails",
     "PhoneField",
     "PolicyCode",
