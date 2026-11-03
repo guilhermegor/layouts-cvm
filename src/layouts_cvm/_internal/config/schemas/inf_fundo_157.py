@@ -19,13 +19,13 @@ from typing import Annotated, Literal
 
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field, StringConstraints
 
+from layouts_cvm._internal.config.schemas._fields import validate_person_doc, validated_cnpj
 from layouts_cvm._internal.utils.xml_fields import (
     check_br_date,
     check_cnpj_shape,
     check_month_year,
     check_xml_text,
 )
-from layouts_cvm.schemas._fields import validate_person_doc, validated_cnpj
 
 
 CnpjField = Annotated[str, AfterValidator(check_cnpj_shape), AfterValidator(validated_cnpj)]

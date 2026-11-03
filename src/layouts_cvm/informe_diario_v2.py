@@ -6,15 +6,21 @@ has no ``DATA_PROX_PL``, so the V4 builder cannot be delegated to; the shared el
 is used instead. Pure logic plus file I/O at the edges — no network.
 """
 
+from collections.abc import Mapping
 from xml.etree import ElementTree as ET  # noqa: S405  # builds XML, never parses untrusted input
 
 from layouts_cvm._internal.config.ports.submission_writer import SubmissionWriter
-from layouts_cvm._internal.utils.typing import type_checker
-from layouts_cvm._internal.utils.xml_writer import append_field, deliver, render_xml
-from layouts_cvm.schemas.informe_diario import SignificantShareholder
-from layouts_cvm.schemas.informe_diario_v2 import (
+from layouts_cvm._internal.config.schemas.informe_diario import SignificantShareholder
+from layouts_cvm._internal.config.schemas.informe_diario_v2 import (
     InformeDiarioV2Document,
     InformeDiarioV2Inform,
+)
+from layouts_cvm._internal.utils.typing import type_checker
+from layouts_cvm._internal.utils.xml_writer import (
+    append_field,
+    coerce_document,
+    deliver,
+    render_xml,
 )
 
 
@@ -35,15 +41,15 @@ class InformeDiarioV2(SubmissionWriter[InformeDiarioV2Document]):
 
     def export(
         self,
-        doc: InformeDiarioV2Document,
+        doc: InformeDiarioV2Document | Mapping[str, object],
         output_path: str | None = None,
     ) -> str | None:
         """Serialize a validated InformeDiarioV2Document to CVM-compliant XML.
 
         Parameters
         ----------
-        doc : InformeDiarioV2Document
-                Fully validated V2 document model.
+        doc : InformeDiarioV2Document or Mapping
+                Validated document model, or plain data to validate into one.
         output_path : Optional[str]
                 Destination file path, written atomically as windows-1252. If given, None
                 is returned; otherwise the XML string is returned, by default None.
@@ -53,10 +59,11 @@ class InformeDiarioV2(SubmissionWriter[InformeDiarioV2Document]):
         Optional[str]
                 XML string when output_path is None, else None.
         """
+        document = coerce_document(InformeDiarioV2Document, doc)
         root = ET.Element("DOC_ARQ", {"xmlns": _NAMESPACE})
-        append_field(root, "cab_inform", doc.header)
+        append_field(root, "cab_inform", document.header)
         informs = ET.SubElement(root, "LISTA_INFORM")
-        for inform in doc.informs:
+        for inform in document.informs:
             self._append_inform(informs, inform)
         xml_str, payload = render_xml(root)
         return deliver(xml_str, payload, output_path)

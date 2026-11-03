@@ -19,6 +19,7 @@ name leaves room for a future non-XML export without changing the contract.
 from __future__ import annotations
 
 from abc import abstractmethod
+from collections.abc import Mapping
 from typing import Generic, TypeVar
 
 from pydantic import BaseModel
@@ -40,13 +41,15 @@ class SubmissionWriter(Generic[TDoc], metaclass=ABCTypeCheckerMeta):
     """
 
     @abstractmethod
-    def export(self, doc: TDoc, output_path: str | None = None) -> str | None:
+    def export(
+        self, doc: TDoc | Mapping[str, object], output_path: str | None = None
+    ) -> str | None:
         """Serialise ``doc`` to a CVM-compliant file (string, or written to disk).
 
         Parameters
         ----------
-        doc : TDoc
-                Fully validated document model for the standard.
+        doc : TDoc or Mapping
+                The document model for the standard, or plain data to validate into one.
         output_path : str, optional
                 Destination file path. When given, the file is written and ``None`` is
                 returned; otherwise the serialised string is returned. By default ``None``.

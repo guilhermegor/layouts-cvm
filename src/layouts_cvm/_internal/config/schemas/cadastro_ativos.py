@@ -26,9 +26,9 @@ from pydantic import (
     model_validator,
 )
 
+from layouts_cvm._internal.config.schemas._fields import validated_cnpj
 from layouts_cvm._internal.utils.typing import type_checker
 from layouts_cvm._internal.utils.xml_fields import check_br_date, check_cnpj_shape
-from layouts_cvm.schemas._fields import validated_cnpj
 
 
 _CNPJ_ZERO_STRIPPED_RE = re.compile(r"[0-9]{1,13}")

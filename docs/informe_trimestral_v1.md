@@ -65,9 +65,9 @@ serializador de elementos é compartilhado com o writer da V2.
 ## Exemplos
 
 ```python
-from layouts_cvm import InformeTrimestralV1, InformeTrimestralV1Document
+from layouts_cvm import InformeTrimestralV1
 
-doc = InformeTrimestralV1Document(
+doc = dict(
     header={"dt_compt": "06/2017", "dt_gerac_arq": "15/07/2017"},
     informs=[
         {

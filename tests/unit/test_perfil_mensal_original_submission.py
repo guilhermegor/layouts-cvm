@@ -12,8 +12,8 @@ import xml.etree.ElementTree as ET  # noqa: S405  # parses our own output only
 from pydantic import ValidationError
 import pytest
 
-from layouts_cvm import (
-    PerfilMensalOriginal,
+from layouts_cvm import PerfilMensalOriginal
+from layouts_cvm._internal.config.schemas.perfil_mensal_original import (
     PerfilMensalOriginalClientCount,
     PerfilMensalOriginalDocument,
     PerfilMensalOriginalHeader,

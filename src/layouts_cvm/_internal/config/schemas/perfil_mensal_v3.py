@@ -2,7 +2,8 @@
 
 V3 (valid from 2015-10-01, ICVM 409/512) is described by the CVM page
 (https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLPerfilV3.asp).
-Measured against the V4 page and the V4 schema in :mod:`layouts_cvm.schemas.perfil_mensal`
+Measured against the V4 page and the V4 schema in
+:mod:`layouts_cvm._internal.config.schemas.perfil_mensal`
 the XML sample is identical tag for tag (92 tags, same order, same scales and cardinalities)
 and the page differs in exactly two ways:
 
@@ -19,7 +20,7 @@ from typing import Literal
 
 from pydantic import BaseModel, model_validator
 
-from layouts_cvm.schemas.perfil_mensal import (
+from layouts_cvm._internal.config.schemas.perfil_mensal import (
     DocumentHeader,
     PatrimonyDistribution,
     PerfilMensalDocument,

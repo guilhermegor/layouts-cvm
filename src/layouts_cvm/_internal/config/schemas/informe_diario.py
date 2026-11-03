@@ -33,7 +33,7 @@ from pydantic import (
     model_validator,
 )
 
-from layouts_cvm.schemas._fields import (
+from layouts_cvm._internal.config.schemas._fields import (
     truncate_to_scale,
     validate_person_doc,
     validated_cnpj,

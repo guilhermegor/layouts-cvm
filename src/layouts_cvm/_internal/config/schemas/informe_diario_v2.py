@@ -2,7 +2,8 @@
 
 V2 (valid 2012-07-01 to 2015-09-30, ICVM 409/512) is described by the CVM page
 (https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNet739.asp).
-Measured against the V4 schema in :mod:`layouts_cvm.schemas.informe_diario` the page differs in:
+Measured against the V4 schema in
+:mod:`layouts_cvm._internal.config.schemas.informe_diario` the page differs in:
 
 * ``VERSAO`` is ``2.0`` (``COD_DOC`` stays ``1``, namespace ``urn:infdiario``).
 * The fund is identified **only** by ``CNPJ_FDO``; ``COD_SUBCLASSE`` does not exist.
@@ -23,8 +24,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from layouts_cvm.schemas._fields import validated_cnpj
-from layouts_cvm.schemas.informe_diario import (
+from layouts_cvm._internal.config.schemas._fields import validated_cnpj
+from layouts_cvm._internal.config.schemas.informe_diario import (
     InformeDiarioHeader,
     QuotaValueField,
     SignificantShareholder,

@@ -78,29 +78,27 @@ implícito: 197, 74 e 189), portanto `cod_tp_aplic` deve ficar vazio neles.
 ### Um fundo com uma posição em ações
 
 ```python
-from layouts_cvm import (
-    Cda, CdaAplic, CdaDemaisCodif, CdaDocument, CdaHeader, CdaInform, CdaNegoc, CdaPosFim,
-)
+from layouts_cvm import Cda
 
-aplic = CdaAplic(
+aplic = dict(
     cod_tp_aplic=37,
     empr_ligada="N",
     qtde_dias_confid=0,
-    negoc=CdaNegoc(
+    negoc=dict(
         tp_negoc=1,
         qtde_vendas_negoc="0", vl_vendas_negoc="0",
         qtde_aquis_negoc="100", vl_aquis_negoc="3500.00",
     ),
-    pos_fim=CdaPosFim(qtde_pos_fim="100", merc_pos_fim="3550.00"),
+    pos_fim=dict(qtde_pos_fim="100", merc_pos_fim="3550.00"),
 )
-doc = CdaDocument(
-    header=CdaHeader(dt_compt="03/2024", dt_gerac_arq="05/04/2024"),
+doc = dict(
+    header=dict(dt_compt="03/2024", dt_gerac_arq="05/04/2024"),
     informs=[
-        CdaInform(
+        dict(
             cnpj_fdo="11.222.333/0001-81",
             vl_pl="1000000.00",
             demais_codif=[
-                CdaDemaisCodif(
+                dict(
                     cod_ativ="PETR4", cod_tp_ativ=1, dt_ini_vigen="01/01/2020", aplic=aplic
                 )
             ],

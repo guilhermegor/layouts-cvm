@@ -4,15 +4,19 @@ Produces CVM-compliant CDA V4 XML (namespace ``urn:cda``) from validated schema 
 Pure logic plus file I/O at the edges — no network.
 """
 
+from collections.abc import Mapping
 from decimal import Decimal
 from xml.etree import ElementTree as ET  # noqa: S405
 
-from pydantic import BaseModel
-
 from layouts_cvm._internal.config.ports.submission_writer import SubmissionWriter
+from layouts_cvm._internal.config.schemas.cda import CdaDocument, CdaInform
 from layouts_cvm._internal.utils.typing import type_checker
-from layouts_cvm._internal.utils.xml_writer import deliver_text, fill_children
-from layouts_cvm.schemas.cda import CdaDocument, CdaInform
+from layouts_cvm._internal.utils.xml_writer import (
+    DocModel,
+    coerce_document,
+    deliver_text,
+    fill_children,
+)
 
 
 _PLACES: dict[str, int] = {
@@ -122,14 +126,14 @@ def _emit(node: ET.Element, name: str, value: object) -> None:
 
 
 @type_checker
-def _build_model(node: ET.Element, model: BaseModel) -> None:
+def _build_model(node: ET.Element, model: DocModel) -> None:
     """Emit a model's set fields as children, in declaration order (the spec's order).
 
     Parameters
     ----------
     node : ET.Element
         Parent element.
-    model : BaseModel
+    model : DocModel
         Model whose set fields become child elements.
     """
     for name, value in [
@@ -171,13 +175,15 @@ class Cda(SubmissionWriter[CdaDocument]):
         Serialize a validated document to a CVM-compliant XML string.
     """
 
-    def export(self, doc: CdaDocument, output_path: str | None = None) -> str | None:
+    def export(
+        self, doc: CdaDocument | Mapping[str, object], output_path: str | None = None
+    ) -> str | None:
         """Serialize a validated CdaDocument to a CVM-compliant XML string.
 
         Parameters
         ----------
-        doc : CdaDocument
-            Fully validated document model.
+        doc : CdaDocument or Mapping
+            Validated document model, or plain data to validate into one.
         output_path : Optional[str]
             Destination file path (written as windows-1252). If given, None is
             returned; otherwise the XML string is returned, by default None.
@@ -187,18 +193,19 @@ class Cda(SubmissionWriter[CdaDocument]):
         Optional[str]
             XML string when output_path is None, else None.
         """
+        document = coerce_document(CdaDocument, doc)
         root = ET.Element("DOC_ARQ", {"xmlns": "urn:cda"})
         fill_children(
             ET.SubElement(root, "CAB_INFORM"),
             [
-                ("COD_DOC", str(doc.header.cod_doc)),
-                ("VERSAO", str(doc.header.versao)),
-                ("DT_COMPT", str(doc.header.dt_compt)),
-                ("DT_GERAC_ARQ", str(doc.header.dt_gerac_arq)),
+                ("COD_DOC", str(document.header.cod_doc)),
+                ("VERSAO", str(document.header.versao)),
+                ("DT_COMPT", str(document.header.dt_compt)),
+                ("DT_GERAC_ARQ", str(document.header.dt_gerac_arq)),
             ],
         )
         lista = ET.SubElement(root, "LISTA_INFORM")
-        for inform in doc.informs:
+        for inform in document.informs:
             _build_inform(ET.SubElement(lista, "INFORM"), inform)
         ET.indent(root, space="    ")
         xml_str = '<?xml version="1.0" encoding="windows-1252"?>\n' + ET.tostring(

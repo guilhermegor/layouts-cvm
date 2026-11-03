@@ -30,14 +30,14 @@ from pydantic import (
     model_validator,
 )
 
+from layouts_cvm._internal.config.schemas._fields import truncate_to_scale, validated_cnpj
+from layouts_cvm._internal.config.schemas.perfil_mensal import PercentField
 from layouts_cvm._internal.utils.xml_fields import (
     check_br_date,
     check_cnpj_shape,
     check_month_year,
     check_xml_text,
 )
-from layouts_cvm.schemas._fields import truncate_to_scale, validated_cnpj
-from layouts_cvm.schemas.perfil_mensal import PercentField
 
 
 _RiskAssetPercentField = Annotated[
