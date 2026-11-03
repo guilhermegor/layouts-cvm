@@ -24,6 +24,7 @@ dist/*
 
 .coverage
 coverage.xml
+coverage.svg
 htmlcov/
 
 site/

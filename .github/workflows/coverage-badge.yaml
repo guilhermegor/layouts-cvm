@@ -1,0 +1,74 @@
+name: Publish Coverage Badge
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+
+concurrency:
+  group: gh-pages-publish
+  cancel-in-progress: false
+
+jobs:
+
+  publish_badge:
+    name: Publish coverage.svg to gh-pages
+    if: ${{ github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Set Up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+
+      - name: Install Poetry
+        uses: snok/install-poetry@a783c322200f0519c7926aa6faa857c4e23e9263 # v1.4.2
+        with:
+          virtualenvs-in-project: true
+          virtualenvs-create: true
+          version: 2.2.1
+
+      - name: Install Dependencies
+        run: poetry install --no-interaction --no-root
+
+      - name: Generate Coverage Badge
+        run: |
+          poetry run pytest --cov=src --cov-report=xml --no-header -q tests/unit/
+          poetry run genbadge coverage --local -i coverage.xml -o coverage.svg
+
+      - name: Refuse a Badge That Is Not a Percentage
+        run: poetry run python bin/check_coverage_badge.py --svg coverage.svg
+
+      - name: Publish to gh-pages Root
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if ! git fetch origin gh-pages; then
+            echo "::warning::No gh-pages branch yet; the first release creates it. Badge not published."
+            exit 0
+          fi
+          git worktree add --detach "$RUNNER_TEMP/gh-pages" FETCH_HEAD
+          cp coverage.svg "$RUNNER_TEMP/gh-pages/coverage.svg"
+          cd "$RUNNER_TEMP/gh-pages"
+          git add coverage.svg
+          if git diff --cached --quiet; then
+            echo "coverage.svg unchanged on gh-pages."
+            exit 0
+          fi
+          git commit -m "chore: update coverage badge" -m "Generated from ${GITHUB_SHA}."
+          git push origin HEAD:gh-pages
+          gh api -X POST "repos/$GITHUB_REPOSITORY/pages/builds" >/dev/null \
+            || echo "::warning::Could not request a Pages build; re-run it from Settings > Pages."
