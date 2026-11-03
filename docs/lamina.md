@@ -122,7 +122,7 @@ O que a biblioteca **não** garante, e o que a página deixa sem resposta:
 ```python
 from layouts_cvm import Lamina
 
-doc = ({
+doc = {
     "header": {"dt_compt": "01/2025", "dt_gerac_arq": "15/01/2025"},
     "informs": [{
         "cnpj_fundo": "11222333000181",
@@ -145,7 +145,7 @@ doc = ({
         "princ_distr_oferta": "Não", "princ_conflito_interes": "Nenhum",
         "tel_sac": "1140041234", "reclamacoes": "sac@alfa.com.br", "info_adic": "Nada a declarar",
     }],
-})
+}
 
 print(Lamina().export(doc))
 ```
@@ -192,7 +192,7 @@ from layouts_cvm import Lamina
 
 try:
     Lamina().export({"header": {"dt_compt": "01/2025", "dt_gerac_arq": "31/02/2025"},
-                                   "informs": []})
+                     "informs": []})
 except ValidationError as exc:
     print(exc)   # 31/02 não existe; informs precisa de ao menos 1
 ```

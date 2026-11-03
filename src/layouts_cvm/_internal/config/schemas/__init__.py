@@ -2,8 +2,8 @@
 
 Direction-neutral contracts consumed by both the ``submission`` section (models →
 XML) and the future ``ingestion`` section (XML → models). One module per CVM
-standard. Ships in the wheel under ``_internal``; the public API is curated by the
-``submission``/``ingestion`` packages, which re-export the names consumers need.
+standard. Ships in the wheel under ``_internal`` and is not public API: the writers take
+plain data and validate it into these models (``coerce_document``).
 """
 
 from layouts_cvm._internal.config.schemas._fields import (

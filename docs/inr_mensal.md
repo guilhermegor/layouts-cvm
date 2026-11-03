@@ -83,9 +83,3 @@ print(InrMensal().export(doc))
 ```python
 InrMensal().export(doc, output_path="inr_mensal_202501.xml")
 ```
-
-### Aplicação com derivativo
-
-```python
-aplic = dict(cd_aplic=15, vl_mercado_aplic=-5, vl_nocion_aplic=900)  # nocional obrigatório
-```

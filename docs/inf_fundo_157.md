@@ -50,19 +50,17 @@ Não se aplica: o writer não faz I/O de rede.
 ```python
 from layouts_cvm import InfFundo157
 
-doc = (
-    {
-        "header": {
-            "cnpj_fdo_157": "11222333000181",
-            "dt_gerac_arq": "31/10/2026",
-            "dt_comptc": "10/2026",
-        },
-        "cotistas": [
-            {"cpf": "52998224725", "nome": "Maria da Conceição",
-             "dt_fim": "15/09/2026", "conf": "S"},
-        ],
-    }
-)
+doc = {
+    "header": {
+        "cnpj_fdo_157": "11222333000181",
+        "dt_gerac_arq": "31/10/2026",
+        "dt_comptc": "10/2026",
+    },
+    "cotistas": [
+        {"cpf": "52998224725", "nome": "Maria da Conceição",
+         "dt_fim": "15/09/2026", "conf": "S"},
+    ],
+}
 xml = InfFundo157().export(doc)                        # retorna str
 InfFundo157().export(doc, output_path="inf157.xml")    # grava windows-1252, retorna None
 ```
