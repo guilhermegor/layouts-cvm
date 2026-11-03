@@ -13,7 +13,7 @@
 [![Docs](https://img.shields.io/badge/docs-latest-blue.svg)](https://guilhermegor.github.io/layouts-cvm/)
 [![Linting](https://img.shields.io/badge/linting-ruff_|_codespell-blue)](https://github.com/astral-sh/ruff)
 [![Mypy](https://img.shields.io/badge/type_checked-mypy-blue)](https://mypy-lang.org)
-![Test Coverage](https://raw.githubusercontent.com/guilhermegor/layouts-cvm/main/coverage.svg)
+![Test Coverage](https://guilhermegor.github.io/layouts-cvm/coverage.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Open Issues](https://img.shields.io/github/issues/guilhermegor/layouts-cvm)
 ![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-darkgreen.svg)
@@ -27,7 +27,7 @@ Build, validate and serialise the files a fund sends to CVM, in CVM's own file l
 <!-- slug: features -->
 ## Features
 
-- Pydantic models for 17 CVM XML layouts, validated before anything is serialised.
+- Pydantic models for 18 CVM XML layouts, validated before anything is serialised.
 - One writer per layout (`export(doc, output_path=None)`), producing windows-1252 XML.
 - Byte-identical to the original `filings-cvm` writers, pinned by a golden-file test.
 - Runtime dependencies: `pydantic` and `beartype`. No network.
@@ -42,6 +42,7 @@ Build, validate and serialise the files a fund sends to CVM, in CVM's own file l
 | Informe Mensal FIDC (ICVM 576) | `InfMensalFidc` | `InfMensalFidcDocument` |
 | Informe Diário V4 | `InformeDiario` | `InformeDiarioDocument` |
 | Informe Diário V3 | `InformeDiarioV3` | `InformeDiarioV3Document` |
+| Informe Diário V2 | `InformeDiarioV2` | `InformeDiarioV2Document` |
 | Informe de Portabilidade | `InformePortabilidade` | `InformePortabilidadeDocument` |
 | Informe Quadrimestral V2 | `InformeQuadrimestral` | `InformeQuadrimestralDocument` |
 | Informe Trimestral V1 | `InformeTrimestralV1` | `InformeTrimestralV1Document` |

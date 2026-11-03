@@ -391,6 +391,13 @@ repos:
         stages:
           - pre-push
 
+      - id: check-coverage-badge
+        name: coverage badge is published from Pages, never tracked
+        entry: bash bin/poetry_exec.sh run python bin/check_coverage_badge.py
+        language: system
+        files: ^(coverage\.svg|README\.md|bin/check_coverage_badge\.py)$
+        pass_filenames: false
+
       - id: coverage-floor
         name: coverage floor (omit list must not swallow capability logic)
         entry: bash bin/poetry_exec.sh run python bin/check_coverage_floor.py
@@ -410,8 +417,8 @@ repos:
           - pre-push
 
       - id: coverage-badge
-        name: coverage badge
-        entry: bash -c "bash bin/poetry_exec.sh run pytest tests/unit/ --cov=src && bash bin/poetry_exec.sh run coverage xml -o coverage.xml && bash bin/poetry_exec.sh run genbadge coverage --local -i coverage.xml -o coverage.svg"
+        name: coverage badge (local preview in htmlcov/; CI publishes the real one)
+        entry: bash bin/test_cov.sh
         language: system
         types:
           - python
