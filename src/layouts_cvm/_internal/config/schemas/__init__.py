@@ -276,6 +276,13 @@ from layouts_cvm._internal.config.schemas.lamina import (
     TimeField,
     YearField,
 )
+from layouts_cvm._internal.config.schemas.lamina_v1 import (
+    LaminaV1Document,
+    LaminaV1Header,
+    LaminaV1Inform,
+    LaminaV1ListaTabRentMensal,
+    LaminaV1TabRentMensal,
+)
 from layouts_cvm._internal.config.schemas.lamina_v2 import (
     LaminaV2Document,
     LaminaV2Header,
@@ -460,6 +467,11 @@ __all__ = [
     "LaminaTaxaAdministracao",
     "LaminaTaxaEntrada",
     "LaminaTaxaSaida",
+    "LaminaV1Document",
+    "LaminaV1Header",
+    "LaminaV1Inform",
+    "LaminaV1ListaTabRentMensal",
+    "LaminaV1TabRentMensal",
     "LaminaV2Document",
     "LaminaV2Header",
     "LaminaV2Inform",
