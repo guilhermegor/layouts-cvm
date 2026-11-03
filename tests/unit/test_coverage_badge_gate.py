@@ -6,6 +6,7 @@ badge off the Pages URL) and stay quiet on the healthy layout; the content guard
 """
 
 import importlib.util
+import os
 from pathlib import Path
 import shutil
 import subprocess
@@ -38,7 +39,7 @@ def _load_gate() -> ModuleType:
 
 
 @pytest.fixture(autouse=True)
-def _clean_git_env(monkeypatch: pytest.MonkeyPatch) -> None:
+def _clean_git_env(monkeypatch: pytest.MonkeyPatch) -> None:  # complexity-ok: one loop over GIT_*
     """Drop the ``GIT_*`` variables a pre-commit hook exports, for the gate and the fixtures.
 
     Parameters
@@ -46,9 +47,8 @@ def _clean_git_env(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch : pytest.MonkeyPatch
         Pytest's environment patcher.
     """
-    monkeypatch.delenv("GIT_DIR", raising=False)
-    monkeypatch.delenv("GIT_INDEX_FILE", raising=False)
-    monkeypatch.delenv("GIT_WORK_TREE", raising=False)
+    for str_key in [str_key for str_key in os.environ if str_key.startswith("GIT_")]:
+        monkeypatch.delenv(str_key)
 
 
 @pytest.fixture
