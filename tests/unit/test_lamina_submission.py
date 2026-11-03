@@ -12,7 +12,8 @@ from xml.etree import ElementTree as ET  # noqa: S405
 from pydantic import ValidationError
 import pytest
 
-from layouts_cvm import Lamina, LaminaDocument
+from layouts_cvm import Lamina
+from layouts_cvm._internal.config.schemas.lamina import LaminaDocument
 
 
 NS = "{urn:lamina}"
@@ -1533,7 +1534,14 @@ def test_mandatory_blocks_cannot_be_omitted(field: str) -> None:
 
 
 def test_lamina_is_exported_from_the_submission_package() -> None:
-    """The writer and its document model are public names of the submission section."""
+    """The writer is a public name of the submission section."""
     import layouts_cvm as submission
 
-    assert {"Lamina", "LaminaDocument", "LaminaInform", "LaminaHeader"} <= set(submission.__all__)
+    assert "Lamina" in submission.__all__
+
+
+def test_lamina_document_models_are_not_public() -> None:
+    """The document models stay private (issue #43)."""
+    import layouts_cvm as submission
+
+    assert not {"LaminaDocument", "LaminaInform", "LaminaHeader"} & set(submission.__all__)

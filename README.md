@@ -45,7 +45,7 @@ Build, validate and serialise the files a fund sends to CVM, in CVM's own file l
 - Byte-identical to the original `filings-cvm` writers, pinned by a golden-file test.
 - Runtime dependencies: `pydantic` and `beartype`. No network.
 
-| Layout | Writer | Document | Spec |
+| Layout | Writer | Document model (private) | Spec |
 |---|---|---|---|
 | Atualização do Cadastro de Ativos | `CadastroAtivos` | `CadastroAtivosDocument` | [PadraoXMLAtivos](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLAtivos.asp) |
 | CDA V4 | `Cda` | `CdaDocument` | [PadraoXMLCDANetV4](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLCDANetV4.aspx) |
@@ -102,12 +102,31 @@ does the same.
 ```python
 from layouts_cvm import InformeDiario
 
+dict_payload = {
+    "header": {"dt_compt": "15/01/2025", "dt_gerac_arq": "15/01/2025"},
+    "informs": [
+        {
+            "cnpj_fdo": "11222333000181",
+            "data_prox_pl": "16/01/2025",
+            "vl_total": "0",
+            "vl_quota": "0",
+            "patrim_liq": "0",
+            "captc_dia": "0",
+            "resg_dia": "0",
+            "vl_total_sai": "0",
+            "vl_total_atv": "0",
+            "nr_cotst": 0,
+        }
+    ],
+}
+
 xml = InformeDiario().export(dict_payload)                  # returns the XML text
 InformeDiario().export(dict_payload, "informe_diario.xml")  # or writes it, atomically
 ```
 
-`dict_payload` is plain data: the writer validates it against the layout's document model
-before serialising. Each layout's page in the documentation lists its fields.
+The payload is plain data: the writer validates it against the layout's document model
+before serialising. The document models are private (`layouts_cvm._internal`) and not part of
+the public API; each layout's page in the documentation lists its fields.
 
 Each layout has its own page under the Layouts section of the documentation.
 
@@ -149,7 +168,9 @@ Once the first release's docs deploy has created the `gh-pages` branch, run
 ## Public API
 
 The public surface is whatever the package `__init__.py` lists in `__all__`; everything
-under `_internal/` is private.
+under `_internal/` is private. That surface is the writers: the document models live in
+`_internal/config/schemas/` and a writer takes plain data (or a built model). The
+`check-public-all-not-internal` gate fails if `__all__` ever exports a name defined there.
 
 <!-- slug: publishing -->
 ## Publishing

@@ -3,7 +3,8 @@
 V3 is described by the CVM page
 (https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLCDANetV3.aspx; namespace
 ``urn:cda``, ``COD_DOC=3``, ``VERSAO=3.0``). Measured against the V4 page
-(``PadraoXMLCDANetV4.aspx``) and the V4 schema in :mod:`layouts_cvm.schemas.cda`, the
+(``PadraoXMLCDANetV4.aspx``) and the V4 schema in
+:mod:`layouts_cvm._internal.config.schemas.cda`, the
 tables (A, B, C, D, E, F, G, H), the block x application-type table, the decimal scales and
 the tag order are identical. Only these differ:
 
@@ -25,8 +26,7 @@ from typing import Literal
 
 from pydantic import Field, ValidationInfo, field_validator
 
-from layouts_cvm._internal.utils.typing import type_checker
-from layouts_cvm.schemas.cda import (
+from layouts_cvm._internal.config.schemas.cda import (
     CdaAplic,
     CdaCotas,
     CdaDepPrazoTitIf,
@@ -35,6 +35,7 @@ from layouts_cvm.schemas.cda import (
     CdaInform,
     CdaInvExt,
 )
+from layouts_cvm._internal.utils.typing import type_checker
 
 
 _MAX_INFORMS = 50

@@ -13,7 +13,8 @@ from xml.etree import ElementTree as ET  # noqa: S405
 from pydantic import ValidationError
 import pytest
 
-from layouts_cvm import (
+from layouts_cvm import CdaV3
+from layouts_cvm._internal.config.schemas.cda import (
     CdaAplic,
     CdaAtivoExt,
     CdaBankEmitter,
@@ -32,7 +33,8 @@ from layouts_cvm import (
     CdaSwapPosFim,
     CdaTitAgroCredPriv,
     CdaTitPub,
-    CdaV3,
+)
+from layouts_cvm._internal.config.schemas.cda_v3 import (
     CdaV3Aplic,
     CdaV3Cotas,
     CdaV3DepPrazoTitIf,
@@ -481,3 +483,10 @@ def test_shared_post_fixed_rule_still_applies() -> None:
     """Keep the shared fixing rule: a post-fixed deposit needs its index block."""
     with pytest.raises(ValidationError, match="post-fixed"):
         _dep_prazo(tit_pos_fix_index=None)
+
+
+def test_export_plain_data_equals_model_export() -> None:
+    """A dict from a valid document's ``model_dump`` exports the same XML as the model."""
+    doc = _doc(_inform())
+
+    assert CdaV3().export(doc.model_dump()) == CdaV3().export(doc)

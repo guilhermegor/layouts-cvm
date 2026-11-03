@@ -35,7 +35,9 @@ def _load_doc(dict_case: dict) -> object:
     object
         The validated schema document.
     """
-    mod_schema = importlib.import_module(f"layouts_cvm.schemas.{dict_case['doc_module']}")
+    mod_schema = importlib.import_module(
+        f"layouts_cvm._internal.config.schemas.{dict_case['doc_module']}"
+    )
     return getattr(mod_schema, dict_case["doc_class"]).model_validate_json(dict_case["doc_json"])
 
 
@@ -56,6 +58,16 @@ def _export(dict_case: dict, output_path: str | None) -> str | None:
     """
     cls_writer = getattr(layouts_cvm, dict_case["writer"])()
     return cls_writer.export(_load_doc(dict_case), output_path, **dict_case["kwargs"])
+
+
+@pytest.mark.parametrize("dict_case", _LIST_CASES, ids=_LIST_IDS)
+def test_plain_data_input_matches_the_original(dict_case: dict) -> None:
+    """A plain mapping is validated by the writer and yields the same XML as the model."""
+    cls_writer = getattr(layouts_cvm, dict_case["writer"])()
+
+    str_xml = cls_writer.export(json.loads(dict_case["doc_json"]), None, **dict_case["kwargs"])
+
+    assert str_xml == dict_case["xml"]
 
 
 @pytest.mark.parametrize("dict_case", _LIST_CASES, ids=_LIST_IDS)

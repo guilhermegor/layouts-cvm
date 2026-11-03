@@ -40,20 +40,18 @@ usa namespace, tem `COD_DOC=2` e é gravado em `windows-1252`.
 ## Exemplos
 
 ```python
-from layouts_cvm import (
-    CadastroAtivos, CadastroAtivosDocument, CadastroAtivosHeader, CadastroAtivosRow,
-)
+from layouts_cvm import CadastroAtivos
 
-doc = CadastroAtivosDocument(
-    header=CadastroAtivosHeader(cnpj_merc="11.222.333/0001-81", dt_gerac_arq="05/04/2024"),
+doc = dict(
+    header=dict(cnpj_merc="11.222.333/0001-81", dt_gerac_arq="05/04/2024"),
     rows=[
-        CadastroAtivosRow(
+        dict(
             acao="I", cd_ativ="PETR4", ds_ativ="Petrobras PN", tp_ativ=2,
             cnpj_emp_emissora="11.222.333/0001-81", tp_emp_emissora=1,
             nm_emp_emissora="Petrobras", ds_isin="BRPETRACNPR6",
             dt_inicio_vigen="02/01/2024",
         ),
-        CadastroAtivosRow(acao="R", cd_ativ="OLD3", tp_ativ=1, dt_inicio_vigen="01/01/2010"),
+        dict(acao="R", cd_ativ="OLD3", tp_ativ=1, dt_inicio_vigen="01/01/2010"),
     ],
 )
 xml = CadastroAtivos().export(doc)                  # devolve a string

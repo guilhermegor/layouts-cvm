@@ -9,13 +9,6 @@ annotation_only:
 src_prefix_depth: 2
 
 layers:
-  __root__:
-    allow:
-      pydantic: >-
-        The submission writers and their schemas ARE the public surface: a layout is a
-        pydantic model that validates a document before it is serialised, so the model type
-        is part of every writer's signature and cannot sit behind a seam.
-
   utils:
     allow:
       pydantic: "xml_writer walks a pydantic document model's fields to emit the XML tags"
@@ -40,7 +33,9 @@ layers:
 
   config:
     allow:
-      pydantic: "the SubmissionWriter port is generic over a pydantic document model (TDoc)"
+      pydantic: >-
+        The document models live in config/schemas and the SubmissionWriter port is generic
+        over a pydantic document model (TDoc). A model defined anywhere else is a finding.
       dotenv: "loads .env at startup; this is the layer that owns environment resolution"
       yaml: "parses inputs.yaml / outputs.yaml"
       psycopg: "PostgreSQL driver, imported lazily by the configured DB_BACKEND"

@@ -52,24 +52,16 @@ não podem ser negativos; valor de mercado e patrimônio líquido podem.
 ### Arquivo XML mínimo
 
 ```python
-from layouts_cvm import (
-    EntradaSaida,
-    InrMensal,
-    InrMensalDocument,
-    InrMensalHeader,
-    MovRecursos,
-    Participante,
-    TransfRecursos,
-)
+from layouts_cvm import InrMensal
 
-doc = InrMensalDocument(
-    header=InrMensalHeader(cd_cvm="12345", dt_compt="01/2025", dt_gerac_arq="15/02/2025"),
+doc = dict(
+    header=dict(cd_cvm="12345", dt_compt="01/2025", dt_gerac_arq="15/02/2025"),
     participantes=[
-        Participante(
+        dict(
             cod_partic="12345.123456.654321.1-9",
-            entrada_saida=EntradaSaida(vl_entr=10, vl_saida=20),
-            mov_recursos=MovRecursos(
-                transf_recursos=TransfRecursos(
+            entrada_saida=dict(vl_entr=10, vl_saida=20),
+            mov_recursos=dict(
+                transf_recursos=dict(
                     vl_invest_carteira_haver_nres=0,
                     vl_haver_nres_invest_carteira=0,
                     vl_invest_carteira_adr=0,
@@ -90,12 +82,4 @@ print(InrMensal().export(doc))
 
 ```python
 InrMensal().export(doc, output_path="inr_mensal_202501.xml")
-```
-
-### Aplicação com derivativo
-
-```python
-from layouts_cvm import Aplicacoes
-
-Aplicacoes(cd_aplic=15, vl_mercado_aplic=-5, vl_nocion_aplic=900)  # nocional obrigatório
 ```

@@ -5,14 +5,13 @@ the *sending* half of the standard; parsing CVM files back into models lives in 
 ``ingestion`` section. Pure logic plus file I/O at the edges — no network.
 """
 
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from decimal import Decimal
 from typing import Any
 from xml.sax import saxutils  # noqa: S406
 
 from layouts_cvm._internal.config.ports.submission_writer import SubmissionWriter
-from layouts_cvm._internal.utils.atomic_write import atomic_write_bytes
-from layouts_cvm.schemas.perfil_mensal import (
+from layouts_cvm._internal.config.schemas.perfil_mensal import (
     ClientCount,
     NominalRiskBlock,
     OtcOperation,
@@ -24,6 +23,8 @@ from layouts_cvm.schemas.perfil_mensal import (
     VarOutros,
     VarPercValCota,
 )
+from layouts_cvm._internal.utils.atomic_write import atomic_write_bytes
+from layouts_cvm._internal.utils.xml_writer import coerce_document
 
 
 class PerfilMensal(SubmissionWriter[PerfilMensalDocument]):
@@ -39,7 +40,7 @@ class PerfilMensal(SubmissionWriter[PerfilMensalDocument]):
 
     def export(
         self,
-        doc: PerfilMensalDocument,
+        doc: PerfilMensalDocument | Mapping[str, object],
         output_path: str | None = None,
         versao: str = "4.0",
     ) -> str | None:
@@ -50,8 +51,8 @@ class PerfilMensal(SubmissionWriter[PerfilMensalDocument]):
 
         Parameters
         ----------
-        doc : PerfilMensalDocument
-                Fully validated document model.
+        doc : PerfilMensalDocument or Mapping
+                Validated document model, or plain data to validate into one.
         output_path : Optional[str]
                 Destination file path. If provided, the file is written and None is
                 returned; otherwise the XML string is returned, by default None.
@@ -63,7 +64,8 @@ class PerfilMensal(SubmissionWriter[PerfilMensalDocument]):
         Optional[str]
                 XML string when output_path is None, else None.
         """
-        xml_str = self._build_xml_str(doc, versao=versao)
+        document = coerce_document(PerfilMensalDocument, doc)
+        xml_str = self._build_xml_str(document, versao=versao)
         if output_path is not None:
             atomic_write_bytes(output_path, xml_str.encode("windows-1252"))
             return None
