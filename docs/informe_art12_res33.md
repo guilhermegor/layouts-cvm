@@ -59,4 +59,5 @@ Ordem das tags: `COD_ARQ`, `DS_INFORM` (`DT_COMPT`, `DT_GERAC_ARQ`), `LISTA_PRES
   sem máscara. Campos desconhecidos são rejeitados. A escrita em arquivo é atômica.
 - Não são verificados: relação entre o período do contrato e a competência (`DT_FIM_CONTRATO` só
   deveria aparecer no mês seguinte ao encerramento) nem duplicidade de CNPJ ou de ativo; a
-  página não define essas regras.
+  página não define essas regras. Também não se verifica `DT_GERAC_ARQ` contra `DT_COMPT`
+  nem se impõe faixa de anos: a validação cobre formato e data de calendário real.

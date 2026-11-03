@@ -104,6 +104,11 @@ class DsInform(BaseModel):
         -------
         str
                 The unchanged value.
+
+        Raises
+        ------
+        ValueError
+                If ``v`` is not a real ``DD/MM/AAAA`` date.
         """
         _parse_date(v)
         return v
