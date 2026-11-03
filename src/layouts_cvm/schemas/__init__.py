@@ -299,6 +299,12 @@ from layouts_cvm.schemas.perfil_mensal_original import (
     PerfilMensalOriginalRow,
     PerfilMensalOriginalTradingDays,
 )
+from layouts_cvm.schemas.perfil_mensal_v3 import (
+    PerfilMensalV3Document,
+    PerfilMensalV3Header,
+    PerfilMensalV3PatrimonyDistribution,
+    PerfilMensalV3Row,
+)
 
 
 __all__ = [
@@ -484,6 +490,10 @@ __all__ = [
     "PerfilMensalOriginalRow",
     "PerfilMensalOriginalTradingDays",
     "PerfilMensalRow",
+    "PerfilMensalV3Document",
+    "PerfilMensalV3Header",
+    "PerfilMensalV3PatrimonyDistribution",
+    "PerfilMensalV3Row",
     "PerformanceFeeDetails",
     "PhoneField",
     "PolicyCode",
