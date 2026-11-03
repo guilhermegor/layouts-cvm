@@ -16,6 +16,7 @@ import sys
 
 
 _SET_NOT_WRITERS = frozenset({"__version__", "main"})
+_STR_TABLE_HEADER = "| Layout | Writer |"
 _RE_ROW = re.compile(r"^\|[^|]*\|\s*`(\w+)`\s*\|")
 
 
@@ -62,11 +63,18 @@ def read_readme_writers(path_readme: Path) -> set[str]:
     Returns
     -------
     set of str
-        The backticked name in the second column of every table row.
+        The backticked name in the second column of each row of the layout table (the one
+        headed ``| Layout | Writer |``); other tables are ignored.
     """
     set_names: set[str] = set()
+    bool_in_table = False
     for str_line in path_readme.read_text(encoding="utf-8").splitlines():
-        cls_match = _RE_ROW.match(str_line)
+        if str_line.startswith(_STR_TABLE_HEADER):
+            bool_in_table = True
+            continue
+        if bool_in_table and not str_line.startswith("|"):
+            break
+        cls_match = _RE_ROW.match(str_line) if bool_in_table else None
         if cls_match:
             set_names.add(cls_match.group(1))
     return set_names

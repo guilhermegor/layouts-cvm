@@ -2626,7 +2626,9 @@ def test_ensure_env_with_an_example_still_seeds_the_env_file(tmp_path: Path) -> 
     assert (tmp_path / ".env").read_text(encoding="utf-8") == "KEY=value\n"
 
 
-def _run_readme_layouts_gate(path_root: Path, list_rows: list[str]) -> subprocess.CompletedProcess:
+def _run_readme_layouts_gate(
+    path_root: Path, list_rows: list[str], str_extra: str = ""
+) -> subprocess.CompletedProcess:
     """Run ``check_readme_layouts.py`` over a throwaway package and README.
 
     The package exports ``Alpha`` and ``Beta`` writers plus ``main``, ``__version__`` and a
@@ -2638,6 +2640,8 @@ def _run_readme_layouts_gate(path_root: Path, list_rows: list[str]) -> subproces
         Throwaway project tree.
     list_rows : list of str
         Writer names to put in the README table.
+    str_extra : str
+        Text appended after the layout table, e.g. an unrelated table.
 
     Returns
     -------
@@ -2653,7 +2657,7 @@ def _run_readme_layouts_gate(path_root: Path, list_rows: list[str]) -> subproces
     str_rows = "".join(f"| Layout | `{str_name}` | `X` | link |\n" for str_name in list_rows)
     path_readme = _write(
         path_root / "README.md",
-        f"| Layout | Writer | Document | Spec |\n|---|---|---|---|\n{str_rows}",
+        f"| Layout | Writer | Document | Spec |\n|---|---|---|---|\n{str_rows}\n{str_extra}",
     )
     return subprocess.run(  # noqa: S603
         [
@@ -2692,3 +2696,11 @@ def test_readme_layouts_gate_fires_on_a_stale_row(tmp_path: Path) -> None:
 
     assert cls_result.returncode == 1
     assert "'Gone' is not an exported writer" in cls_result.stderr
+
+
+def test_readme_layouts_gate_ignores_a_writer_in_an_unrelated_table(tmp_path: Path) -> None:
+    """A writer named only in another table does not satisfy the layout table."""
+    cls_result = _run_readme_layouts_gate(tmp_path, ["Alpha"], str_extra="| Other | `Beta` |\n")
+
+    assert cls_result.returncode == 1
+    assert "'Beta' is exported but has no table row" in cls_result.stderr
