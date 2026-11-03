@@ -63,8 +63,10 @@ def readme_badge_url(path_readme: pathlib.Path) -> str | None:
     Returns
     -------
     str or None
-        The badge URL, or ``None`` when the README has no coverage badge.
+        The badge URL, or ``None`` when the README is missing or has no coverage badge.
     """
+    if not path_readme.is_file():
+        return None
     cls_match = _RE_README_BADGE.search(path_readme.read_text(encoding="utf-8"))
     return cls_match.group(1) if cls_match else None
 

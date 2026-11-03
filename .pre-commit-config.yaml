@@ -395,7 +395,7 @@ repos:
         name: coverage badge is published from Pages, never tracked
         entry: bash bin/poetry_exec.sh run python bin/check_coverage_badge.py
         language: system
-        files: ^(coverage\.svg|README\.md|bin/check_coverage_badge\.py)$
+        files: (^|/)coverage\.svg$|^(README\.md|bin/check_coverage_badge\.py)$
         pass_filenames: false
 
       - id: coverage-floor
