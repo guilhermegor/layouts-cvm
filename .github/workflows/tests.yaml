@@ -170,6 +170,10 @@ jobs:
         if: runner.os == 'Linux'
         run: poetry run python bin/check_sql_guards.py
 
+      - name: Run Coverage Badge Guard
+        if: runner.os == 'Linux'
+        run: poetry run python bin/check_coverage_badge.py
+
       - name: Run Coverage Floor Gate
         if: runner.os == 'Linux'
         run: poetry run python bin/check_coverage_floor.py
@@ -249,16 +253,3 @@ jobs:
       - name: Run Coverage Gate
         if: runner.os == 'Linux'
         run: poetry run pytest tests/unit/ --cov=src --cov-report=term-missing || [ $? -eq 5 ]
-
-      - name: Run Coverage Report
-        if: ${{ github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/') }}
-        run: |
-          poetry run pytest --cov=src --cov-report=xml --no-header -q tests/unit/
-          poetry run genbadge coverage --local -i coverage.xml -o coverage.svg
-
-      - name: Upload Badge
-        if: ${{ github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/') }}
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: coverage-badge-${{ matrix.os }}-${{ matrix.python-version }}
-          path: coverage.svg
