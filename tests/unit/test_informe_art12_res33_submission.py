@@ -94,12 +94,20 @@ def test_dt_fim_contrato_omitted_when_open() -> None:
     assert "DT_FIM_CONTRATO" not in _xml(_ativo(dt_fim_contrato=None))
 
 
-def test_ativo_repeats_per_asset() -> None:
-    """Repeat ATIVO inside one EMISSOR."""
-    doc = _doc()
-    doc.prestadores[0].emissores[0].ativo.append(_ativo(ativo_escriturado="A2"))
+def test_repeats_every_level_of_the_hierarchy() -> None:
+    """Repeat INFORM_PREST, EMISSOR and ATIVO siblings, two at each level."""
+    emissor = Emissor(cnpj_emissor=CNPJ_B, ativo=[_ativo(), _ativo(ativo_escriturado="A2")])
+    prestador = Prestador(
+        ds_prest=DsPrest(cnpj_escriturador=CNPJ_A, cd_tp_prest=41),
+        emissores=[emissor, emissor],
+    )
+    doc = InformeArt12Res33Document(
+        ds_inform=DsInform(dt_compt="01/2021", dt_gerac_arq="05/02/2021"),
+        prestadores=[prestador, prestador],
+    )
+    xml = InformeArt12Res33().export(doc) or ""
 
-    assert InformeArt12Res33().export(doc).count("<ATIVO>") == 2  # type: ignore[union-attr]
+    assert [xml.count(f"<{tag}>") for tag in ("INFORM_PREST", "EMISSOR", "ATIVO")] == [2, 4, 8]
 
 
 def test_cnpj_is_stored_unmasked() -> None:

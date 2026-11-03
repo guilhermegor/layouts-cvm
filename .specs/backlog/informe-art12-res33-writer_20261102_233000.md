@@ -8,6 +8,8 @@ Stacks on #47 (`refactor/43-schemas-internal-config`).
 - [x] Writer `informe_art12_res33.py` + `__init__` registry
 - [x] Unit tests
 - [x] Docs page + mkdocs nav
-- [ ] Lint, docs code-reference gate
-- [ ] README row/count and docs/index.md count (own last commit)
-- [ ] PR opened against main; merge `origin/main` once #47 merges
+- [x] Lint, docs code-reference gate
+- [x] README row/count and docs/index.md count (own last commit)
+- [x] PR opened against main; merge `origin/main` once #47 merges
+
+Completed — kept as a record. PR #54; review-ladder findings answered on the PR.

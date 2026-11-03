@@ -42,8 +42,8 @@ Build, validate and serialise the files a fund sends to CVM, in CVM's own file l
 | Informe Mensal FIDC (ICVM 576) | `InfMensalFidc` | `InfMensalFidcDocument` |
 | Informe Diário V4 | `InformeDiario` | `InformeDiarioDocument` |
 | Informe Diário V3 | `InformeDiarioV3` | `InformeDiarioV3Document` |
-| Informe Art. 12 Res. CVM 33 | `InformeArt12Res33` | `InformeArt12Res33Document` |
 | Informe Diário V2 | `InformeDiarioV2` | `InformeDiarioV2Document` |
+| Informe Art. 12 Res. CVM 33 | `InformeArt12Res33` | `InformeArt12Res33Document` |
 | Informe de Portabilidade | `InformePortabilidade` | `InformePortabilidadeDocument` |
 | Informe Quadrimestral V2 | `InformeQuadrimestral` | `InformeQuadrimestralDocument` |
 | Informe Trimestral V1 | `InformeTrimestralV1` | `InformeTrimestralV1Document` |

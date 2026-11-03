@@ -57,3 +57,6 @@ Ordem das tags: `COD_ARQ`, `DS_INFORM` (`DT_COMPT`, `DT_GERAC_ARQ`), `LISTA_PRES
 - Pelo menos um prestador, um emissor por prestador e um ativo por emissor (a página não diz).
 - A página não declara campos decimais. CNPJs são validados (dígitos verificadores) e emitidos
   sem máscara. Campos desconhecidos são rejeitados. A escrita em arquivo é atômica.
+- Não são verificados: relação entre o período do contrato e a competência (`DT_FIM_CONTRATO` só
+  deveria aparecer no mês seguinte ao encerramento) nem duplicidade de CNPJ ou de ativo; a
+  página não define essas regras.
