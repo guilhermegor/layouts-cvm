@@ -6,10 +6,13 @@ order and names them after their tag, so the serialiser is one recursive walk ov
 ``model_fields``: a ``None`` is omitted, a nested model is a block and a list repeats its element.
 """
 
+from collections.abc import Mapping
 from decimal import Decimal
+from typing import TypeAlias, TypeVar
 from xml.etree import ElementTree as ET  # noqa: S405
 
 from pydantic import BaseModel
+from pydantic.fields import FieldInfo
 
 from layouts_cvm._internal.utils.atomic_write import atomic_write_bytes
 from layouts_cvm._internal.utils.typing import type_checker
@@ -18,6 +21,36 @@ from layouts_cvm._internal.utils.typing import type_checker
 ENCODING = "windows-1252"
 DECLARATION = f'<?xml version="1.0" encoding="{ENCODING}"?>\n'
 INDENT = "    "
+
+DocModel: TypeAlias = BaseModel
+FieldMeta: TypeAlias = FieldInfo
+
+TDocument = TypeVar("TDocument", bound=BaseModel)
+
+
+@type_checker
+def coerce_document(
+    cls_document: type[TDocument], doc: TDocument | Mapping[str, object]
+) -> TDocument:
+    """Return ``doc`` as a validated ``cls_document``, validating a mapping on the way in.
+
+    An already-built model passes through untouched (it was validated on construction, and
+    re-running its validators could reject a deliberately hand-built one), so a mapping and
+    its model serialise to identical bytes.
+
+    Parameters
+    ----------
+    cls_document : type[TDocument]
+        The document model the writer serialises.
+    doc : TDocument or Mapping
+        A built model, or plain data to validate into one.
+
+    Returns
+    -------
+    TDocument
+        The validated document.
+    """
+    return doc if isinstance(doc, cls_document) else cls_document.model_validate(doc)
 
 
 @type_checker

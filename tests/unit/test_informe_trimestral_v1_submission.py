@@ -13,8 +13,8 @@ from xml.etree import ElementTree as ET  # noqa: S405
 from pydantic import ValidationError
 import pytest
 
-from layouts_cvm import (
-    InformeTrimestralV1,
+from layouts_cvm import InformeTrimestralV1
+from layouts_cvm._internal.config.schemas.informe_trimestral_v1 import (
     InformeTrimestralV1Document,
     InformeTrimestralV1Header,
 )

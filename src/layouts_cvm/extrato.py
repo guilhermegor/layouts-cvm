@@ -6,12 +6,18 @@ fields in XML order and named after their tag, so the serialiser is one recursiv
 Pure logic plus file I/O at the edges — no network.
 """
 
+from collections.abc import Mapping
 from xml.etree import ElementTree as ET  # noqa: S405  # builds XML, never parses untrusted input
 
 from layouts_cvm._internal.config.ports.submission_writer import SubmissionWriter
+from layouts_cvm._internal.config.schemas.extrato import ExtratoDocument
 from layouts_cvm._internal.utils.xml_fields import require
-from layouts_cvm._internal.utils.xml_writer import append_field, deliver, render_xml
-from layouts_cvm.schemas.extrato import ExtratoDocument
+from layouts_cvm._internal.utils.xml_writer import (
+    append_field,
+    coerce_document,
+    deliver,
+    render_xml,
+)
 
 
 _NAMESPACE = "urn:extr"
@@ -30,7 +36,9 @@ class Extrato(SubmissionWriter[ExtratoDocument]):
             Serialize a validated document to windows-1252 XML.
     """
 
-    def export(self, doc: ExtratoDocument, output_path: str | None = None) -> str | None:
+    def export(
+        self, doc: ExtratoDocument | Mapping[str, object], output_path: str | None = None
+    ) -> str | None:
         """Serialize a validated ExtratoDocument to a CVM-compliant XML string or file.
 
         The text is encoded and checked for well-formedness and size **before** the destination
@@ -38,8 +46,8 @@ class Extrato(SubmissionWriter[ExtratoDocument]):
 
         Parameters
         ----------
-        doc : ExtratoDocument
-                Fully validated document model.
+        doc : ExtratoDocument or Mapping
+                Validated document model, or plain data to validate into one.
         output_path : Optional[str]
                 Destination file. When given the file is written in windows-1252 and ``None`` is
                 returned; otherwise the XML string is returned, by default None.
@@ -56,10 +64,11 @@ class Extrato(SubmissionWriter[ExtratoDocument]):
                 possible when validation was bypassed, e.g. ``model_construct``), or the encoded
                 file exceeds the page's 1 MB limit.
         """
+        document = coerce_document(ExtratoDocument, doc)
         root = ET.Element("DOC_ARQ", {"xmlns": _NAMESPACE})
-        append_field(root, "cab_inform", doc.header)
+        append_field(root, "cab_inform", document.header)
         funds = ET.SubElement(root, "EXTRATO_FUNDO")
-        for row in doc.rows:
+        for row in document.rows:
             append_field(funds, "row_extrato", row)
         xml_str, payload = render_xml(root)
         require(

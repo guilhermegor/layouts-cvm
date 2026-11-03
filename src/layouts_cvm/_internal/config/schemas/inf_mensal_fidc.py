@@ -39,9 +39,9 @@ from pydantic import (
     model_validator,
 )
 
+from layouts_cvm._internal.config.schemas._fields import truncate_to_scale, validated_cnpj
 from layouts_cvm._internal.utils.br_identifiers import is_valid_cnpj, is_valid_cpf
 from layouts_cvm._internal.utils.typing import type_checker
-from layouts_cvm.schemas._fields import truncate_to_scale, validated_cnpj
 
 
 _COMPETENCE_RE = re.compile(r"^(0[1-9]|1[0-2])/\d{4}$")

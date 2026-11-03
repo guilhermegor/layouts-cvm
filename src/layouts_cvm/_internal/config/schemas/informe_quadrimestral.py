@@ -22,13 +22,13 @@ from typing import Annotated, Literal
 
 from pydantic import AfterValidator, BaseModel, BeforeValidator, ConfigDict, Field, model_validator
 
+from layouts_cvm._internal.config.schemas._fields import validated_cnpj
 from layouts_cvm._internal.utils.xml_fields import (
     check_br_date,
     check_cnpj_shape,
     check_month_year,
     strict_decimal,
 )
-from layouts_cvm.schemas._fields import validated_cnpj
 
 
 _DECIMAL_SCALE = 8

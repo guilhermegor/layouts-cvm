@@ -66,9 +66,9 @@ e percentuais não podem ser negativos; percentuais ficam entre 0 e 100. `vl_pl_
 ### Arquivo XML mínimo
 
 ```python
-from layouts_cvm import InformeQuadrimestral, InformeQuadrimestralDocument
+from layouts_cvm import InformeQuadrimestral
 
-doc = InformeQuadrimestralDocument(
+doc = dict(
     header={"dt_compt": "04/2026", "dt_gerac_arq": "15/05/2026"},
     informs=[
         {
@@ -123,8 +123,8 @@ InformeQuadrimestral().export(doc, output_path="informe_quadrimestral.xml")
 from pydantic import ValidationError
 
 try:
-    InformeQuadrimestralDocument(
-        header={"dt_compt": "01/2026", "dt_gerac_arq": "15/05/2026"}, informs=[]
+    InformeQuadrimestral().export(
+        dict(header={"dt_compt": "01/2026", "dt_gerac_arq": "15/05/2026"}, informs=[])
     )
 except ValidationError as exc:
     print(exc)

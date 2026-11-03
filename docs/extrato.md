@@ -76,11 +76,11 @@ arquivo já existente.
 ## Exemplos
 
 ```python
-from layouts_cvm import Extrato, ExtratoDocument, ExtratoHeader, ExtratoRow
+from layouts_cvm import Extrato
 
-doc = ExtratoDocument(
-    header=ExtratoHeader(dt_gerac_arq="31/10/2026"),
-    rows=[ExtratoRow(...)],
+doc = dict(
+    header=dict(dt_gerac_arq="31/10/2026"),
+    rows=[dict(...)],  # uma linha por classe: ver os campos acima
 )
 xml = Extrato().export(doc)                       # retorna str
 Extrato().export(doc, output_path="extrato.xml")  # grava windows-1252, retorna None

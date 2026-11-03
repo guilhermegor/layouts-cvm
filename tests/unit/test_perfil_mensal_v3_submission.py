@@ -10,23 +10,24 @@ import re
 from pydantic import ValidationError
 import pytest
 
-from layouts_cvm import (
+from layouts_cvm import PerfilMensal, PerfilMensalV3
+from layouts_cvm._internal.config.schemas.perfil_mensal import (
     ClientCount,
     NominalRiskBlock,
     NominalRiskFactor,
     OtcOperation,
-    PerfilMensal,
     PerfilMensalDocument,
-    PerfilMensalV3,
-    PerfilMensalV3Document,
-    PerfilMensalV3Header,
-    PerfilMensalV3PatrimonyDistribution,
-    PerfilMensalV3Row,
     PerformanceFeeDetails,
     PrimitiveRiskFactor,
     PrivateCreditIssuer,
     VarOutros,
     VarPercValCota,
+)
+from layouts_cvm._internal.config.schemas.perfil_mensal_v3 import (
+    PerfilMensalV3Document,
+    PerfilMensalV3Header,
+    PerfilMensalV3PatrimonyDistribution,
+    PerfilMensalV3Row,
 )
 
 
@@ -371,3 +372,10 @@ def test_v3_writer_rejects_a_v4_document() -> None:
 def test_v4_writer_stamps_its_own_versao_on_a_v3_document() -> None:
     """Pin that the V4 writer emits VERSAO 4.0 for a V3 model (V3 fields are a V4 subset)."""
     assert "<VERSAO>4.0</VERSAO>" in str(PerfilMensal().export(_doc()))
+
+
+def test_export_plain_data_equals_model_export() -> None:
+    """A dict from a valid document's ``model_dump`` exports the same XML as the model."""
+    doc = _doc()
+
+    assert PerfilMensalV3().export(doc.model_dump()) == PerfilMensalV3().export(doc)

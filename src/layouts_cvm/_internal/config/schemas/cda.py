@@ -31,12 +31,12 @@ from pydantic import (
     model_validator,
 )
 
-from layouts_cvm._internal.utils.typing import type_checker
-from layouts_cvm.schemas._fields import (
+from layouts_cvm._internal.config.schemas._fields import (
     truncate_to_scale,
     validate_person_doc,
     validated_cnpj,
 )
+from layouts_cvm._internal.utils.typing import type_checker
 
 
 _DATE_BR_RE = re.compile(r"[0-9]{2}/[0-9]{2}/[0-9]{4}")

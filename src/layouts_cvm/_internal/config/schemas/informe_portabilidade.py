@@ -19,8 +19,8 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from layouts_cvm._internal.config.schemas._fields import validated_cnpj
 from layouts_cvm._internal.utils.typing import type_checker
-from layouts_cvm.schemas._fields import validated_cnpj
 
 
 _DATE_BR_RE = re.compile(r"[0-9]{2}/[0-9]{2}/[0-9]{4}")

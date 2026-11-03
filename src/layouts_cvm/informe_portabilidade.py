@@ -4,16 +4,16 @@ Produces the Informe de Portabilidade XML (COD_DOC 478, V1.0) from a validated
 :class:`InformePortabilidadeDocument`. Pure logic plus file I/O at the edges — no network.
 """
 
+from collections.abc import Mapping
 from xml.etree import ElementTree as ET  # noqa: S405  # builds XML, never parses untrusted input
 
-from pydantic import BaseModel
-
 from layouts_cvm._internal.config.ports.submission_writer import SubmissionWriter
-from layouts_cvm._internal.utils.atomic_write import atomic_write_bytes
-from layouts_cvm._internal.utils.typing import type_checker
-from layouts_cvm.schemas.informe_portabilidade import (
+from layouts_cvm._internal.config.schemas.informe_portabilidade import (
     InformePortabilidadeDocument,
 )
+from layouts_cvm._internal.utils.atomic_write import atomic_write_bytes
+from layouts_cvm._internal.utils.typing import type_checker
+from layouts_cvm._internal.utils.xml_writer import DocModel, coerce_document
 
 
 _NAMESPACE = "urn:portab"
@@ -23,7 +23,7 @@ _INDENT = "    "
 
 
 @type_checker
-def _blocks(doc: InformePortabilidadeDocument) -> list[tuple[str, BaseModel]]:
+def _blocks(doc: InformePortabilidadeDocument) -> list[tuple[str, DocModel]]:
     """List the (tag, model) pairs of the document in XML order.
 
     Parameters
@@ -33,14 +33,14 @@ def _blocks(doc: InformePortabilidadeDocument) -> list[tuple[str, BaseModel]]:
 
     Returns
     -------
-    list[tuple[str, BaseModel]]
+    list[tuple[str, DocModel]]
             ``CAB_INFORM`` first, then one ``INFORM`` per entry of ``doc.informs``.
     """
     return [("CAB_INFORM", doc.header), *(("INFORM", inform) for inform in doc.informs)]
 
 
 @type_checker
-def _append_block(root: ET.Element, tag: str, model: BaseModel) -> None:
+def _append_block(root: ET.Element, tag: str, model: DocModel) -> None:
     """Append one block whose children are the model fields, named after their tag.
 
     Parameters
@@ -49,7 +49,7 @@ def _append_block(root: ET.Element, tag: str, model: BaseModel) -> None:
             Parent element.
     tag : str
             Block tag.
-    model : BaseModel
+    model : DocModel
             Model whose fields are declared in XML order.
     """
     element = ET.SubElement(root, tag)
@@ -136,7 +136,9 @@ class InformePortabilidade(SubmissionWriter[InformePortabilidadeDocument]):
     """
 
     def export(
-        self, doc: InformePortabilidadeDocument, output_path: str | None = None
+        self,
+        doc: InformePortabilidadeDocument | Mapping[str, object],
+        output_path: str | None = None,
     ) -> str | None:
         """Serialize a validated document to an XML string or a windows-1252 file.
 
@@ -147,8 +149,8 @@ class InformePortabilidade(SubmissionWriter[InformePortabilidadeDocument]):
 
         Parameters
         ----------
-        doc : InformePortabilidadeDocument
-                Fully validated document model.
+        doc : InformePortabilidadeDocument or Mapping
+                Validated document model, or plain data to validate into one.
         output_path : Optional[str]
                 Destination file. When given the file is written and None is returned;
                 otherwise the XML string is returned, by default None.
@@ -165,8 +167,9 @@ class InformePortabilidade(SubmissionWriter[InformePortabilidadeDocument]):
                 text windows-1252 cannot encode or XML cannot carry (only possible when validation
                 was bypassed, e.g. ``model_construct``).
         """
-        _require_informs(doc)
-        xml_str = _build_xml(doc)
+        document = coerce_document(InformePortabilidadeDocument, doc)
+        _require_informs(document)
+        xml_str = _build_xml(document)
         payload = _encode_checked(xml_str)
         if output_path is None:
             return xml_str

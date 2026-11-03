@@ -6,17 +6,17 @@ after its tag, so the document is built by one generic walk. Pure logic plus fil
 edges — no network.
 """
 
+from collections.abc import Mapping
 from decimal import Decimal
 from xml.etree import ElementTree as ET  # noqa: S405  # builds XML, never parses untrusted input
 
-from pydantic import BaseModel
-
 from layouts_cvm._internal.config.ports.submission_writer import SubmissionWriter
-from layouts_cvm._internal.utils.atomic_write import atomic_write_bytes
-from layouts_cvm._internal.utils.typing import type_checker
-from layouts_cvm.schemas.perfil_mensal_original import (
+from layouts_cvm._internal.config.schemas.perfil_mensal_original import (
     PerfilMensalOriginalDocument,
 )
+from layouts_cvm._internal.utils.atomic_write import atomic_write_bytes
+from layouts_cvm._internal.utils.typing import type_checker
+from layouts_cvm._internal.utils.xml_writer import DocModel, coerce_document
 
 
 _ENCODING = "windows-1252"
@@ -45,12 +45,12 @@ def _text(value: object) -> str:
 
 
 @type_checker
-def _set_fields(model: BaseModel) -> list[tuple[str, object]]:
+def _set_fields(model: DocModel) -> list[tuple[str, object]]:
     """List a model's fields that hold a value, in declaration (= sample) order.
 
     Parameters
     ----------
-    model : BaseModel
+    model : DocModel
             The block to walk.
 
     Returns
@@ -74,23 +74,23 @@ def _fill(element: ET.Element, value: object) -> None:
     element : ET.Element
             The element for one field.
     value : object
-            A nested ``BaseModel`` block, or a scalar to render.
+            A nested ``DocModel`` block, or a scalar to render.
     """
-    if isinstance(value, BaseModel):
+    if isinstance(value, DocModel):
         _append(element, value)
         return
     element.text = _text(value)
 
 
 @type_checker
-def _append(parent: ET.Element, model: BaseModel) -> None:
+def _append(parent: ET.Element, model: DocModel) -> None:
     """Append a model's set fields to ``parent`` as tags; field ``x_y`` becomes ``X_Y``.
 
     Parameters
     ----------
     parent : ET.Element
             The element receiving the children.
-    model : BaseModel
+    model : DocModel
             The block to walk.
     """
     for name, value in _set_fields(model):
@@ -161,15 +161,15 @@ class PerfilMensalOriginal(SubmissionWriter[PerfilMensalOriginalDocument]):
 
     def export(
         self,
-        doc: PerfilMensalOriginalDocument,
+        doc: PerfilMensalOriginalDocument | Mapping[str, object],
         output_path: str | None = None,
     ) -> str | None:
         """Serialize a validated document to a CVM-compliant XML string.
 
         Parameters
         ----------
-        doc : PerfilMensalOriginalDocument
-                Fully validated document model.
+        doc : PerfilMensalOriginalDocument or Mapping
+                Validated document model, or plain data to validate into one.
         output_path : Optional[str]
                 Destination file path (windows-1252, written atomically). If given, the file
                 is written and None is returned; otherwise the XML string is returned, by
@@ -180,7 +180,8 @@ class PerfilMensalOriginal(SubmissionWriter[PerfilMensalOriginalDocument]):
         Optional[str]
                 XML string when output_path is None, else None.
         """
-        payload = _render(doc)
+        document = coerce_document(PerfilMensalOriginalDocument, doc)
+        payload = _render(document)
         if output_path is not None:
             atomic_write_bytes(output_path, payload)
             return None

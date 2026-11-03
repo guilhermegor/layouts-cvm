@@ -11,8 +11,8 @@ from xml.etree import ElementTree as ET  # noqa: S405
 from pydantic import ValidationError
 import pytest
 
-from layouts_cvm import (
-    InformeQuadrimestral,
+from layouts_cvm import InformeQuadrimestral
+from layouts_cvm._internal.config.schemas.informe_quadrimestral import (
     InformeQuadrimestralDocument,
     InformeQuadrimestralHeader,
 )

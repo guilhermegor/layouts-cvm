@@ -31,6 +31,7 @@ from pydantic import (
     model_validator,
 )
 
+from layouts_cvm._internal.config.schemas._fields import validated_cnpj
 from layouts_cvm._internal.utils.typing import type_checker
 from layouts_cvm._internal.utils.xml_fields import (
     check_br_date,
@@ -38,7 +39,6 @@ from layouts_cvm._internal.utils.xml_fields import (
     check_xml_text,
     strict_decimal,
 )
-from layouts_cvm.schemas._fields import validated_cnpj
 
 
 _DIGITS = 18
