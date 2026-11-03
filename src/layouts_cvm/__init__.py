@@ -29,6 +29,7 @@ from layouts_cvm.inf_mensal_fidc import (
 from layouts_cvm.informe_diario import (
     InformeDiario,
 )
+from layouts_cvm.informe_diario_v2 import InformeDiarioV2
 from layouts_cvm.informe_diario_v3 import InformeDiarioV3
 from layouts_cvm.informe_portabilidade import InformePortabilidade
 from layouts_cvm.informe_quadrimestral import InformeQuadrimestral
@@ -154,6 +155,11 @@ from layouts_cvm.schemas.informe_diario import (
     InformeDiarioHeader,
     InformeDiarioInform,
     SignificantShareholder,
+)
+from layouts_cvm.schemas.informe_diario_v2 import (
+    InformeDiarioV2Document,
+    InformeDiarioV2Header,
+    InformeDiarioV2Inform,
 )
 from layouts_cvm.schemas.informe_diario_v3 import (
     InformeDiarioV3Document,
@@ -340,6 +346,10 @@ __all__ = [
     "InformeDiarioDocument",
     "InformeDiarioHeader",
     "InformeDiarioInform",
+    "InformeDiarioV2",
+    "InformeDiarioV2Document",
+    "InformeDiarioV2Header",
+    "InformeDiarioV2Inform",
     "InformeDiarioV3",
     "InformeDiarioV3Document",
     "InformeDiarioV3Header",
