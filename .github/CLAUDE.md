@@ -112,8 +112,15 @@ unit + integration tests, and the **coverage floor**.
 
 - **Single-source the coverage floor.** `.coveragerc` `[report] fail_under` is the one value;
   pre-commit's `coverage-check` and the CI `Run Coverage Gate` both read it — never duplicate a
-  `--cov-fail-under=NN` literal. The CI coverage gate runs on **every** PR (the badge step is
-  main/tags-only, so without it a PR could drop below the floor uncaught).
+  `--cov-fail-under=NN` literal. The CI coverage gate runs on **every** PR (the badge is built
+  by `coverage-badge.yaml` on `main` only, so without it a PR could drop below the floor
+  uncaught).
+- **The coverage badge is published, not committed.** `coverage-badge.yaml` pushes
+  `coverage.svg` to the `gh-pages` root on every push to `main`; it is a separate workflow
+  because `tests.yaml` is also called by the release workflows, whose default token is
+  read-only and would reject a nested `contents: write` job. `bin/check_coverage_badge.py`
+  fails on a tracked `coverage.svg`, a README badge off the Pages URL, or (with `--svg`) a
+  badge whose text is not a percentage.
 - **Version-floor consistency.** `requires-python`, `ruff target-version`, `mypy.ini
   python_version`, and the CI `python-version` matrix must all agree. Pin mypy's `python_version`
   to the **floor** (not the newest) so a too-new construct fails locally, not only on the CI

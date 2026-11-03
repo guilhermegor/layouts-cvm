@@ -13,7 +13,7 @@
 [![Docs](https://img.shields.io/badge/docs-latest-blue.svg)](https://guilhermegor.github.io/layouts-cvm/)
 [![Linting](https://img.shields.io/badge/linting-ruff_|_codespell-blue)](https://github.com/astral-sh/ruff)
 [![Mypy](https://img.shields.io/badge/type_checked-mypy-blue)](https://mypy-lang.org)
-![Test Coverage](https://raw.githubusercontent.com/guilhermegor/layouts-cvm/main/coverage.svg)
+![Test Coverage](https://guilhermegor.github.io/layouts-cvm/coverage.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Open Issues](https://img.shields.io/github/issues/guilhermegor/layouts-cvm)
 ![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-darkgreen.svg)
