@@ -20,6 +20,7 @@ from layouts_cvm.cadastro_ativos import (
 from layouts_cvm.cda import (
     Cda,
 )
+from layouts_cvm.cda_v3 import CdaV3
 from layouts_cvm.extrato import Extrato
 from layouts_cvm.inf_fundo_157 import InfFundo157
 from layouts_cvm.inf_mensal_fidc import (
@@ -67,6 +68,15 @@ from layouts_cvm.schemas.cda import (
     CdaSwapPosFim,
     CdaTitAgroCredPriv,
     CdaTitPub,
+)
+from layouts_cvm.schemas.cda_v3 import (
+    CdaV3Aplic,
+    CdaV3Cotas,
+    CdaV3DepPrazoTitIf,
+    CdaV3Document,
+    CdaV3Header,
+    CdaV3Inform,
+    CdaV3InvExt,
 )
 from layouts_cvm.schemas.extrato import (
     ExtratoDocument,
@@ -279,6 +289,14 @@ __all__ = [
     "CdaSwapPosFim",
     "CdaTitAgroCredPriv",
     "CdaTitPub",
+    "CdaV3",
+    "CdaV3Aplic",
+    "CdaV3Cotas",
+    "CdaV3DepPrazoTitIf",
+    "CdaV3Document",
+    "CdaV3Header",
+    "CdaV3Inform",
+    "CdaV3InvExt",
     "Cedent",
     "CedentCredExiste",
     "ClasseCotas",
