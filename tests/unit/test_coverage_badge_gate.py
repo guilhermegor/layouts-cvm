@@ -6,7 +6,6 @@ badge off the Pages URL) and stay quiet on the healthy layout; the content guard
 """
 
 import importlib.util
-import os
 from pathlib import Path
 import shutil
 import subprocess
@@ -15,7 +14,6 @@ from types import ModuleType
 import pytest
 
 
-_ENV_CLEAN_GIT = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
 _STR_GIT = shutil.which("git") or "git"
 
 _STR_SVG_REAL = '<svg><text x="1">coverage</text><text x="2">87%</text></svg>'
@@ -37,6 +35,20 @@ def _load_gate() -> ModuleType:
     cls_module = importlib.util.module_from_spec(cls_spec)
     cls_spec.loader.exec_module(cls_module)
     return cls_module
+
+
+@pytest.fixture(autouse=True)
+def _clean_git_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Drop the ``GIT_*`` variables a pre-commit hook exports, for the gate and the fixtures.
+
+    Parameters
+    ----------
+    monkeypatch : pytest.MonkeyPatch
+        Pytest's environment patcher.
+    """
+    monkeypatch.delenv("GIT_DIR", raising=False)
+    monkeypatch.delenv("GIT_INDEX_FILE", raising=False)
+    monkeypatch.delenv("GIT_WORK_TREE", raising=False)
 
 
 @pytest.fixture
@@ -66,7 +78,7 @@ def _repo(path_root: Path, str_badge_url: str) -> Path:
     pathlib.Path
         The repository root.
     """
-    subprocess.run([_STR_GIT, "init", "-q"], cwd=path_root, check=True, env=_ENV_CLEAN_GIT)  # noqa: S603
+    subprocess.run([_STR_GIT, "init", "-q"], cwd=path_root, check=True)  # noqa: S603
     (path_root / "README.md").write_text(f"![Test Coverage]({str_badge_url})\n", encoding="utf-8")
     return path_root
 
@@ -82,7 +94,7 @@ def _track(path_root: Path, str_name: str) -> None:
         File to create and stage.
     """
     (path_root / str_name).write_text(_STR_SVG_NA, encoding="utf-8")
-    subprocess.run([_STR_GIT, "add", str_name], cwd=path_root, check=True, env=_ENV_CLEAN_GIT)  # noqa: S603
+    subprocess.run([_STR_GIT, "add", str_name], cwd=path_root, check=True)  # noqa: S603
 
 
 def test_structural_healthy_layout_has_no_findings(gate: ModuleType, tmp_path: Path) -> None:
@@ -161,8 +173,6 @@ def test_main_svg_mode_exits_nonzero_on_na(gate: ModuleType, tmp_path: Path) -> 
 def test_structural_missing_readme_is_a_finding_not_a_traceback(
     gate: ModuleType, tmp_path: Path
 ) -> None:
-    """A repo without ``README.md`` reports the badge finding instead of raising."""
-    subprocess.run([_STR_GIT, "init", "-q"], cwd=tmp_path, check=True, env=_ENV_CLEAN_GIT)  # noqa: S603
-    assert any(
-        "README coverage badge" in str_msg for str_msg in gate.structural_findings(tmp_path)
-    )
+    """A repo without ``README.md`` reports a README-not-found finding instead of raising."""
+    subprocess.run([_STR_GIT, "init", "-q"], cwd=tmp_path, check=True)  # noqa: S603
+    assert any("README.md not found" in str_msg for str_msg in gate.structural_findings(tmp_path))

@@ -89,7 +89,11 @@ def structural_findings(path_root: pathlib.Path) -> list[str]:
         "(it is gitignored)."
         for str_path in tracked_badge_files(path_root)
     ]
-    str_url = readme_badge_url(path_root / "README.md")
+    path_readme = path_root / "README.md"
+    if not path_readme.is_file():
+        list_findings.append(f"{path_readme} not found: cannot check its coverage badge.")
+        return list_findings
+    str_url = readme_badge_url(path_readme)
     if str_url != URL_BADGE:
         list_findings.append(
             f"README coverage badge is {str_url!r}, expected the Pages URL {URL_BADGE!r}."
