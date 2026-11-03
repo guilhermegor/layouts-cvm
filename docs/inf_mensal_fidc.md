@@ -47,15 +47,13 @@ Cada tag XML é o nome do atributo em maiúsculas, na ordem do modelo (que é a 
 
 ### Gerar o XML
 
-O documento completo tem centenas de tags obrigatórias; monte-o a partir de um dicionário e
-valide com `model_validate`. <!-- codespell:ignore valide -->
+O documento completo tem centenas de tags obrigatórias; monte-o como um dicionário: o writer
+valida os dados antes de serializar.
 
 ```python
 from layouts_cvm import InfMensalFidc
-from layouts_cvm._internal.config.schemas.inf_mensal_fidc import InfMensalFidcDocument
 
-doc = InfMensalFidcDocument.model_validate(payload)  # payload: dict com todos os blocos
-InfMensalFidc().export(doc, output_path="inf_mensal_fidc_202010.xml")
+InfMensalFidc().export(payload, output_path="inf_mensal_fidc_202010.xml")
 ```
 
 ### Totais inconsistentes são recusados
@@ -63,9 +61,11 @@ InfMensalFidc().export(doc, output_path="inf_mensal_fidc_202010.xml")
 ```python
 from pydantic import ValidationError
 
+from layouts_cvm import InfMensalFidc
+
 payload["lista_inform"]["patrliq"]["vl_patrim_liq"] = "10.00"  # VL_SOM_PATRLIQ continua 0,00
 try:
-    InfMensalFidcDocument.model_validate(payload)
+    InfMensalFidc().export(payload)
 except ValidationError as exc:
     print(exc)  # VL_SOM_PATRLIQ (item 16): SOMATÓRIO must be 10.00, got 0.00
 ```

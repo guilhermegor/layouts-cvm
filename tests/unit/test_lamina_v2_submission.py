@@ -404,3 +404,10 @@ def test_distinct_funds_are_accepted() -> None:
     """Two different CNPJs in one file pass."""
     doc = _doc(_inform(), _inform(cnpj_fundo=OTHER_CNPJ))
     assert len(doc.informs) == 2
+
+
+def test_export_plain_data_equals_model_export() -> None:
+    """A dict from a valid document's ``model_dump`` exports the same XML as the model."""
+    doc = _doc(_full_inform())
+
+    assert LaminaV2().export(doc.model_dump()) == LaminaV2().export(doc)

@@ -55,18 +55,43 @@ Escalas e cardinalidades, como a página as declara:
 
 ```python
 from layouts_cvm import PerfilMensalOriginal
-from layouts_cvm._internal.config.schemas.perfil_mensal_original import PerfilMensalOriginalClientCount, PerfilMensalOriginalDocument, PerfilMensalOriginalHeader, PerfilMensalOriginalPatrimonyDistribution, PerfilMensalOriginalRow
 
-clientes = PerfilMensalOriginalClientCount(
-    **dict.fromkeys(PerfilMensalOriginalClientCount.model_fields, 0)
+clientes = dict(
+    nr_pf_priv_bank=0,
+    nr_pf_varj=0,
+    nr_pj_n_financ_priv_bank=0,
+    nr_pj_n_financ_varj=0,
+    nr_bnc_comerc_nac=0,
+    nr_pj_corr_dist_nac=0,
+    nr_pj_outr_financ_nac=0,
+    nr_inv_n_res=0,
+    nr_ent_ab_fc_prev_compl=0,
+    nr_soc_seg_reseg=0,
+    nr_soc_captlz_arrendm_merc=0,
+    nr_fdos_club_inv=0,
+    nr_cotst_distr_fdo=0,
+    nr_outros_n_relac=0,
 )
-distribuicao = PerfilMensalOriginalPatrimonyDistribution(
-    **dict.fromkeys(PerfilMensalOriginalPatrimonyDistribution.model_fields, "0")
+distribuicao = dict(
+    pr_pf_priv_bank="0",
+    pr_pf_varj="0",
+    pr_pj_n_financ_priv_bank="0",
+    pr_pj_n_financ_varj="0",
+    pr_bnc_comerc_nac="0",
+    pr_pj_corr_dist_nac="0",
+    pr_pj_outr_financ_nac="0",
+    pr_inv_n_res="0",
+    pr_ent_ab_fc_prev_compl="0",
+    pr_soc_seg_reseg="0",
+    pr_soc_captlz_arrendm_merc="0",
+    pr_fdos_club_inv="0",
+    pr_cotst_distr_fdo="0",
+    pr_outros_n_relac="0",
 )
-doc = PerfilMensalOriginalDocument(
-    header=PerfilMensalOriginalHeader(dt_compt="01/2008", dt_gerac_arq="15/02/2008"),
+doc = dict(
+    header=dict(dt_compt="01/2008", dt_gerac_arq="15/02/2008"),
     rows=[
-        PerfilMensalOriginalRow(
+        dict(
             cnpj_fdo="11222333000181",
             nr_client=clientes,
             distr_patrim=distribuicao,

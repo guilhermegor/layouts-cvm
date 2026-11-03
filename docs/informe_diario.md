@@ -43,12 +43,11 @@ Um cabeçalho e um `INFORM` com os campos obrigatórios.
 
 ```python
 from layouts_cvm import InformeDiario
-from layouts_cvm._internal.config.schemas.informe_diario import InformeDiarioDocument, InformeDiarioHeader, InformeDiarioInform
 
-doc = InformeDiarioDocument(
-    header=InformeDiarioHeader(dt_compt="15/01/2025", dt_gerac_arq="15/01/2025"),
+doc = dict(
+    header=dict(dt_compt="15/01/2025", dt_gerac_arq="15/01/2025"),
     informs=[
-        InformeDiarioInform(
+        dict(
             cnpj_fdo="11222333000181",
             data_prox_pl="16/01/2025",
             vl_total="1000000.00", vl_quota="1.23456789",
@@ -72,16 +71,14 @@ InformeDiario().export(doc, output_path="informe_20250115.xml")
 O bloco `LISTA_COTST_SIGNIF` é opcional; `pr_cotst` sai com até 4 casas e vírgula decimal.
 
 ```python
-from layouts_cvm._internal.config.schemas.informe_diario import InformeDiarioInform, SignificantShareholder
-
-inform = InformeDiarioInform(
+inform = dict(
     cnpj_fdo="11222333000181",
     data_prox_pl="16/01/2025",
     vl_total="0", vl_quota="1.0", patrim_liq="0",
     captc_dia="0", resg_dia="0", vl_total_sai="0", vl_total_atv="0",
     nr_cotst=1,
     lista_cotst_signif=[
-        SignificantShareholder(
+        dict(
             tp_pessoa="PJ",
             cpf_cnpj_cotst="11222333000181",   # CPF para PF, CNPJ para PJ
             pr_cotst="25.5",                    # <PR_COTST>25,5000</PR_COTST>
@@ -92,20 +89,28 @@ inform = InformeDiarioInform(
 
 ### Identificar o fundo por classe OU subclasse (nunca ambos)
 
-Informar os dois — ou nenhum — falha cedo na construção do modelo.
+Informar os dois — ou nenhum — falha cedo, na validação feita pelo writer.
 
 ```python
 from pydantic import ValidationError
-from layouts_cvm._internal.config.schemas.informe_diario import InformeDiarioInform
+
+from layouts_cvm import InformeDiario
 
 try:
-    InformeDiarioInform(
-        cnpj_fdo="11222333000181",
-        cod_subclasse="SUB123",   # conflito: classe E subclasse
-        data_prox_pl="16/01/2025",
-        vl_total="0", vl_quota="1.0", patrim_liq="0",
-        captc_dia="0", resg_dia="0", vl_total_sai="0", vl_total_atv="0",
-        nr_cotst=0,
+    InformeDiario().export(
+        dict(
+            header=dict(dt_compt="15/01/2025", dt_gerac_arq="15/01/2025"),
+            informs=[
+                dict(
+                    cnpj_fdo="11222333000181",
+                    cod_subclasse="SUB123",   # conflito: classe E subclasse
+                    data_prox_pl="16/01/2025",
+                    vl_total="0", vl_quota="1.0", patrim_liq="0",
+                    captc_dia="0", resg_dia="0", vl_total_sai="0", vl_total_atv="0",
+                    nr_cotst=0,
+                )
+            ],
+        )
     )
 except ValidationError as exc:
     print("Identificador ambíguo recusado:", exc)

@@ -483,3 +483,10 @@ def test_shared_post_fixed_rule_still_applies() -> None:
     """Keep the shared fixing rule: a post-fixed deposit needs its index block."""
     with pytest.raises(ValidationError, match="post-fixed"):
         _dep_prazo(tit_pos_fix_index=None)
+
+
+def test_export_plain_data_equals_model_export() -> None:
+    """A dict from a valid document's ``model_dump`` exports the same XML as the model."""
+    doc = _doc(_inform())
+
+    assert CdaV3().export(doc.model_dump()) == CdaV3().export(doc)

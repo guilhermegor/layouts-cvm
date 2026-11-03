@@ -77,11 +77,10 @@ arquivo já existente.
 
 ```python
 from layouts_cvm import Extrato
-from layouts_cvm._internal.config.schemas.extrato import ExtratoDocument, ExtratoHeader, ExtratoRow
 
-doc = ExtratoDocument(
-    header=ExtratoHeader(dt_gerac_arq="31/10/2026"),
-    rows=[ExtratoRow(...)],
+doc = dict(
+    header=dict(dt_gerac_arq="31/10/2026"),
+    rows=[dict(...)],  # uma linha por classe: ver os campos acima
 )
 xml = Extrato().export(doc)                       # retorna str
 Extrato().export(doc, output_path="extrato.xml")  # grava windows-1252, retorna None

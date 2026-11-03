@@ -213,3 +213,10 @@ def test_writer_rejects_a_non_v2_document() -> None:
     """Refuse an object that is not an InformeDiarioV2Document (runtime type check)."""
     with pytest.raises(TypeError):
         InformeDiarioV2().export("not a document")  # type: ignore[arg-type]
+
+
+def test_export_plain_data_equals_model_export() -> None:
+    """A dict from a valid document's ``model_dump`` exports the same XML as the model."""
+    doc = _doc()
+
+    assert InformeDiarioV2().export(doc.model_dump()) == InformeDiarioV2().export(doc)

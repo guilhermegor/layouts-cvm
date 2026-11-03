@@ -121,9 +121,8 @@ O que a biblioteca **não** garante, e o que a página deixa sem resposta:
 
 ```python
 from layouts_cvm import Lamina
-from layouts_cvm._internal.config.schemas.lamina import LaminaDocument
 
-doc = LaminaDocument.model_validate({
+doc = ({
     "header": {"dt_compt": "01/2025", "dt_gerac_arq": "15/01/2025"},
     "informs": [{
         "cnpj_fundo": "11222333000181",
@@ -189,8 +188,10 @@ destino truncado.
 ```python
 from pydantic import ValidationError
 
+from layouts_cvm import Lamina
+
 try:
-    LaminaDocument.model_validate({"header": {"dt_compt": "01/2025", "dt_gerac_arq": "31/02/2025"},
+    Lamina().export({"header": {"dt_compt": "01/2025", "dt_gerac_arq": "31/02/2025"},
                                    "informs": []})
 except ValidationError as exc:
     print(exc)   # 31/02 não existe; informs precisa de ao menos 1
