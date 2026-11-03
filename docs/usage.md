@@ -9,32 +9,28 @@ Examples for installing and using this library.
 ## Installation
 
 ```bash
-pip install <package-name>
+pip install layouts-cvm
 ```
 
 Or with Poetry:
 
 ```bash
-poetry add <package-name>
+poetry add layouts-cvm
 ```
-
-With an optional extra, keep the extras identical on both sides:
-
-```bash
-pip install "<package-name>[<extra>]"
-poetry add "<package-name>[<extra>]"
-```
-
-Every `pip install` line has a Poetry twin.
 
 ---
 
 ## Basic usage
 
-```python
-from <package_name>.main import main
+Each layout has one writer. It takes a plain dict, validates it against the layout, and
+returns the XML text or writes it atomically. The field names, scales and cardinalities
+come from the [CVM catalog](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadroesXML.asp), not from this page.
 
-main()
+```python
+from layouts_cvm import InformeDiario
+
+xml = InformeDiario().export(dict_payload)
+InformeDiario().export(dict_payload, "informe_diario.xml")
 ```
 
 ---

@@ -2624,3 +2624,71 @@ def test_ensure_env_with_an_example_still_seeds_the_env_file(tmp_path: Path) -> 
     )
 
     assert (tmp_path / ".env").read_text(encoding="utf-8") == "KEY=value\n"
+
+
+def _run_readme_layouts_gate(path_root: Path, list_rows: list[str]) -> subprocess.CompletedProcess:
+    """Run ``check_readme_layouts.py`` over a throwaway package and README.
+
+    The package exports ``Alpha`` and ``Beta`` writers plus ``main``, ``__version__`` and a
+    schema model that must all be ignored.
+
+    Parameters
+    ----------
+    path_root : pathlib.Path
+        Throwaway project tree.
+    list_rows : list of str
+        Writer names to put in the README table.
+
+    Returns
+    -------
+    subprocess.CompletedProcess
+        The completed run, stdout and stderr captured as text.
+    """
+    path_init = _write(
+        path_root / "__init__.py",
+        "from pkg.alpha import Alpha\nfrom pkg.beta import Beta\nfrom pkg.main import main\n"
+        "from pkg.schemas.alpha import AlphaDocument\n"
+        '__all__ = ["__version__", "main", "Alpha", "Beta", "AlphaDocument"]\n',
+    )
+    str_rows = "".join(f"| Layout | `{str_name}` | `X` | link |\n" for str_name in list_rows)
+    path_readme = _write(
+        path_root / "README.md",
+        f"| Layout | Writer | Document | Spec |\n|---|---|---|---|\n{str_rows}",
+    )
+    return subprocess.run(  # noqa: S603
+        [
+            sys.executable,
+            str(_bin_script("check_readme_layouts.py")),
+            "--init",
+            str(path_init),
+            "--readme",
+            str(path_readme),
+        ],
+        capture_output=True,
+        encoding="utf-8",
+        errors="replace",
+        check=False,
+    )
+
+
+def test_readme_layouts_gate_passes_when_table_matches_writers(tmp_path: Path) -> None:
+    """Writers and rows agree, schema and ``main`` names ignored: exit 0."""
+    cls_result = _run_readme_layouts_gate(tmp_path, ["Alpha", "Beta"])
+
+    assert cls_result.returncode == 0, cls_result.stderr
+
+
+def test_readme_layouts_gate_fires_on_a_missing_row(tmp_path: Path) -> None:
+    """A writer with no README row fails the gate and is named."""
+    cls_result = _run_readme_layouts_gate(tmp_path, ["Alpha"])
+
+    assert cls_result.returncode == 1
+    assert "'Beta' is exported but has no table row" in cls_result.stderr
+
+
+def test_readme_layouts_gate_fires_on_a_stale_row(tmp_path: Path) -> None:
+    """A row for a writer that is not exported fails the gate."""
+    cls_result = _run_readme_layouts_gate(tmp_path, ["Alpha", "Beta", "Gone"])
+
+    assert cls_result.returncode == 1
+    assert "'Gone' is not an exported writer" in cls_result.stderr
