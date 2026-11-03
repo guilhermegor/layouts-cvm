@@ -27,7 +27,7 @@ Build, validate and serialise the files a fund sends to CVM, in CVM's own file l
 <!-- slug: features -->
 ## Features
 
-- Pydantic models for 18 CVM XML layouts, validated before anything is serialised.
+- Pydantic models for 19 CVM XML layouts, validated before anything is serialised.
 - One writer per layout (`export(doc, output_path=None)`), producing windows-1252 XML.
 - Byte-identical to the original `filings-cvm` writers, pinned by a golden-file test.
 - Runtime dependencies: `pydantic` and `beartype`. No network.
@@ -43,6 +43,7 @@ Build, validate and serialise the files a fund sends to CVM, in CVM's own file l
 | Informe Diário V4 | `InformeDiario` | `InformeDiarioDocument` |
 | Informe Diário V3 | `InformeDiarioV3` | `InformeDiarioV3Document` |
 | Informe Diário V2 | `InformeDiarioV2` | `InformeDiarioV2Document` |
+| Informe Diário V1 | `InformeDiarioV1` | `InformeDiarioV1Document` |
 | Informe de Portabilidade | `InformePortabilidade` | `InformePortabilidadeDocument` |
 | Informe Quadrimestral V2 | `InformeQuadrimestral` | `InformeQuadrimestralDocument` |
 | Informe Trimestral V1 | `InformeTrimestralV1` | `InformeTrimestralV1Document` |
