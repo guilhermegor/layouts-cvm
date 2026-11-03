@@ -5,21 +5,20 @@ declares its fields in XML order and named after their tag, so the serialiser is
 Pure logic plus file I/O at the edges — no network.
 """
 
+from collections.abc import Mapping
 from xml.etree import ElementTree as ET  # noqa: S405  # builds XML, never parses untrusted input
 
-from pydantic import BaseModel
-
 from layouts_cvm._internal.config.ports.submission_writer import SubmissionWriter
+from layouts_cvm._internal.config.schemas.inf_fundo_157 import InfFundo157Document
 from layouts_cvm._internal.utils.typing import type_checker
-from layouts_cvm._internal.utils.xml_writer import deliver, render_xml
-from layouts_cvm.schemas.inf_fundo_157 import InfFundo157Document
+from layouts_cvm._internal.utils.xml_writer import DocModel, coerce_document, deliver, render_xml
 
 
 _NAMESPACE = "urn:inffdo157"
 
 
 @type_checker
-def _block(parent: ET.Element, tag: str, model: BaseModel) -> None:
+def _block(parent: ET.Element, tag: str, model: DocModel) -> None:
     """Append ``model`` to ``parent`` as ``<tag>`` with one child per field, in field order.
 
     Parameters
@@ -28,7 +27,7 @@ def _block(parent: ET.Element, tag: str, model: BaseModel) -> None:
             The enclosing element.
     tag : str
             The block's XML tag.
-    model : BaseModel
+    model : DocModel
             A block whose fields are all scalars named after their lower-cased tag.
     """
     element = ET.SubElement(parent, tag)
@@ -47,7 +46,9 @@ class InfFundo157(SubmissionWriter[InfFundo157Document]):
             Serialize a validated document to windows-1252 XML.
     """
 
-    def export(self, doc: InfFundo157Document, output_path: str | None = None) -> str | None:
+    def export(
+        self, doc: InfFundo157Document | Mapping[str, object], output_path: str | None = None
+    ) -> str | None:
         """Serialize a validated InfFundo157Document to a CVM-compliant XML string or file.
 
         The text is encoded and checked for well-formedness **before** the destination is
@@ -55,8 +56,8 @@ class InfFundo157(SubmissionWriter[InfFundo157Document]):
 
         Parameters
         ----------
-        doc : InfFundo157Document
-                Fully validated document model.
+        doc : InfFundo157Document or Mapping
+                Validated document model, or plain data to validate into one.
         output_path : Optional[str]
                 Destination file. When given the file is written in windows-1252 and ``None`` is
                 returned; otherwise the XML string is returned, by default None.
@@ -72,10 +73,11 @@ class InfFundo157(SubmissionWriter[InfFundo157Document]):
                 If the document holds text windows-1252 cannot encode or XML cannot carry (only
                 possible when validation was bypassed, e.g. ``model_construct``).
         """
+        document = coerce_document(InfFundo157Document, doc)
         root = ET.Element("DOC_ARQ", {"xmlns": _NAMESPACE})
-        _block(root, "DESC_FDO_157", doc.header)
+        _block(root, "DESC_FDO_157", document.header)
         cotistas = ET.SubElement(root, "LISTA_COTSTS")
-        for cotista in doc.cotistas:
+        for cotista in document.cotistas:
             _block(cotistas, "COTST", cotista)
         xml_str, payload = render_xml(root)
         return deliver(xml_str, payload, output_path)

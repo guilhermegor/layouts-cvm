@@ -9,10 +9,10 @@ from xml.etree import ElementTree as ET  # noqa: S405
 from pydantic import ValidationError
 import pytest
 
-from layouts_cvm import (
+from layouts_cvm import InrMensal
+from layouts_cvm._internal.config.schemas.inr_mensal import (
     Aplicacoes,
     EntradaSaida,
-    InrMensal,
     InrMensalDocument,
     InrMensalHeader,
     MovRecursos,

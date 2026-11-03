@@ -2,8 +2,8 @@
 
 V2 (from 2015-10-01, ICVM 555) is described by the CVM page
 (https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLLaminaV2.asp).
-Measured against the V3 schema in :mod:`layouts_cvm.schemas.lamina` the page differs in
-three ways:
+Measured against the V3 schema in
+:mod:`layouts_cvm._internal.config.schemas.lamina` the page differs in three ways:
 
 * ``VERSAO`` is ``2.0`` (``COD_DOC`` stays ``24``).
 * The fund is identified **only** by ``CNPJ_FUNDO``, which is mandatory; ``COD_SUBCLASSE`` does
@@ -23,8 +23,7 @@ from typing import Literal
 
 from pydantic import Field, field_validator, model_validator
 
-from layouts_cvm._internal.utils.typing import type_checker
-from layouts_cvm.schemas.lamina import (
+from layouts_cvm._internal.config.schemas.lamina import (
     _MAX_INFORMS,
     _MAX_MONTHLY_ROWS,
     CnpjField,
@@ -42,6 +41,7 @@ from layouts_cvm.schemas.lamina import (
     _has_index_reference,
     _monthly_rows,
 )
+from layouts_cvm._internal.utils.typing import type_checker
 
 
 class LaminaV2Header(LaminaHeader):

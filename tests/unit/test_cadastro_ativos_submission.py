@@ -11,8 +11,8 @@ from xml.etree import ElementTree as ET  # noqa: S405
 from pydantic import ValidationError
 import pytest
 
-from layouts_cvm import (
-    CadastroAtivos,
+from layouts_cvm import CadastroAtivos
+from layouts_cvm._internal.config.schemas.cadastro_ativos import (
     CadastroAtivosDocument,
     CadastroAtivosHeader,
     CadastroAtivosRow,

@@ -11,8 +11,8 @@ import re
 from pydantic import ValidationError
 import pytest
 
-from layouts_cvm import (
-    InformePortabilidade,
+from layouts_cvm import InformePortabilidade
+from layouts_cvm._internal.config.schemas.informe_portabilidade import (
     InformePortabilidadeDocument,
     PortabilidadeHeader,
     PortabilidadeInform,

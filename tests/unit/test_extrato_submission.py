@@ -7,12 +7,8 @@ from xml.etree import ElementTree as ET  # noqa: S405  # parses our own output i
 from pydantic import ValidationError
 import pytest
 
-from layouts_cvm import (
-    Extrato,
-    ExtratoDocument,
-    ExtratoHeader,
-    ExtratoRow,
-)
+from layouts_cvm import Extrato
+from layouts_cvm._internal.config.schemas.extrato import ExtratoDocument, ExtratoHeader, ExtratoRow
 
 
 _NS = "{urn:extr}"

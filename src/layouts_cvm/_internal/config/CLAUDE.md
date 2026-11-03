@@ -71,9 +71,18 @@ operation as a port here; the concrete classes are the adapters.
 example once your own ports exist. Drop this whole sub-package if the library has no
 macro-sections sharing a behavioural contract.
 
+## `schemas/` is private (issue #43)
+
+In this library `schemas/` holds the document models of every CVM standard. They are an
+implementation detail of the writers: a writer's `export` takes `Document | Mapping`, validates
+a mapping with `coerce_document` (`_internal/utils/xml_writer.py`) and a model passes through
+untouched. Pydantic is allowed only in `utils/` and `config/` (`.layer-policy.yaml`), and
+`bin/check_public_all_not_internal.py` fails when `layouts_cvm.__all__` exports anything
+defined under `_internal/`.
+
 ## `schemas/` vs `contracts/` — the boundary people get wrong
 
-If you add `schemas/` (opt-in), keep the distinction sharp: a **schema** is a Pydantic model
+Keep the distinction sharp: a **schema** is a Pydantic model
 that mirrors an external **standard** (e.g. the submission XML your library emits) — **schema ↔
 structured document**. A **`FileContract`** describes a flat **tabular dump** an ingestion
 reader consumes (an open-data CSV of the *same* standard) — **`FileContract` ↔ flat table**. So a

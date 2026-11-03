@@ -10,16 +10,17 @@ import re
 from pydantic import ValidationError
 import pytest
 
-from layouts_cvm import (
-    InformeDiario,
+from layouts_cvm import InformeDiario, InformeDiarioV3
+from layouts_cvm._internal.config.schemas.informe_diario import (
     InformeDiarioDocument,
     InformeDiarioHeader,
     InformeDiarioInform,
-    InformeDiarioV3,
+    SignificantShareholder,
+)
+from layouts_cvm._internal.config.schemas.informe_diario_v3 import (
     InformeDiarioV3Document,
     InformeDiarioV3Header,
     InformeDiarioV3Inform,
-    SignificantShareholder,
 )
 
 

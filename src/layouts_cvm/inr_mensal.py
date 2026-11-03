@@ -6,14 +6,14 @@ its fields in XML order and named after their tag, so the serialiser is one recu
 Pure logic plus file I/O at the edges — no network.
 """
 
+from collections.abc import Mapping
 from xml.etree import ElementTree as ET  # noqa: S405  # builds XML, never parses untrusted input
 
-from pydantic import BaseModel
-
 from layouts_cvm._internal.config.ports.submission_writer import SubmissionWriter
+from layouts_cvm._internal.config.schemas.inr_mensal import InrMensalDocument
 from layouts_cvm._internal.utils.atomic_write import atomic_write_bytes
 from layouts_cvm._internal.utils.typing import type_checker
-from layouts_cvm.schemas.inr_mensal import InrMensalDocument
+from layouts_cvm._internal.utils.xml_writer import DocModel, coerce_document
 
 
 _NAMESPACE = "urn:infmensal"
@@ -24,7 +24,7 @@ _MAX_BYTES = 10 * 1024 * 1024
 
 
 @type_checker
-def _fill_block(element: ET.Element, value: BaseModel) -> None:
+def _fill_block(element: ET.Element, value: DocModel) -> None:
     """Append every field of a nested model to ``element``, in declaration order."""
     for field in type(value).model_fields:
         _append(element, field, getattr(value, field))
@@ -44,7 +44,7 @@ _ITEMS = {type(None): lambda _: [], list: lambda value: value}
 def _append_one(parent: ET.Element, name: str, value: object) -> None:
     """Append one non-list field to ``parent`` as an element named after the upper-cased field."""
     element = ET.SubElement(parent, name.upper())
-    _FILLERS[isinstance(value, BaseModel)](element, value)
+    _FILLERS[isinstance(value, DocModel)](element, value)
 
 
 @type_checker
@@ -105,7 +105,9 @@ class InrMensal(SubmissionWriter[InrMensalDocument]):
             Serialize a validated document to windows-1252 XML.
     """
 
-    def export(self, doc: InrMensalDocument, output_path: str | None = None) -> str | None:
+    def export(
+        self, doc: InrMensalDocument | Mapping[str, object], output_path: str | None = None
+    ) -> str | None:
         """Serialize a validated document to a CVM-compliant XML string or file.
 
         The text is encoded and checked for well-formedness **before** the destination is
@@ -113,8 +115,8 @@ class InrMensal(SubmissionWriter[InrMensalDocument]):
 
         Parameters
         ----------
-        doc : InrMensalDocument
-                Fully validated document model.
+        doc : InrMensalDocument or Mapping
+                Validated document model, or plain data to validate into one.
         output_path : Optional[str]
                 Destination file. When given the file is written in windows-1252 and ``None`` is
                 returned; otherwise the XML string is returned, by default None.
@@ -130,7 +132,8 @@ class InrMensal(SubmissionWriter[InrMensalDocument]):
                 If the document cannot be encoded as windows-1252 XML (only possible when
                 validation was bypassed, e.g. ``model_construct``).
         """
-        xml_str = _build_xml(doc)
+        document = coerce_document(InrMensalDocument, doc)
+        xml_str = _build_xml(document)
         payload = _encode_checked(xml_str)
         _require_within_limit(payload)
         if output_path is None:
