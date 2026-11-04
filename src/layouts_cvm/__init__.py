@@ -14,6 +14,7 @@ from importlib.metadata import PackageNotFoundError, version
 
 from layouts_cvm.cadastro_ativos import CadastroAtivos
 from layouts_cvm.cda import Cda
+from layouts_cvm.cda_v2 import CdaV2
 from layouts_cvm.cda_v3 import CdaV3
 from layouts_cvm.cofi_4016 import Cofi4016
 from layouts_cvm.extrato import Extrato
@@ -48,6 +49,7 @@ __all__ = [
     "CadastroAtivos",
     "Cda",
     "CdaV3",
+    "CdaV2",
     "Cofi4016",
     "Extrato",
     "InfFundo157",
