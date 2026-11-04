@@ -34,3 +34,26 @@ def test_read_top_level_imports_keeps_only_absolute_imports_of_the_package() -> 
     )
 
     assert _DICT_GATE["read_top_level_imports"](cls_tree, "pkg") == {"A"}
+
+
+def test_find_order_problems_accepts_a_sorted_list_with_leading_names() -> None:
+    """Leading names are exempt; the rest must be sorted."""
+    assert _DICT_GATE["find_order_problems"]("x", ["main", "a", "b"], ("main",)) == []
+
+
+def test_find_order_problems_names_the_first_misplaced_key() -> None:
+    """An out-of-order list is reported with the key that broke the order."""
+    list_problems = _DICT_GATE["find_order_problems"]("x", ["a", "c", "b"])
+
+    assert "first misplaced: 'c'" in list_problems[0]
+
+
+def test_read_nav_modules_reads_stems_until_the_section_ends(tmp_path: Path) -> None:
+    """Only the ``Layouts`` entries are read, in file order."""
+    path_yml = tmp_path / "mkdocs.yml"
+    path_yml.write_text(
+        'nav:\n  - Layouts:\n      - "B": b.md\n      - "A": a.md\n  - API:\n      - X: x.md\n',
+        encoding="utf-8",
+    )
+
+    assert _DICT_GATE["read_nav_modules"](path_yml) == ["b", "a"]

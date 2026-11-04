@@ -34,6 +34,24 @@ poe lint                # ruff + mypy + codespell + pydocstyle + shell/sql/yaml 
 
 CI runs the same gates on every pull request; keep them green locally before pushing.
 
+## Registering a new writer
+
+A writer is listed in four lists (three files), and all four use **one sort key: the writer's submodule name**
+(`cda_v3` for `CdaV3`), plain ASCII order. Insert your entry at its sorted position, never at the
+end, so two writer PRs touch different lines and merge without a conflict:
+
+1. `src/layouts_cvm/__init__.py`: the `from layouts_cvm.<module> import <Writer>` line and the
+   `"<Writer>"` entry in `__all__` (one per line; `__version__` and `main` stay first).
+2. The `README.md` layout table row.
+3. The `mkdocs.yml` `Layouts` nav entry.
+
+Do not write a count of layouts anywhere: it is the one line two branches would both change
+and git would merge silently into a wrong number. `bin/check_readme_layouts.py` fails when any
+of the lists is out of order. Schemas are imported from their own module
+(`layouts_cvm._internal.config.schemas.<module>`); there is no aggregator to update.
+
+If a rebase conflicts in one of these lists, keep both sides' lines and re-sort by the key.
+
 ## Verifying the built package
 
 Before opening a release PR, confirm the wheel actually builds and imports — this catches
