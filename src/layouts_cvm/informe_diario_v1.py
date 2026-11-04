@@ -25,7 +25,7 @@ from layouts_cvm._internal.utils.xml_writer import (
 
 
 _NAMESPACE = "urn:infdiario"
-_LIST_SCALAR_FIELDS = tuple(
+_INFORM_SCALAR_FIELDS = tuple(
     field for field in InformeDiarioV1Inform.model_fields if field != "lista_cotst_signif"
 )
 
@@ -81,7 +81,7 @@ def _append_inform(parent: ET.Element, inform: InformeDiarioV1Inform) -> None:
             Validated fund-informe model.
     """
     node = ET.SubElement(parent, "INFORM")
-    for field in _LIST_SCALAR_FIELDS:
+    for field in _INFORM_SCALAR_FIELDS:
         append_field(node, field, getattr(inform, field))
     _append_shareholders(node, inform.lista_cotst_signif)
 
