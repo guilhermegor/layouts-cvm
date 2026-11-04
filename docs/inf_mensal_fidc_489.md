@@ -21,7 +21,8 @@ reaproveitados do schema dela; só diferem `CAB_INFORM`, `APLIC_ATIVO` e `OUTRAS
   de cota (`QT_COTAS`/`VL_COTAS` das séries, `QT_COTAS` dos movimentos, `VL_COTA` das
   amortizações) com até **8**. O excedente é **truncado** (`ROUND_DOWN`). Vírgula decimal.
 - **Cabeçalho:** sem prazos de resgate (`PR_ENTRE_*`/`TP_DIAS_*` não existem nesta versão).
-- **Somatórios (itens 1 a 31):** cada total deve ser igual à soma prescrita; a provisão
+- **Somatórios (itens 1 a 31):** os itens 1, 2, 30 e 31 e os totais cruzados são verificados
+  aqui; os demais vêm dos blocos reaproveitados do layout ICVM 576. Cada total deve ser igual à soma prescrita; a provisão
   (`VL_PROVIS_REDUC_RECUP`) deve ser positiva e menor ou igual aos créditos que cobre;
   `VL_SOM_PRAZO_VENC` e `VL_SOM_INAD_VENC` fecham com os créditos existentes; item 31 é a soma
   das `QT_COTISTAS_SUBORD`.
@@ -33,6 +34,8 @@ reaproveitados do schema dela; só diferem `CAB_INFORM`, `APLIC_ATIVO` e `OUTRAS
 
 ## Não são verificados
 
+- A vigência (até a data-base 2019-11-01): a página do padrão não traz data, então `DT_COMPT`
+  só é validado como `MM/AAAA`; escolher este layout em vez do ICVM 576 é decisão de quem envia.
 - Os limites mínimo/máximo "Validação para todos os subcampos" (itens de carteira): o trecho
   da página não traz os valores numéricos extraídos aqui.
 - A ordem decrescente de cedentes e sacados, e o corte de 10% do patrimônio líquido dos cedentes.

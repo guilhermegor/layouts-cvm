@@ -446,8 +446,8 @@ def test_export_to_file_writes_windows_1252(tmp_path: Path) -> None:
     assert path_out.read_bytes() == _xml(_doc()).encode("windows-1252")
 
 
-def test_totals_that_match_the_spec_sums_are_accepted() -> None:
-    """Item 16: a non-zero net equity with matching total."""
+def test_net_equity_is_truncated_to_two_places() -> None:
+    """Item 16: a non-zero net equity is truncated, never rounded, to two places."""
     assert _doc(_net_equity).lista_inform.patrliq.vl_patrim_liq == Decimal("100.99")
 
 
@@ -491,4 +491,59 @@ def test_sacado_with_placeholder_document_is_accepted() -> None:
 def test_invalid_input_is_rejected(mutate: Callable[[dict[str, Any]], None]) -> None:
     """Each rule of the page (or tag outside it) makes validation fail."""
     with pytest.raises(ValidationError):
+        _doc(mutate)
+
+
+_MERC = (*_AA, "merc_derivativo")
+
+
+def _item_1_with_margin(data: dict[str, Any]) -> None:
+    """Item 1 as the page lists it: disponibilidades + margin deposits as separate terms."""
+    _put((*_AA, "vl_disponib"), "1.00", data)
+    _put((*_MERC, "vl_depos_margem"), "2.00", data)
+    _put((*_AA, "vl_som_aplic_ativo"), "3.00", data)
+
+
+def test_item_1_counts_the_margin_deposit_as_its_own_term() -> None:
+    """The page's item 1 adds 'Valor de Depositos de Margem' beside the derivatives sum."""
+    assert _doc(_item_1_with_margin).lista_inform.aplic_ativo.vl_som_aplic_ativo == Decimal("3")
+
+
+def _item_1_total_omits_margin(data: dict[str, Any]) -> None:
+    """Item 1 with a margin deposit but a total that leaves it out."""
+    _item_1_with_margin(data)
+    _put((*_AA, "vl_som_aplic_ativo"), "1.00", data)
+
+
+def test_item_1_without_the_margin_term_is_rejected() -> None:
+    """Dropping the margin deposit from the item 1 total no longer balances."""
+    with pytest.raises(ValidationError, match="item 1"):
+        _doc(_item_1_total_omits_margin)
+
+
+def test_negative_monthly_return_is_accepted() -> None:
+    """A loss month reports a negative RENT_MES; the page sets no lower bound."""
+    mutate = _set(*_OUT, "rent_mes", "pr_apurada_senior", value="-1.50")
+    assert _doc(mutate).lista_inform.outras_inform.rent_mes.pr_apurada_senior == Decimal("-1.5")
+
+
+def _default_without_credits(data: dict[str, Any]) -> None:
+    """Report a default total no existing credit backs."""
+    block = data["lista_inform"]["compmt_dicred_aquis"]
+    block.update(vl_som_inad_venc="1.00", vl_inad_venc_30="1.00")
+
+
+@pytest.mark.parametrize(
+    ("mutate", "match"),
+    [
+        (_default_without_credits, "VL_SOM_INAD_VENC vs portfolio"),
+        (_set(*_OUT, "num_cotistas", "qt_total_cotistas", value=1), "item 30"),
+        (_set(*_OUT, "num_cotistas", "qt_cotistas_subord", value=[1]), "item 31"),
+    ],
+)
+def test_invalid_input_names_the_rule_that_fired(
+    mutate: Callable[[dict[str, Any]], None], match: str
+) -> None:
+    """The error message names the page rule, not just any validation failure."""
+    with pytest.raises(ValidationError, match=match):
         _doc(mutate)
