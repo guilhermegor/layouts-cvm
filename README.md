@@ -52,6 +52,7 @@ Build, validate and serialise the files a fund sends to CVM, in CVM's own file l
 | Lâmina de Fundos V2 | `LaminaV2` | `LaminaV2Document` |
 | Perfil Mensal V4 | `PerfilMensal` | `PerfilMensalDocument` |
 | Perfil Mensal (original) | `PerfilMensalOriginal` | `PerfilMensalOriginalDocument` |
+| Perfil Mensal ICVM 739 | `PerfilMensal739` | `PerfilMensal739Document` |
 | Perfil Mensal V3 | `PerfilMensalV3` | `PerfilMensalV3Document` |
 
 <!-- slug: documentation -->

@@ -310,6 +310,12 @@ from layouts_cvm._internal.config.schemas.perfil_mensal import (
     VarPercentPlField,
     VarPercValCota,
 )
+from layouts_cvm._internal.config.schemas.perfil_mensal_739 import (
+    PerfilMensal739Document,
+    PerfilMensal739Header,
+    PerfilMensal739Row,
+    PerfilMensal739VarOutros,
+)
 from layouts_cvm._internal.config.schemas.perfil_mensal_original import (
     PerfilMensalOriginalClientCount,
     PerfilMensalOriginalDocument,
@@ -522,6 +528,10 @@ __all__ = [
     "PerfilMensalOriginalRow",
     "PerfilMensalOriginalTradingDays",
     "PerfilMensalRow",
+    "PerfilMensal739Document",
+    "PerfilMensal739Header",
+    "PerfilMensal739Row",
+    "PerfilMensal739VarOutros",
     "PerfilMensalV3Document",
     "PerfilMensalV3Header",
     "PerfilMensalV3PatrimonyDistribution",
