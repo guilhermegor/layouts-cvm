@@ -214,6 +214,11 @@ from layouts_cvm._internal.config.schemas.informe_quadrimestral import (
     SignedAmountField,
     YesNo,
 )
+from layouts_cvm._internal.config.schemas.informe_semestral_inr import (
+    InformeSemestralInrDocument,
+    InformeSemestralInrHeader,
+    InformeSemestralInrParticipante,
+)
 from layouts_cvm._internal.config.schemas.informe_trimestral_v1 import (
     InformeTrimestralV1Document,
     InformeTrimestralV1Header,
@@ -441,6 +446,9 @@ __all__ = [
     "InformeQuadrimestralDocument",
     "InformeQuadrimestralHeader",
     "InformeQuadrimestralInform",
+    "InformeSemestralInrDocument",
+    "InformeSemestralInrHeader",
+    "InformeSemestralInrParticipante",
     "InformeTrimestralV1Document",
     "InformeTrimestralV1Header",
     "InformeTrimestralV1Inform",
