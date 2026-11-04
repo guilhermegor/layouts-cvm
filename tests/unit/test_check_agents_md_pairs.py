@@ -85,7 +85,7 @@ def test_non_ascii_path_is_listed_unquoted(tmp_path: Path) -> None:
     """``git ls-files -z`` returns accented directories verbatim, not C-quoted."""
     path_dir = tmp_path / "relações"
     path_dir.mkdir()
-    (path_dir / "CLAUDE.md").write_text(_STUB)
+    (path_dir / "CLAUDE.md").write_text(_STUB, encoding="utf-8")
     subprocess.run(["git", "-C", str(tmp_path), "init", "-q"], check=True)  # noqa: S603, S607
     subprocess.run(["git", "-C", str(tmp_path), "add", "-A"], check=True)  # noqa: S603, S607
 
@@ -98,6 +98,7 @@ def test_home_relative_import_above_marker_resolves(
     """``@~/x.md`` resolves against the home directory, not the file's directory."""
     (tmp_path / "x.md").write_text("x")
     monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.setenv("USERPROFILE", str(tmp_path))
     (path_sub / "CLAUDE.md").write_text("@AGENTS.md\n@~/x.md\n" + _STUB.split("\n", 1)[1])
 
     assert _check(path_sub.parent) == []

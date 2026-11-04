@@ -43,14 +43,15 @@ def list_tracked_claude_files(path_root: Path) -> list[Path]:
     cls_proc = subprocess.run(  # noqa: S603
         ["git", "-C", str(path_root), "ls-files", "-z", "--", "CLAUDE.md", "**/CLAUDE.md"],  # noqa: S607
         capture_output=True,
-        text=True,
         check=False,
     )
     if cls_proc.returncode != 0:
-        raise RuntimeError(f"git ls-files failed: {cls_proc.stderr.strip()}")
+        raise RuntimeError(
+            f"git ls-files failed: {cls_proc.stderr.decode('utf-8', 'replace').strip()}"
+        )
     return sorted(
         Path(str_line)
-        for str_line in cls_proc.stdout.split("\0")
+        for str_line in cls_proc.stdout.decode("utf-8").split("\0")
         if str_line and Path(str_line).parts[0] != ".claude"
     )
 
@@ -80,9 +81,13 @@ def check_imports_above_marker(
         if not str_stripped:
             continue
         if not str_stripped.startswith("@"):
-            list_problems.append(f"{path_rel}: content above the marker: '{str_stripped}'")
+            list_problems.append(
+                f"{path_rel.as_posix()}: content above the marker: '{str_stripped}'"
+            )
         elif not (path_file.parent / Path(str_stripped[1:]).expanduser()).is_file():
-            list_problems.append(f"{path_rel}: import {str_stripped} names a missing file")
+            list_problems.append(
+                f"{path_rel.as_posix()}: import {str_stripped} names a missing file"
+            )
     return list_problems
 
 
@@ -103,21 +108,23 @@ def check_claude_file(path_root: Path, path_rel: Path) -> list[str]:
     """
     path_file = path_root / path_rel
     if not (path_file.parent / "AGENTS.md").is_file():
-        return [f"{path_rel}: no sibling AGENTS.md"]
+        return [f"{path_rel.as_posix()}: no sibling AGENTS.md"]
     try:
         list_lines = path_file.read_text(encoding="utf-8").splitlines()
     except (OSError, UnicodeDecodeError) as cls_err:
-        return [f"{path_rel}: unreadable ({cls_err})"]
+        return [f"{path_rel.as_posix()}: unreadable ({cls_err})"]
     list_problems = []
     list_nonblank = [str_line.strip() for str_line in list_lines if str_line.strip()]
     if not list_nonblank or list_nonblank[0] != STR_IMPORT_FIRST:
-        list_problems.append(f"{path_rel}: first non-blank line must be {STR_IMPORT_FIRST}")
+        list_problems.append(
+            f"{path_rel.as_posix()}: first non-blank line must be {STR_IMPORT_FIRST}"
+        )
     int_marker = next(
         (int_i for int_i, str_line in enumerate(list_lines) if str_line.startswith(STR_MARKER)),
         None,
     )
     if int_marker is None:
-        return [*list_problems, f"{path_rel}: missing the '{STR_MARKER}' marker line"]
+        return [*list_problems, f"{path_rel.as_posix()}: missing the '{STR_MARKER}' marker line"]
     return [
         *list_problems,
         *check_imports_above_marker(path_rel, path_file, list_lines[:int_marker]),
