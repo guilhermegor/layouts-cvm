@@ -53,9 +53,9 @@ def _quantize(value: DecimalInput, quantum: Decimal) -> Decimal:
     """
     try:
         as_decimal = value if isinstance(value, Decimal) else Decimal(str(value))
+        truncated = as_decimal.quantize(quantum, rounding=ROUND_DOWN)
     except (InvalidOperation, ValueError) as exc:
         raise ValueError(f"invalid decimal value: {value!r}") from exc
-    truncated = as_decimal.quantize(quantum, rounding=ROUND_DOWN)
     return truncated.copy_abs() if truncated.is_zero() else truncated
 
 

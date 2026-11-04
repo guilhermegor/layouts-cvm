@@ -42,7 +42,7 @@ from layouts_cvm._internal.config.schemas._fields import (
 )
 
 
-_DATE_BR_RE = re.compile(r"^\d{2}/\d{2}/\d{4}$")
+_DATE_BR_RE = re.compile(r"[0-9]{2}/[0-9]{2}/[0-9]{4}")
 
 TwoDecimalField = Annotated[
     Decimal, BeforeValidator(truncate_to_scale(2)), Field(decimal_places=2)

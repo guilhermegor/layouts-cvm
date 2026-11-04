@@ -215,11 +215,39 @@ def test_header_rejects_other_cod_doc() -> None:
         InformeDiarioV1Header(dt_compt="15/01/2011", dt_gerac_arq="15/01/2011", cod_doc=2)
 
 
-@pytest.mark.parametrize("str_date", ["2013-01-15", "31/02/2011", "99/99/2011", "15/01/2011\n"])
+@pytest.mark.parametrize(
+    "str_date",
+    ["2013-01-15", "31/02/2011", "99/99/2011", "15/01/2011\n", "15/01/\u0662\u0660\u0661\u0661"],
+)
 def test_header_rejects_malformed_or_impossible_date(str_date: str) -> None:
     """Reject a date that is not a real DD/MM/AAAA one, trailing newline included."""
     with pytest.raises(ValidationError):
         InformeDiarioV1Header(dt_compt=str_date, dt_gerac_arq="15/01/2011")
+
+
+@pytest.mark.parametrize("field", ["vl_total", "vl_quota", "patrim_liq", "captc_dia", "resg_dia"])
+@pytest.mark.parametrize("value", ["Infinity", "1e30"])
+def test_unrepresentable_decimal_is_a_validation_error(field: str, value: str) -> None:
+    """Surface Infinity or an oversized number as a ValidationError, not InvalidOperation."""
+    with pytest.raises(ValidationError):
+        _inform(**{field: value})
+
+
+@pytest.mark.parametrize(
+    ("tp_pessoa", "cpf_cnpj"),
+    [("XX", VALID_CNPJ), ("PF", VALID_CNPJ), ("PJ", "52998224725"), ("PJ", "11222333000182")],
+)
+def test_shareholder_rejects_bad_person_type_or_document(tp_pessoa: str, cpf_cnpj: str) -> None:
+    """Reject an unknown person type and a document that does not fit its type."""
+    with pytest.raises(ValidationError):
+        InformeDiarioV1Shareholder(tp_pessoa=tp_pessoa, cpf_cnpj_cotst=cpf_cnpj, pr_cotst="5")
+
+
+@pytest.mark.parametrize("pr_cotst", ["-0.5", "100.1"])
+def test_shareholder_rejects_participation_outside_0_to_100(pr_cotst: str) -> None:
+    """Reject a PR_COTST below 0 or above 100."""
+    with pytest.raises(ValidationError):
+        InformeDiarioV1Shareholder(tp_pessoa="PJ", cpf_cnpj_cotst=VALID_CNPJ, pr_cotst=pr_cotst)
 
 
 def test_truncated_negative_zero_is_emitted_unsigned() -> None:
