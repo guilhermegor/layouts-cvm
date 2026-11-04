@@ -1,8 +1,9 @@
 """Pydantic models for the CVM Informe Sintético XML standard — four fund-type variants.
 
-Direction-neutral schema for the four ``PadraoXMLSint*.asp`` pages under
-https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/. The variants are not versions: each fund
-type has its own page, ``COD_DOC`` and block layout, so each has its own models.
+Direction-neutral schema for the four ``PadraoXMLSint*.asp`` pages, e.g.
+https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLSintFITVM.asp
+The variants are not versions: each fund type has its own page, ``COD_DOC`` and block
+layout, so each has its own models.
 
 | Variant  | Page                     | ``COD_DOC`` | Funds                     |
 |----------|--------------------------|-------------|---------------------------|
@@ -92,8 +93,8 @@ class InformeSinteticoOutrosHeader(_Header):
     cod_doc: Literal[9] = 9
 
 
-class _Shared(_Block):
-    """The OUTRAS fields of the FITVM and FIC variants, in the page's order."""
+class FitvmOutras(_Block):
+    """OUTRAS of the FITVM variant."""
 
     nr_tot_quotst_ult_dia_mes: _Count
     vl_quota_ult_dia_mes: _QuotaValue
@@ -102,12 +103,14 @@ class _Shared(_Block):
     quota_resg_mes: _Amount
 
 
-class FitvmOutras(_Shared):
-    """OUTRAS of the FITVM variant."""
+class FicOutras(_Block):
+    """OUTRAS of the FIC-FITVM variant (its own page, so its own copy)."""
 
-
-class FicOutras(_Shared):
-    """OUTRAS of the FIC-FITVM variant."""
+    nr_tot_quotst_ult_dia_mes: _Count
+    vl_quota_ult_dia_mes: _QuotaValue
+    patrim_liq: _Amount
+    quota_emitida_mes: _Amount
+    quota_resg_mes: _Amount
 
 
 class FcceAplicacoes(_Block):

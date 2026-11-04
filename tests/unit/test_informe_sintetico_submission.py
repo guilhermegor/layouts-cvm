@@ -7,6 +7,7 @@ from the models, so a field declared out of order fails here. Every test holds o
 
 from contextlib import suppress
 from copy import deepcopy
+from decimal import Decimal
 from pathlib import Path
 from xml.etree import ElementTree as ET  # noqa: S405
 
@@ -293,7 +294,7 @@ def test_mapping_picks_the_variant_from_cod_doc(cod_doc: int) -> None:
     assert InformeSintetico().export(data) == InformeSintetico().export(model)
 
 
-@pytest.mark.parametrize("bad", [None, 6, "5", 0])
+@pytest.mark.parametrize("bad", [None, 6, "5", 0, 5.0, Decimal(5), True])
 def test_unknown_cod_doc_rejected(bad: object) -> None:
     """A mapping whose COD_DOC is not 5, 7, 8 or 9 is refused."""
     with pytest.raises(ValueError, match="cod_doc"):
@@ -332,14 +333,20 @@ def test_invalid_outras_values_rejected(field: str, bad: object) -> None:
         InformeSintetico().export(_data(7, _row(7, **{field: bad})))
 
 
+def _body_text(data: dict, index: int) -> str | None:
+    return _xml(data)[1][0][1][1][index].text
+
+
+def test_quota_value_with_exactly_twelve_places_is_kept() -> None:
+    """Twelve places are emitted unchanged."""
+    data = _data(7, _row(7, vl_quota_ult_dia_mes="1.123456789012"))
+    assert _body_text(data, 1) == "1,123456789012"
+
+
 def test_quota_value_truncates_beyond_twelve_places() -> None:
     """The quota value truncates, never rounds, beyond twelve places."""
     data = _data(7, _row(7, vl_quota_ult_dia_mes="1.9999999999999"))
     assert _body_text(data, 1) == "1,999999999999"
-
-
-def _body_text(data: dict, index: int) -> str | None:
-    return _xml(data)[1][0][1][1][index].text
 
 
 def test_negative_amount_allowed() -> None:

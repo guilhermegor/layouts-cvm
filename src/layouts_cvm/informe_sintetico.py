@@ -25,34 +25,50 @@ from layouts_cvm._internal.utils.xml_writer import (
 )
 
 
-SinteticoDocument = (
+_SinteticoDocument = (
     InformeSinteticoFcceDocument
     | InformeSinteticoFitvmDocument
     | InformeSinteticoFicDocument
     | InformeSinteticoOutrosDocument
 )
 
-_DOCUMENTS_BY_COD_DOC = {
-    5: InformeSinteticoFcceDocument,
-    7: InformeSinteticoFitvmDocument,
-    8: InformeSinteticoFicDocument,
-    9: InformeSinteticoOutrosDocument,
+_DOCUMENTS_BY_COD_DOC: dict[tuple[type, object], type] = {
+    (int, 5): InformeSinteticoFcceDocument,
+    (int, 7): InformeSinteticoFitvmDocument,
+    (int, 8): InformeSinteticoFicDocument,
+    (int, 9): InformeSinteticoOutrosDocument,
 }
 
 
 @type_checker
-def _resolve_document(doc: SinteticoDocument | Mapping[str, object]) -> SinteticoDocument:
+def _read_cod_doc(doc: Mapping[str, object]) -> object:
+    """Return ``doc["header"]["cod_doc"]``, or ``None`` when the header is missing."""
+    header = doc.get("header")
+    return header.get("cod_doc") if isinstance(header, Mapping) else None
+
+
+@type_checker
+def _pick_document_class(cod_doc: object) -> type:
+    """Return the document class for ``cod_doc``; numeric look-alikes of 5/7/8/9 are refused."""
+    cls_document = _DOCUMENTS_BY_COD_DOC.get((type(cod_doc), cod_doc))
+    if cls_document is None:
+        raise ValueError(f"header.cod_doc must be one of 5, 7, 8 or 9, got {cod_doc!r}")
+    return cls_document
+
+
+@type_checker
+def _resolve_document(doc: _SinteticoDocument | Mapping[str, object]) -> _SinteticoDocument:
     """Return ``doc`` as a validated variant document, picking the variant from ``COD_DOC``.
 
     Parameters
     ----------
-    doc : SinteticoDocument or Mapping
+    doc : _SinteticoDocument or Mapping
             A built model (passes through), or plain data whose ``header.cod_doc`` is 5, 7, 8
             or 9.
 
     Returns
     -------
-    SinteticoDocument
+    _SinteticoDocument
             The validated document.
 
     Raises
@@ -62,16 +78,10 @@ def _resolve_document(doc: SinteticoDocument | Mapping[str, object]) -> Sintetic
     """
     if not isinstance(doc, Mapping):
         return doc
-    header = doc.get("header")
-    cod_doc = header.get("cod_doc") if isinstance(header, Mapping) else None
-    if cod_doc not in _DOCUMENTS_BY_COD_DOC:
-        raise ValueError(
-            f"header.cod_doc must be one of {sorted(_DOCUMENTS_BY_COD_DOC)}, got {cod_doc!r}"
-        )
-    return coerce_document(_DOCUMENTS_BY_COD_DOC[cod_doc], doc)
+    return coerce_document(_pick_document_class(_read_cod_doc(doc)), doc)
 
 
-class InformeSintetico(SubmissionWriter[SinteticoDocument]):
+class InformeSintetico(SubmissionWriter[_SinteticoDocument]):
     """Serialize a validated Informe Sintético document (any of the four variants) to XML.
 
     Methods
@@ -81,13 +91,13 @@ class InformeSintetico(SubmissionWriter[SinteticoDocument]):
     """
 
     def export(
-        self, doc: SinteticoDocument | Mapping[str, object], output_path: str | None = None
+        self, doc: _SinteticoDocument | Mapping[str, object], output_path: str | None = None
     ) -> str | None:
         """Serialize a validated Informe Sintético document to CVM-compliant XML.
 
         Parameters
         ----------
-        doc : SinteticoDocument or Mapping
+        doc : _SinteticoDocument or Mapping
                 A variant document model, or plain data whose ``header.cod_doc`` (5 FCCE,
                 7 FITVM, 8 FIC-FITVM, 9 Outros) selects the variant to validate it into.
         output_path : Optional[str]

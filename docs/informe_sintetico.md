@@ -57,8 +57,11 @@ Cada campo do schema é a tag da página em minúsculas, declarado na ordem do X
 - A página não fixa a escala de `VL_QUOTA_ULT_DIA_MES` ("decimal"): adotadas 12 casas, como no
   `VL_QUOTA` do Informe Diário.
 - A página não limita a largura dos inteiros: aceitos até 999.999.999.999 (módulo).
-- Valores negativos não são mencionados; aceitos em campos de valor (por exemplo, patrimônio
-  líquido de fundo descoberto), recusados em `NR_TOT_QUOTST_ULT_DIA_MES`.
+- Valores negativos não são mencionados; como a página não impõe sinal, são aceitos em todos
+  os campos de valor inteiros (`PATRIM_LIQ`, `QUOTA_EMITIDA_MES`, `QUOTA_RESG_MES`, as posições
+  de `APLICACOES` e `MERC_A_TERMO`, prêmios e margem), recusados só em `NR_TOT_QUOTST_ULT_DIA_MES`.
+- `VL_QUOTA_ULT_DIA_MES` aceita até 18 dígitos inteiros e 12 decimais, mais largo que os
+  inteiros (12 dígitos), porque a página não fixa a largura de nenhum dos dois.
 - Não há limite de fundos por arquivo na página; nenhum é imposto. CNPJ repetido no mesmo
   arquivo não é recusado.
 - Não é verificado que `DT_COMPT` é anterior a `DT_GERAC_ARQ`, nem o prazo de envio.
