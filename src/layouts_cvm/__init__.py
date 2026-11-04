@@ -16,6 +16,7 @@ from layouts_cvm.cadastro_ativos import CadastroAtivos
 from layouts_cvm.cda import Cda
 from layouts_cvm.cda_v2 import CdaV2
 from layouts_cvm.cda_v3 import CdaV3
+from layouts_cvm.cofi_4016 import Cofi4016
 from layouts_cvm.extrato import Extrato
 from layouts_cvm.extrato_v2 import ExtratoV2
 from layouts_cvm.inf_fundo_157 import InfFundo157
@@ -54,6 +55,7 @@ __all__ = [
     "Cda",
     "CdaV3",
     "CdaV2",
+    "Cofi4016",
     "Extrato",
     "ExtratoV2",
     "InfFundo157",

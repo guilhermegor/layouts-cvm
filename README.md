@@ -41,7 +41,7 @@ Build, validate and serialise the files a fund sends to CVM, in CVM's own file l
 ## Features
 
 - Pydantic models for every CVM XML layout listed below, validated before anything is serialised.
-- One writer per layout (`export(doc, output_path=None)`), producing windows-1252 XML.
+- One writer per layout (`export(doc, output_path=None)`), producing windows-1252 XML (`Cofi4016` is the exception: ASCII fixed-width `.cvm` records).
 - Byte-identical to the original `filings-cvm` writers, pinned by a golden-file test.
 - Runtime dependencies: `pydantic` and `beartype`. No network.
 
@@ -51,6 +51,7 @@ Build, validate and serialise the files a fund sends to CVM, in CVM's own file l
 | CDA V4 | `Cda` | `CdaDocument` | [PadraoXMLCDANetV4](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLCDANetV4.aspx) |
 | CDA V3 | `CdaV3` | `CdaV3Document` | [PadraoXMLCDANetV3](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLCDANetV3.aspx) |
 | CDA V2 | `CdaV2` | `CdaV2Document` | [PadraoXMLCDANet](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLCDANet.aspx) |
+| COFI 4016 (Balanço, largura fixa) | `Cofi4016` | `Cofi4016Document` | [PadraoCOFI](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoCOFI.aspx) |
 | Extrato das Informações sobre o Fundo V3 | `Extrato` | `ExtratoDocument` | [PadraoXMLInfExtratoV3](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfExtratoV3.asp) |
 | Extrato das Informações sobre o Fundo V2 | `ExtratoV2` | `ExtratoV2Document` | [PadraoXMLInfExtratoV2](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfExtratoV2.asp) |
 | Informe de Fundo 157 | `InfFundo157` | `InfFundo157Document` | [PadraoXMLInf157](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInf157.asp) |

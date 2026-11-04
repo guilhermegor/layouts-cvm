@@ -78,6 +78,14 @@ from layouts_cvm._internal.config.schemas.cda_v3 import (
     CdaV3Inform,
     CdaV3InvExt,
 )
+from layouts_cvm._internal.config.schemas.cofi_4016 import (
+    AccountField,
+    Cofi4016Account,
+    Cofi4016Block,
+    Cofi4016Document,
+    Cofi4016Fund,
+    SignedValueField,
+)
 from layouts_cvm._internal.config.schemas.extrato import (
     AnbimaCode,
     AtivExter,
@@ -424,6 +432,7 @@ from layouts_cvm._internal.config.schemas.perfil_mensal_v3 import (
 
 __all__ = [
     "ASSET_TYPE_CODES",
+    "AccountField",
     "Alienacao",
     "Amort",
     "Amortizacao",
@@ -494,6 +503,10 @@ __all__ = [
     "ClasseCotistas",
     "ClientCount",
     "CnpjField",
+    "Cofi4016Account",
+    "Cofi4016Block",
+    "Cofi4016Document",
+    "Cofi4016Fund",
     "CompetenceField",
     "CompmtDicred",
     "CotasMovimento",
@@ -743,6 +756,7 @@ __all__ = [
     "SignedMoney",
     "SignedMoneyField",
     "SignedPercentField",
+    "SignedValueField",
     "SignificantShareholder",
     "SubclassCodeField",
     "Taxa",
