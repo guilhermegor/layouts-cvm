@@ -237,7 +237,9 @@ def published_pages(
     list_pages = []
     for path_md in sorted(_walk_markdown(path_docs)[0]):
         str_rel = path_md.relative_to(path_docs).as_posix()
-        if str_rel == "CLAUDE.md" or any(spec.match_file(str_rel) for spec in tuple_specs):
+        if str_rel in ("CLAUDE.md", "AGENTS.md") or any(
+            spec.match_file(str_rel) for spec in tuple_specs
+        ):
             continue
         list_pages.append(str_rel)
     return list_pages
