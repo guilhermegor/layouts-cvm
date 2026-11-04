@@ -21,7 +21,6 @@ from layouts_cvm._internal.utils.xml_fields import require
 VALUE_SCALE = 2
 VALUE_DIGITS = 18
 ACCOUNT_DIGITS = 10
-DOC_CODE = "4010"
 COMPETENCE_LENGTH = 6
 MAX_MONTH = 12
 

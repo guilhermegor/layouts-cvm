@@ -9,6 +9,7 @@ from pydantic import ValidationError
 import pytest
 
 from layouts_cvm import Cofi4010
+from layouts_cvm._internal.utils.cofi_4010_records import MAX_RECORDS, build_footer
 
 
 CNPJ = "11222333000181"
@@ -53,6 +54,41 @@ def test_export_every_record_has_71_positions() -> None:
 def test_export_two_funds_share_one_footer() -> None:
     """Two funds share one footer holding the total count."""
     assert _lines([_fund(), _fund(OTHER_CNPJ)])[-1].startswith("@1000005")
+
+
+def test_export_separates_records_with_crlf() -> None:
+    """Every record, the last included, ends with CRLF."""
+    assert Cofi4010().export({"fundos": [_fund()]}).count("\r\n") == 3
+
+
+def test_export_truncates_a_float_never_rounds() -> None:
+    """A float 0.019 becomes 1 centavo (truncated, not 2)."""
+    dict_account = {**ACCOUNT, "total": 0.019}
+    assert _lines([_fund(contas=[dict_account])])[1][14:33] == "0" * 17 + "1 "
+
+
+def test_export_negative_value_truncated_to_zero_has_blank_sign() -> None:
+    """A -0.001 truncates to zero and carries no minus sign."""
+    dict_account = {**ACCOUNT, "total": "-0.001"}
+    assert _lines([_fund(contas=[dict_account])])[1][14:33] == "0" * 18 + " "
+
+
+def test_export_unmasks_a_masked_cnpj() -> None:
+    """A masked CNPJ is written as its 14 bare characters."""
+    assert _lines([_fund("11.222.333/0001-81")])[0][7:21] == CNPJ
+
+
+def test_export_rejects_a_value_over_18_digits() -> None:
+    """A value needing more than 18 digits is rejected."""
+    dict_account = {**ACCOUNT, "total": "1" + "0" * 16 + ".00"}
+    with pytest.raises(ValidationError):
+        Cofi4010().export({"fundos": [_fund(contas=[dict_account])]})
+
+
+def test_footer_rejects_a_count_over_six_digits() -> None:
+    """A record count past 999999 would spill into the filler, so it is rejected."""
+    with pytest.raises(ValueError, match="at most"):
+        build_footer(MAX_RECORDS + 1)
 
 
 def test_export_writes_ascii_file_to_disk(tmp_path: Path) -> None:

@@ -14,11 +14,13 @@ from layouts_cvm._internal.config.schemas.cofi_4010 import (
     Cofi4010Fund,
 )
 from layouts_cvm._internal.utils.typing import type_checker
+from layouts_cvm._internal.utils.xml_fields import require
 
 
 ENCODING = "ascii"
 RECORD_LENGTH = 71
 LINE_END = "\r\n"
+MAX_RECORDS = 999_999
 _HEADER_ID = "#C1"
 _FOOTER_ID = "@1"
 _FILLER_ACCOUNT = 4
@@ -99,6 +101,10 @@ def build_footer(int_records: int) -> str:
     str
         A 71-character footer record.
     """
+    require(
+        int_records <= MAX_RECORDS,
+        f"a COFI 4010 file holds at most {MAX_RECORDS} records: {int_records}",
+    )
     return f"{_FOOTER_ID}{int_records:06d}".ljust(RECORD_LENGTH)
 
 

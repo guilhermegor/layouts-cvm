@@ -66,7 +66,6 @@ from layouts_cvm._internal.config.schemas.cda_v3 import (
 from layouts_cvm._internal.config.schemas.cofi_4010 import (
     ACCOUNT_DIGITS,
     COMPETENCE_LENGTH,
-    DOC_CODE,
     MAX_MONTH,
     VALUE_DIGITS,
     VALUE_SCALE,
@@ -400,7 +399,6 @@ __all__ = [
     "CompetenceField",
     "ACCOUNT_DIGITS",
     "COMPETENCE_LENGTH",
-    "DOC_CODE",
     "MAX_MONTH",
     "VALUE_DIGITS",
     "VALUE_SCALE",
