@@ -161,7 +161,7 @@ def default_branch() -> str:
     """
     str_ref = _git(["symbolic-ref", "--quiet", "--short", "refs/remotes/origin/HEAD"])
     if str_ref:
-        return str_ref.rsplit("/", 1)[-1]
+        return str_ref.removeprefix("origin/")
     for str_candidate in ("main", "master"):
         if _git(["rev-parse", "--verify", "--quiet", str_candidate]):
             return str_candidate
@@ -190,44 +190,73 @@ def base_candidates() -> list:
     """Return the refs a base may come from, best first.
 
     A CI checkout of a pull request has neither ``origin/HEAD`` nor a local ``main``, only
-    ``origin/main``, so the remote-tracking ref is tried before the local branch (which is
-    also never staler than the remote one).
+    ``origin/main``. The remote-tracking ref is tried first because it reflects what the PR
+    will actually merge into; a local branch can be behind it or carry unpushed commits.
+
+    When ``GITHUB_BASE_REF`` is set the PR's base is known, so ONLY that branch is a
+    candidate: falling back to another default would diff against the wrong branch and
+    pass or fail for the wrong reason.
 
     Returns
     -------
     list of str
-        ``origin/<name>`` then ``<name>`` for the PR's base branch (``GITHUB_BASE_REF``), the
-        detected default branch, then ``main`` and ``master``; duplicates dropped.
+        ``origin/<name>`` then ``<name>``, for ``GITHUB_BASE_REF`` alone when set, else for
+        the detected default branch, ``main`` and ``master``; duplicates dropped.
     """
-    list_names = [os.environ.get("GITHUB_BASE_REF", ""), default_branch(), "main", "master"]
+    str_base_ref = os.environ.get("GITHUB_BASE_REF", "")
+    list_names = [str_base_ref] if str_base_ref else [default_branch(), "main", "master"]
     list_refs = [
-        str_ref
-        for str_name in list_names
-        if str_name
-        for str_ref in (f"origin/{str_name}", str_name)
+        str_ref for str_name in list_names for str_ref in (f"origin/{str_name}", str_name)
     ]
     return list(dict.fromkeys(list_refs))
 
 
-def resolve_base() -> str:
-    """Return the merge-base of HEAD and the default branch, counting a merge in progress.
+def resolve_base(list_refs: list) -> str:
+    """Return the merge-base of HEAD and the first resolvable ref, counting a merge in progress.
+
+    Parameters
+    ----------
+    list_refs : list of str
+        Candidate refs, best first (see ``base_candidates``).
 
     Returns
     -------
     str
         The base commit; empty when no candidate ref resolves.
     """
-    for str_ref in base_candidates():
+    for str_ref in list_refs:
         str_base = _git(["merge-base", str_ref, "HEAD", *merge_heads()])
         if str_base:
             return str_base
     return ""
 
 
-def report_unresolved_base() -> int:
-    """Fail loudly: no base resolved, so nothing could be checked.
+def is_unborn_branch() -> bool:
+    """Return whether HEAD names a branch that has no commit yet.
+
+    Distinguishes a genuinely empty repository (nothing to diff, so nothing to check) from
+    "git could not run here" (not a repository, git missing, ``safe.directory`` refusal),
+    where ``symbolic-ref`` fails too.
+
+    Returns
+    -------
+    bool
+        ``True`` only when ``HEAD`` is a symbolic ref that does not resolve.
+    """
+    return bool(_git(["symbolic-ref", "--quiet", "HEAD"])) and not _git(
+        ["rev-parse", "--verify", "--quiet", "HEAD"]
+    )
+
+
+def fail_closed(str_cause: str) -> int:
+    """Report that the gate could not look, and fail.
 
     "Could not look" must never print the same verdict as "nothing to check".
+
+    Parameters
+    ----------
+    str_cause : str
+        What could not be resolved, e.g. the refs that were tried.
 
     Returns
     -------
@@ -235,9 +264,8 @@ def report_unresolved_base() -> int:
         Always 1.
     """
     print(
-        "❌ work-ledger check could not resolve a base branch "
-        f"(tried {', '.join(base_candidates())}). In CI, check out with 'fetch-depth: 0' so "
-        "origin/<default> and a common ancestor exist.",
+        f"❌ work-ledger check {str_cause}. In CI, check out with 'fetch-depth: 0' so "
+        "the base branch and a common ancestor exist.",
         file=sys.stderr,
     )
     return 1
@@ -334,14 +362,15 @@ def main() -> int:
         print("bin/pr_gate.py absent — skipping the work-ledger check.")
         return 0
 
-    str_base = resolve_base()
-    str_head = _git(["rev-parse", "HEAD"])
-    if not str_head or str_base == str_head:
-        return 0
+    str_head = _git(["rev-parse", "--verify", "--quiet", "HEAD"])
+    if not str_head:
+        return 0 if is_unborn_branch() else fail_closed("could not resolve HEAD")
+    list_refs = base_candidates()
+    str_base = resolve_base(list_refs)
     if not str_base:
-        return report_unresolved_base()
+        return fail_closed(f"could not resolve a base branch (tried {', '.join(list_refs)})")
 
-    list_paths = changed_paths(str_base)
+    list_paths = [] if str_base == str_head else changed_paths(str_base)
     if not list_paths or not needs_ledger(list_paths, cls_gate):
         return 0
 
