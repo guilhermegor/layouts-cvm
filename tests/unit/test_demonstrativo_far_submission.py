@@ -173,6 +173,47 @@ def test_negative_decimal_is_rejected(bad: str) -> None:
         DemonstrativoFar().export(_doc(_fund(vl_quota_ult_dia_mes=bad)))
 
 
+@pytest.mark.parametrize("zero", ["-0", "-0.00000000001"])
+def test_negative_zero_is_written_as_plain_zero(zero: str) -> None:
+    """A value truncating to negative zero serialises without a minus sign."""
+    xml = DemonstrativoFar().export(_doc(_fund(nr_quota_circul_ult_dia_mes=zero)))
+    assert "<NR_QUOTA_CIRCUL_ULT_DIA_MES>0,0000000000<" in xml
+
+
+@pytest.mark.parametrize("bad", ["NaN", "Infinity", "", True])
+def test_sentinel_decimals_are_validation_errors(bad: object) -> None:
+    """Non-numeric sentinels never reach the XML or raise decimal.InvalidOperation."""
+    with pytest.raises(ValidationError):
+        DemonstrativoFar().export(_doc(_fund(nr_quota_circul_ult_dia_mes=bad)))
+
+
+@pytest.mark.parametrize(
+    ("field", "ok"),
+    [("nr_quota_circul_ult_dia_mes", "9" * 18), ("nr_total_quotst_ult_dia_mes", 999_999_999_999)],
+)
+def test_value_at_the_limit_is_accepted(field: str, ok: object) -> None:
+    """The documented maximum passes."""
+    assert DemonstrativoFar().export(_doc(_fund(**{field: ok})))
+
+
+@pytest.mark.parametrize(
+    ("field", "over"),
+    [
+        ("nr_quota_circul_ult_dia_mes", "1" + "0" * 18),
+        ("nr_total_quotst_ult_dia_mes", 1_000_000_000_000),
+    ],
+)
+def test_value_over_the_limit_is_rejected(field: str, over: object) -> None:
+    """One more than the maximum is a ValidationError."""
+    with pytest.raises(ValidationError):
+        DemonstrativoFar().export(_doc(_fund(**{field: over})))
+
+
+def test_alphanumeric_cnpj_is_accepted() -> None:
+    """The 2026 alphanumeric CNPJ passes the fund CNPJ check."""
+    assert DemonstrativoFar().export(_doc(_fund(cnpj_fundo="12ABC34501DE35")))
+
+
 @pytest.mark.parametrize("bad", ["1" + "0" * 30, "1" + "0" * 19])
 def test_oversized_decimal_is_a_validation_error(bad: str) -> None:
     """Too many integer digits raises ValidationError, not decimal.InvalidOperation."""

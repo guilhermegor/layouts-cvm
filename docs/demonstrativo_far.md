@@ -36,14 +36,19 @@ Cada campo é a tag da página em minúsculas, na ordem do XML.
   vazias (omitidas). Um código não se repete no mesmo fundo.
 - `cnpj_adm` e `cnpj_fundo`: CNPJ com dígitos verificadores, gravado sem máscara.
 
+## Limites aplicados (escolha do projeto, a página não os fixa)
+
+- Até 18 dígitos inteiros nos decimais e 999.999.999.999 nos inteiros.
+- Valores negativos são recusados em todos os campos numéricos.
+
 ## Não são verificados
 
 - Que **todos** os tipos da Tabela A apareçam em cada fundo (a página diz que devem ser
   utilizados); só se recusa código fora da tabela e repetido.
 - Que `dt_distr` caia no mês da competência.
 - Que os fundos pertençam ao administrador `cnpj_adm`.
-- Larguras máximas dos números (a página não as fixa): aceitos até 18 dígitos inteiros nos
-  decimais e 999.999.999.999 nos inteiros; limite de fundos por arquivo.
+- Que `dt_gerac_arq` não seja anterior à competência.
+- Limite de fundos por arquivo.
 - Nenhum validador da CVM foi executado.
 
 ## Exemplo
