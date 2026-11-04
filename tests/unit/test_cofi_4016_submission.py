@@ -93,6 +93,8 @@ def test_export_writes_file(tmp_path: Path) -> None:
     [
         {"dt_compt": "13/2026"},
         {"dt_compt": "3/2026"},
+        {"fundos": [{"cnpj_fundo": CNPJ, "contas": [{"conta": "٠٠١٠٠٠٠٠٠٧"}]}]},
+        {"fundos": [{"cnpj_fundo": CNPJ, "contas": [{"conta": "0010000007", "total": "1" * 17}]}]},
         {"fundos": []},
         {"fundos": [{"cnpj_fundo": "11111111111111", "contas": [{"conta": "0010000007"}]}]},
         {"fundos": [{"cnpj_fundo": CNPJ, "contas": [{"conta": "10000007"}]}]},
@@ -139,3 +141,13 @@ def test_pad_rejects_overflow() -> None:
 
     with pytest.raises(ValueError, match="at most"):
         _pad("x" * 72)
+
+
+def test_export_accepts_sixteen_integer_digits() -> None:
+    """The widest value that fits 18 digits of cents is accepted."""
+    str_line = _lines(
+        _doc(
+            [{"cnpj_fundo": CNPJ, "contas": [{"conta": "0010000007", "total": "9" * 16 + ".99"}]}]
+        )
+    )[1]
+    assert str_line[14:33] == "9" * 18 + "+"

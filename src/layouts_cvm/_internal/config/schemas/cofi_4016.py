@@ -34,7 +34,7 @@ from layouts_cvm._internal.utils.xml_fields import (
 _VALUE_SCALE = 2
 _VALUE_DIGITS = 18
 
-AccountField = Annotated[str, StringConstraints(pattern=r"^\d{10}$")]
+AccountField = Annotated[str, StringConstraints(pattern=r"^[0-9]{10}$")]
 CnpjField = Annotated[str, AfterValidator(check_cnpj_shape), AfterValidator(validated_cnpj)]
 CompetenceField = Annotated[str, AfterValidator(check_month_year)]
 SignedValueField = Annotated[
