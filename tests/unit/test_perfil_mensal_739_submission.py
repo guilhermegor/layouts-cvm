@@ -6,31 +6,33 @@ Pin the tag order and decimal scales to PadraoXMLPerfil739.asp and cover the 739
 
 from pathlib import Path
 import re
+from types import ModuleType
 
 from pydantic import ValidationError
 import pytest
 
 from layouts_cvm import PerfilMensal739
-from layouts_cvm._internal.config.schemas.perfil_mensal import (
-    ClientCount,
-    NominalRiskBlock,
-    NominalRiskFactor,
-    OtcOperation,
-    PerformanceFeeDetails,
-    PrimitiveRiskFactor,
-    PrivateCreditIssuer,
-    VarPercValCota,
+from layouts_cvm._internal.config.schemas import (
+    perfil_mensal as v4,
+    perfil_mensal_739 as m739,
+    perfil_mensal_v3 as v3,
 )
 from layouts_cvm._internal.config.schemas.perfil_mensal_739 import (
+    PerfilMensal739ClientCount,
     PerfilMensal739Document,
     PerfilMensal739Header,
+    PerfilMensal739NominalRiskBlock,
+    PerfilMensal739NominalRiskFactor,
+    PerfilMensal739OtcOperation,
+    PerfilMensal739PatrimonyDistribution,
+    PerfilMensal739PerformanceFeeDetails,
+    PerfilMensal739PrimitiveRiskFactor,
+    PerfilMensal739PrivateCreditIssuer,
     PerfilMensal739Row,
     PerfilMensal739VarOutros,
+    PerfilMensal739VarPercValCota,
 )
-from layouts_cvm._internal.config.schemas.perfil_mensal_v3 import (
-    PerfilMensalV3Document,
-    PerfilMensalV3PatrimonyDistribution,
-)
+from layouts_cvm._internal.config.schemas.perfil_mensal_v3 import PerfilMensalV3Document
 
 
 VALID_CNPJ = "11222333000181"
@@ -125,11 +127,11 @@ PAGE_TAGS = [
     "DATA_COTA_FUNDO",
     "VAL_COTA_FUNDO",
 ]
-PATRIM_FIELDS = list(PerfilMensalV3PatrimonyDistribution.model_fields)
+PATRIM_FIELDS = list(PerfilMensal739PatrimonyDistribution.model_fields)
 
 
-def _clients() -> ClientCount:
-    return ClientCount(**dict.fromkeys(ClientCount.model_fields, 1))
+def _clients() -> PerfilMensal739ClientCount:
+    return PerfilMensal739ClientCount(**dict.fromkeys(PerfilMensal739ClientCount.model_fields, 1))
 
 
 def _patrimony(**overrides: object) -> dict[str, object]:
@@ -140,7 +142,7 @@ def _row(**overrides: object) -> PerfilMensal739Row:
     fields: dict[str, object] = {
         "cnpj_fdo": VALID_CNPJ,
         "nr_client": _clients(),
-        "distr_patrim": PerfilMensalV3PatrimonyDistribution(**_patrimony()),
+        "distr_patrim": PerfilMensal739PatrimonyDistribution(**_patrimony()),
         "total_recurs_exter": "1.999",
         "total_recurs_br": "2",
         "tot_ativos_p_relac": "3.99",
@@ -158,10 +160,12 @@ def _full_row() -> PerfilMensal739Row:
         mod_var_utiliz="1",
         praz_med_cart_tit="2.34567",
         res_delib="c",
-        variacao_perc_val_cota=VarPercValCota(
+        variacao_perc_val_cota=PerfilMensal739VarPercValCota(
             val_percent="1.239",
             lista_fator_primit_risco=[
-                PrimitiveRiskFactor(nome_fator_primit_risco="IBOVESPA", cen_util="s")
+                PerfilMensal739PrimitiveRiskFactor(
+                    nome_fator_primit_risco="IBOVESPA", cen_util="s"
+                )
             ],
         ),
         var_diar_perc_cota_fdo_pior_cen_estress="1.239",
@@ -171,16 +175,16 @@ def _full_row() -> PerfilMensal739Row:
         variacao_diar_perc_patrim_fdo_var_n_outros=PerfilMensal739VarOutros(
             fator_risco_outros="x", val_percent_outros="1.239"
         ),
-        valor_noc_tot_contrat_deriv_mant_fdo=NominalRiskBlock(
+        valor_noc_tot_contrat_deriv_mant_fdo=PerfilMensal739NominalRiskBlock(
             val_colateral="1.239",
             lista_fator_risco_noc=[
-                NominalRiskFactor(
+                PerfilMensal739NominalRiskFactor(
                     nome_fator_noc="DOLAR", val_fator_risco_noc_long=1, val_fator_risco_noc_short=2
                 )
             ],
         ),
         lista_oper_curs_merc_balcao=[
-            OtcOperation(
+            PerfilMensal739OtcOperation(
                 tp_pessoa="PJ",
                 nr_pf_pj_comitente=VALID_CNPJ,
                 parte_relacionada="S",
@@ -188,7 +192,7 @@ def _full_row() -> PerfilMensal739Row:
             )
         ],
         lista_emissores_tit_cred_priv=[
-            PrivateCreditIssuer(
+            PerfilMensal739PrivateCreditIssuer(
                 tp_pessoa_emissor="PJ",
                 nr_pf_pj_emissor=VALID_CNPJ,
                 parte_relacionada="N",
@@ -196,7 +200,7 @@ def _full_row() -> PerfilMensal739Row:
             )
         ],
         ved_regul_cobr_taxa_perform="S",
-        resp_ved_regul_cobr_taxa_perform=PerformanceFeeDetails(
+        resp_ved_regul_cobr_taxa_perform=PerfilMensal739PerformanceFeeDetails(
             data_cota_fundo="15/01/2025", val_cota_fundo="1.1234599"
         ),
     )
@@ -261,7 +265,7 @@ def test_row_rejects_tags_the_739_page_does_not_have(field: str) -> None:
 def test_distr_patrim_rejects_a_missing_percentage() -> None:
     """Reject a DISTR_PATRIM that leaves a percentage out (the page marks it mandatory)."""
     with pytest.raises(ValidationError):
-        PerfilMensalV3PatrimonyDistribution(**_patrimony(pr_pf_varj=None))
+        PerfilMensal739PatrimonyDistribution(**_patrimony(pr_pf_varj=None))
 
 
 def test_header_rejects_other_versao() -> None:
@@ -284,7 +288,7 @@ def test_invalid_cnpj_check_digit_is_rejected() -> None:
 
 def test_more_than_three_otc_counterparties_rejected() -> None:
     """Reject a fourth OPER_CURS_MERC_BALCAO: the page repeats the block up to 3 times."""
-    otc = OtcOperation(
+    otc = PerfilMensal739OtcOperation(
         tp_pessoa="PJ", nr_pf_pj_comitente=VALID_CNPJ, parte_relacionada="S", valor_parte="1"
     )
     with pytest.raises(ValidationError):
@@ -329,3 +333,19 @@ def test_export_plain_data_equals_model_export() -> None:
     doc = _doc()
 
     assert PerfilMensal739().export(doc.model_dump()) == PerfilMensal739().export(doc)
+
+
+def _own_classes(mod: ModuleType) -> list[type]:
+    return [
+        obj
+        for obj in vars(mod).values()
+        if isinstance(obj, type) and obj.__module__ == mod.__name__
+    ]
+
+
+@pytest.mark.parametrize("cls_model", _own_classes(m739))
+def test_739_models_do_not_subclass_live_models(cls_model: type) -> None:
+    """Keep 739 standalone so a validator or type added to a V3/V4 model cannot reach it."""
+    set_live = set(_own_classes(v4)) | set(_own_classes(v3))
+
+    assert not set_live & set(cls_model.__mro__)

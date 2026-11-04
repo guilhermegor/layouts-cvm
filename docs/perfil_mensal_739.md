@@ -23,8 +23,8 @@ A página foi comparada à página e ao schema V3 (tag a tag, e linha a linha do
 - `VAR_DIAR_PERC_PATRIM_FDO_VAR_N_TAXA_ANUAL`, `VAR_DIAR_PERC_PATRIM_FDO_VAR_N_TAXA_CAMBIO`,
   `VAR_PATRIM_FDO_N_PRECO_ACOES` e `VAL_PERCENT_OUTROS` têm **2 casas decimais** (4 no V3/V4).
 
-Os demais blocos são idênticos, por isso os modelos estendem os do V3 e o writer reutiliza a
-rotina de montagem do V4, trocando só a escala das tags de estresse.
+Os demais blocos são idênticos, mas os modelos são **independentes** (o 739 é um padrão
+encerrado e não herda dos modelos vivos do V3/V4); o writer reutiliza a rotina de montagem do V4, trocando só a escala das tags de estresse.
 
 | Tag | Regra |
 |-----|-------|

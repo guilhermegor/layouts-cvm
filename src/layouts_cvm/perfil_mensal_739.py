@@ -1,15 +1,17 @@
 """CVM Perfil Mensal ICVM 739 — submission (envio) writer.
 
 Produces CVM-compliant Monthly Profile XML (``VERSAO`` 1.0) from validated schema models.
-The layout has the V4 tag order (the V3 page differs from it in the same way, so the models
-extend V3) and differs only in the scale of four tags and in the absence of two. The V4
-builder reads none of the V3-only tags, so this writer subclasses ``PerfilMensal`` and sets
-the stress scale to 2 instead of duplicating the builder under ``PerfilMensalV3``.
+The layout has the V4 tag order and differs only in the scale of four tags and in the
+absence of two. The V4 builder reads none of the V3-only tags, so this writer subclasses
+``PerfilMensal`` and sets the stress scale to 2 instead of duplicating the builder. The 739
+models are standalone; the writer maps them onto the V4 shape the builder reads.
 """
 
 from collections.abc import Mapping
 
+from layouts_cvm._internal.config.schemas.perfil_mensal import PerfilMensalDocument
 from layouts_cvm._internal.config.schemas.perfil_mensal_739 import PerfilMensal739Document
+from layouts_cvm._internal.utils.atomic_write import atomic_write_bytes
 from layouts_cvm._internal.utils.xml_writer import coerce_document
 from layouts_cvm.perfil_mensal import PerfilMensal
 
@@ -46,4 +48,9 @@ class PerfilMensal739(PerfilMensal):
                 XML string when output_path is None, else None.
         """
         document = coerce_document(PerfilMensal739Document, doc)
-        return super().export(document, output_path, versao=document.header.versao)
+        doc_v4 = PerfilMensalDocument.model_validate(document.model_dump())
+        xml_str = self._build_xml_str(doc_v4, versao=document.header.versao)
+        if output_path is not None:
+            atomic_write_bytes(output_path, xml_str.encode("windows-1252"))
+            return None
+        return xml_str
