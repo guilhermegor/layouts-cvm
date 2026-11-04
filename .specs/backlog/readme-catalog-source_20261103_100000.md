@@ -4,7 +4,7 @@ Source of truth: CVM `PadroesXML.asp`.
 
 - [x] Source-of-truth callout in README Overview and `docs/index.md`.
 - [x] Spec column in the README layout table (URLs taken from each `docs/<layout>.md`).
-- [x] Coverage line (18 implemented, rest tracked as open writer issues).
+- [x] Coverage line (19 implemented, rest tracked as open writer issues).
 - [x] Validation guarantees (ROUND_DOWN truncation, CNPJ/CPF check digits) and submission-only direction.
 - [x] `pip install layouts-cvm` under Install (0.1.2 is on PyPI).
 - [x] Runnable Usage example (dict payload, shape from #47); `docs/usage.md` template placeholders replaced.
