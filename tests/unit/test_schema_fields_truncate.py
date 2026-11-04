@@ -1,6 +1,6 @@
 """Unit tests for the shared decimal truncation in ``_internal.config.schemas._fields``."""
 
-from decimal import Decimal
+from decimal import Decimal, localcontext
 
 import pytest
 
@@ -18,3 +18,11 @@ def test_unrepresentable_value_raises_value_error(value: str) -> None:
 def test_truncated_zero_is_unsigned(value: str | Decimal) -> None:
     """Return 0.00, never -0.00, when truncation takes a small negative value to zero."""
     assert str(truncate_to_scale(2)(value)) == "0.00"
+
+
+def test_overflow_does_not_depend_on_the_ambient_decimal_precision() -> None:
+    """Reject the same oversized value whatever precision the consumer configured."""
+    with localcontext() as ctx:
+        ctx.prec = 50
+        with pytest.raises(ValueError, match="invalid decimal value"):
+            truncate_to_scale(12)("12345678901234567")

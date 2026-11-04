@@ -250,6 +250,18 @@ def test_shareholder_rejects_participation_outside_0_to_100(pr_cotst: str) -> No
         InformeDiarioV1Shareholder(tp_pessoa="PJ", cpf_cnpj_cotst=VALID_CNPJ, pr_cotst=pr_cotst)
 
 
+@pytest.mark.parametrize(
+    ("vl_quota", "tag"),
+    [
+        ("0", "<VL_QUOTA>0,000000000000</VL_QUOTA>"),
+        ("0.000000012345", "<VL_QUOTA>0,000000012345</VL_QUOTA>"),
+    ],
+)
+def test_small_quota_is_fixed_point_never_scientific(vl_quota: str, tag: str) -> None:
+    """Emit a zero or tiny VL_QUOTA as fixed-point, not as 0E-12 or 1.2345E-8."""
+    assert tag in _xml(_inform(vl_quota=vl_quota))
+
+
 def test_truncated_negative_zero_is_emitted_unsigned() -> None:
     """Emit 0,00, never -0,00, when truncation takes a small negative value to zero."""
     assert "<VL_TOTAL>0,00</VL_TOTAL>" in _xml(_inform(vl_total="-0.001"))
