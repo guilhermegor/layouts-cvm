@@ -41,7 +41,7 @@ Build, validate and serialise the files a fund sends to CVM, in CVM's own file l
 ## Features
 
 - Pydantic models for every CVM XML layout listed below, validated before anything is serialised.
-- One writer per layout (`export(doc, output_path=None)`), producing windows-1252 XML.
+- One writer per layout (`export(doc, output_path=None)`), producing windows-1252 XML (`Cofi4016` is the exception: ASCII fixed-width `.cvm` records).
 - Byte-identical to the original `filings-cvm` writers, pinned by a golden-file test.
 - Runtime dependencies: `pydantic` and `beartype`. No network.
 

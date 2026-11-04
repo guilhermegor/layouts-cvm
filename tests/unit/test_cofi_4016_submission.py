@@ -3,6 +3,7 @@
 Expected records are typed from the column table of PadraoCOFI.aspx, not derived from the code.
 """
 
+from collections.abc import Callable
 from decimal import Decimal
 from pathlib import Path
 
@@ -10,6 +11,7 @@ from pydantic import ValidationError
 import pytest
 
 from layouts_cvm import Cofi4016
+from layouts_cvm._internal.config.schemas.cofi_4016 import Cofi4016Document
 
 
 CNPJ = "11222333000181"
@@ -151,3 +153,11 @@ def test_export_accepts_sixteen_integer_digits() -> None:
         )
     )[1]
     assert str_line[14:33] == "9" * 18 + "+"
+
+
+@pytest.mark.parametrize("fn_get", [lambda d: d.fundos, lambda d: d.fundos[0].contas])
+def test_validated_collections_cannot_be_emptied_after_construction(fn_get: Callable) -> None:
+    """A frozen model must not let a caller clear its min_length=1 collections."""
+    cls_doc = Cofi4016Document.model_validate(_doc())
+    with pytest.raises(AttributeError):
+        fn_get(cls_doc).clear()

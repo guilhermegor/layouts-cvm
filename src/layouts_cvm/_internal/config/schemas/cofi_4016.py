@@ -63,11 +63,11 @@ class Cofi4016Fund(Cofi4016Block):
     """The balanço of one fund: its CNPJ and account records."""
 
     cnpj_fundo: CnpjField
-    contas: list[Cofi4016Account] = Field(min_length=1)
+    contas: tuple[Cofi4016Account, ...] = Field(min_length=1)
 
 
 class Cofi4016Document(Cofi4016Block):
     """A whole COFI 4016 file: one competence and one or more funds."""
 
     dt_compt: CompetenceField
-    fundos: list[Cofi4016Fund] = Field(min_length=1)
+    fundos: tuple[Cofi4016Fund, ...] = Field(min_length=1)
