@@ -294,7 +294,7 @@ def test_mapping_picks_the_variant_from_cod_doc(cod_doc: int) -> None:
     assert InformeSintetico().export(data) == InformeSintetico().export(model)
 
 
-@pytest.mark.parametrize("bad", [None, 6, "5", 0, 5.0, Decimal(5), True])
+@pytest.mark.parametrize("bad", [None, 6, "5", 0, 5.0, Decimal(5), True, [5], {}])
 def test_unknown_cod_doc_rejected(bad: object) -> None:
     """A mapping whose COD_DOC is not 5, 7, 8 or 9 is refused."""
     with pytest.raises(ValueError, match="cod_doc"):
@@ -324,6 +324,9 @@ def test_cod_doc_must_match_the_variant() -> None:
         ("nr_tot_quotst_ult_dia_mes", 1.0),
         ("vl_quota_ult_dia_mes", 1.5),
         ("vl_quota_ult_dia_mes", "NaN"),
+        ("vl_quota_ult_dia_mes", "-1"),
+        ("vl_quota_ult_dia_mes", "-0.0000000000001"),
+        ("vl_quota_ult_dia_mes", "0"),
         ("vl_quota_ult_dia_mes", "Infinity"),
     ],
 )

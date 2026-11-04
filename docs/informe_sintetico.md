@@ -39,7 +39,8 @@ Cada campo do schema é a tag da página em minúsculas, declarado na ordem do X
 - `NR_TOT_QUOTST_ULT_DIA_MES`: inteiro ≥ 0.
 - `VL_QUOTA_ULT_DIA_MES`: `Decimal` marcado "(decimal)" na página, **12 casas** na saída
   (escala decidida aqui, ver abaixo); `float` recusado, casas excedentes **truncadas**, vírgula
-  decimal.
+  decimal. Deve ser > 0 (como o `VL_QUOTA` do Informe Diário); zero e negativos são recusados.
+- Inteiros são `int` estrito: `numpy.int64` é recusado, converta com `int()` antes.
 - `CNPJ_ADM` e `CNPJ_FUNDO`: CNPJ com dígitos verificadores, gravado sem máscara.
 - `DT_COMPT`: `MM/AAAA` real; `DT_GERAC_ARQ`: data real `DD/MM/AAAA`.
 
@@ -51,6 +52,9 @@ Cada campo do schema é a tag da página em minúsculas, declarado na ordem do X
   campo.
 - Vírgula como separador decimal; FCCE: documento mensal com vencimento até o quinto dia útil do
   mês seguinte.
+
+A gravação em disco usa arquivo temporário no mesmo diretório + `os.replace`
+(`atomic_write_bytes`).
 
 ## Não são verificados
 
@@ -71,8 +75,6 @@ Cada campo do schema é a tag da página em minúsculas, declarado na ordem do X
   líquido).
 - Os comentários de exemplo das páginas ("SUBSTITUA ESTA FRASE...") não são emitidos.
 - Nenhum validador da CVM foi executado.
-- A gravação em disco usa arquivo temporário no mesmo diretório + `os.replace`
-  (`atomic_write_bytes`).
 
 ## Exemplos
 

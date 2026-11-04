@@ -47,7 +47,9 @@ _Count = Annotated[int, Field(strict=True, ge=0, le=_INT_MAX)]
 _QuotaValue = Annotated[
     Decimal,
     BeforeValidator(strict_decimal(_QUOTA_VALUE_PLACES)),
-    Field(max_digits=_INTEGER_DIGITS + _QUOTA_VALUE_PLACES, decimal_places=_QUOTA_VALUE_PLACES),
+    Field(
+        max_digits=_INTEGER_DIGITS + _QUOTA_VALUE_PLACES, decimal_places=_QUOTA_VALUE_PLACES, gt=0
+    ),
 ]
 _Competence = Annotated[str, AfterValidator(check_month_year)]
 _Date = Annotated[str, AfterValidator(check_br_date)]

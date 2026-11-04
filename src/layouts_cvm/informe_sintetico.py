@@ -33,10 +33,10 @@ _SinteticoDocument = (
 )
 
 _DOCUMENTS_BY_COD_DOC: dict[tuple[type, object], type] = {
-    (int, 5): InformeSinteticoFcceDocument,
-    (int, 7): InformeSinteticoFitvmDocument,
-    (int, 8): InformeSinteticoFicDocument,
-    (int, 9): InformeSinteticoOutrosDocument,
+    (int, "5"): InformeSinteticoFcceDocument,
+    (int, "7"): InformeSinteticoFitvmDocument,
+    (int, "8"): InformeSinteticoFicDocument,
+    (int, "9"): InformeSinteticoOutrosDocument,
 }
 
 
@@ -50,7 +50,7 @@ def _read_cod_doc(doc: Mapping[str, object]) -> object:
 @type_checker
 def _pick_document_class(cod_doc: object) -> type:
     """Return the document class for ``cod_doc``; numeric look-alikes of 5/7/8/9 are refused."""
-    cls_document = _DOCUMENTS_BY_COD_DOC.get((type(cod_doc), cod_doc))
+    cls_document = _DOCUMENTS_BY_COD_DOC.get((type(cod_doc), repr(cod_doc)))
     if cls_document is None:
         raise ValueError(f"header.cod_doc must be one of 5, 7, 8 or 9, got {cod_doc!r}")
     return cls_document
