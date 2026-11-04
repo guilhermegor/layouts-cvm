@@ -35,6 +35,8 @@ from layouts_cvm._internal.config.schemas.informe_diario import (
 class InformeDiarioV1Header(InformeDiarioHeader):
     """CAB_INFORM — V1 header; ``COD_DOC`` is pinned to ``1`` and ``VERSAO`` is never emitted."""
 
+    model_config = ConfigDict(extra="forbid")
+
     cod_doc: Literal[1] = 1
     versao: None = None  # type: ignore[assignment]  # V1 has no VERSAO; None is omitted
 
@@ -77,6 +79,8 @@ class InformeDiarioV1Inform(BaseModel):
 
 class InformeDiarioV1Document(BaseModel):
     """DOC_ARQ — complete V1 document (up to 100 funds, one competence)."""
+
+    model_config = ConfigDict(extra="forbid")
 
     header: InformeDiarioV1Header
     informs: list[InformeDiarioV1Inform] = Field(max_length=100)
