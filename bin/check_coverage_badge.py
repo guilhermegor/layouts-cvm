@@ -91,7 +91,7 @@ def structural_findings(path_root: pathlib.Path) -> list[str]:
     ]
     path_readme = path_root / "README.md"
     if not path_readme.is_file():
-        list_findings.append(f"{path_readme} not found: cannot check its coverage badge.")
+        list_findings.append("README.md is missing or not a regular file: cannot check its badge.")
         return list_findings
     str_url = readme_badge_url(path_readme)
     if str_url != URL_BADGE:

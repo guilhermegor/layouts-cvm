@@ -40,7 +40,9 @@ def _load_gate() -> ModuleType:
 
 @pytest.fixture(autouse=True)
 def _clean_git_env(monkeypatch: pytest.MonkeyPatch) -> None:  # complexity-ok: one loop over GIT_*
-    """Drop the ``GIT_*`` variables a pre-commit hook exports, for the gate and the fixtures.
+    """Scrub every ``GIT_`` variable so the gate and fixtures run hermetically.
+
+    This also drops deliberate ones such as ``GIT_CONFIG_GLOBAL``; that is intended here.
 
     Parameters
     ----------
@@ -175,4 +177,27 @@ def test_structural_missing_readme_is_a_finding_not_a_traceback(
 ) -> None:
     """A repo without ``README.md`` reports a README-not-found finding instead of raising."""
     subprocess.run([_STR_GIT, "init", "-q"], cwd=tmp_path, check=True)  # noqa: S603
-    assert any("README.md not found" in str_msg for str_msg in gate.structural_findings(tmp_path))
+    assert gate.structural_findings(tmp_path) == [
+        "README.md is missing or not a regular file: cannot check its badge."
+    ]
+
+
+def test_readme_badge_url_missing_file_is_none(gate: ModuleType, tmp_path: Path) -> None:
+    """A missing README yields ``None`` rather than raising."""
+    assert gate.readme_badge_url(tmp_path / "README.md") is None
+
+
+def test_structural_readme_directory_is_a_finding(gate: ModuleType, tmp_path: Path) -> None:
+    """A directory named ``README.md`` is reported, not read."""
+    subprocess.run([_STR_GIT, "init", "-q"], cwd=tmp_path, check=True)  # noqa: S603
+    (tmp_path / "README.md").mkdir()
+    assert len(gate.structural_findings(tmp_path)) == 1
+
+
+def test_main_exits_nonzero_without_readme(
+    gate: ModuleType, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The structural mode fails the run when the README is absent."""
+    subprocess.run([_STR_GIT, "init", "-q"], cwd=tmp_path, check=True)  # noqa: S603
+    monkeypatch.chdir(tmp_path)
+    assert gate.main([]) == 1
