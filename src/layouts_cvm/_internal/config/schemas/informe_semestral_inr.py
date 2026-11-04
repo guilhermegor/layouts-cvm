@@ -14,11 +14,12 @@ Part II (``COD_DOC=70``, the applications) is **not** modelled here.
 
 from __future__ import annotations
 
-from typing import Literal
+from typing import Annotated, Literal
 
-from pydantic import field_validator
+from pydantic import Field, field_validator
 
 from layouts_cvm._internal.config.schemas.inr_mensal import (
+    _MAX_PARTICIPANTS,
     InrMensalDocument,
     InrMensalHeader,
     Participante,
@@ -63,4 +64,7 @@ class InformeSemestralInrDocument(InrMensalDocument):
     """DOC_ARQ — a complete Part I file: header plus 1 to 1000 participants."""
 
     header: InformeSemestralInrHeader
-    participantes: list[InformeSemestralInrParticipante]  # type: ignore[assignment]
+    participantes: Annotated[  # type: ignore[assignment]
+        list[InformeSemestralInrParticipante],
+        Field(min_length=1, max_length=_MAX_PARTICIPANTS),
+    ]

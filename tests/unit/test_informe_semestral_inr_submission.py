@@ -99,3 +99,31 @@ def test_participant_prefix_must_equal_cd_cvm() -> None:
     bad = _data(cod_partic="99999.123456.654321.1-9")
     with pytest.raises(ValidationError, match="CD_CVM"):
         InformeSemestralInr().export(bad)
+
+
+def _with_participants(count: int) -> dict[str, object]:
+    """Build data holding ``count`` participants with distinct codes."""
+    data = _data()
+    base = data["participantes"][0]  # type: ignore[index]
+    data["participantes"] = [
+        {**base, "cod_partic": f"12345.123456.{n}.1-9"} for n in range(1, count + 1)
+    ]
+    return data
+
+
+def test_zero_participants_is_rejected() -> None:
+    """A file needs at least one participant."""
+    with pytest.raises(ValidationError, match="at least 1"):
+        InformeSemestralInr().export(_with_participants(0))
+
+
+def test_1001_participants_is_rejected() -> None:
+    """The page allows at most 1000 PARTICIPANTE tags per file."""
+    with pytest.raises(ValidationError, match="at most 1000"):
+        InformeSemestralInr().export(_with_participants(1001))
+
+
+def test_1000_participants_is_accepted() -> None:
+    """The upper bound itself is valid."""
+    xml = InformeSemestralInr().export(_with_participants(1000))
+    assert xml.count("<PARTICIPANTE>") == 1000

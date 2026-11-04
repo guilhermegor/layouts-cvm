@@ -37,6 +37,8 @@ descritos em [Informe Mensal INR](inr_mensal.md). `aplicacoes` é recusado nesta
   (`FormTestaArquivo`) não foi usado.
 - A página pede "vírgula para casas decimais" mas descreve os valores como inteiros: adotou-se
   **inteiro**. Esta decisão não foi confirmada com a CVM.
+- O mínimo de **1** participante por arquivo é herdado do Informe Mensal: a página da Parte I
+  só declara o máximo (1000 tags `PARTICIPANTE`), não um mínimo.
 - A premissa de que o `AAAAA` de cada participante iguala `CD_CVM` vem do Informe Mensal e não
   foi lida de forma explícita na página da Parte I.
 
