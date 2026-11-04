@@ -56,6 +56,7 @@ Build, validate and serialise the files a fund sends to CVM, in CVM's own file l
 | Informe de Fundo 157 | `InfFundo157` | `InfFundo157Document` | [PadraoXMLInf157](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInf157.asp) |
 | Informe Mensal FIDC (ICVM 576) | `InfMensalFidc` | `InfMensalFidcDocument` | [PadraoXMLMensalFIDC576](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLMensalFIDC576.asp) |
 | Informe Mensal FIDC (ICVM 489) | `InfMensalFidc489` | `InfMensalFidc489Document` | [PadraoXMLMensalFIDC489](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLMensalFIDC489.asp) |
+| Informe Art. 12 Res. CVM 33 | `InformeArt12Res33` | `InformeArt12Res33Document` | [PadraoXMLPrest](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLPrest.asp) |
 | Informe Diário V4 | `InformeDiario` | `InformeDiarioDocument` | [PadraoXMLInfoDiarioNetV4](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNetV4.asp) |
 | Informe Diário V3 | `InformeDiarioV3` | `InformeDiarioV3Document` | [PadraoXMLInfoDiarioNetV3](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNetV3.asp) |
 | Informe Diário V2 | `InformeDiarioV2` | `InformeDiarioV2Document` | [PadraoXMLInfoDiarioNet739](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNet739.asp) |
