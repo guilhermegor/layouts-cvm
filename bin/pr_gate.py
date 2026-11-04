@@ -64,6 +64,9 @@ RISK_PATHS = {
 
 AUTO_MERGEABLE = frozenset({"docs", "ci", "deps"})
 
+FILES_PER_PAGE = 100
+FILES_API_CAP = 3000
+
 SIZE_BUCKETS = (("XS", 10), ("S", 50), ("M", 200), ("L", 500))
 SIZE_XL = "XL"
 
@@ -515,6 +518,41 @@ def sync_gate_labels(str_repo: str, int_pr: int, list_current: list, list_desire
             _api("DELETE", f"{API}/repos/{str_repo}/issues/{int_pr}/labels/{str_stale}")
 
 
+def fetch_pr_files(str_repo: str, int_pr: int, dict_pr: dict | None) -> list | None:
+    """Return every changed path of the PR, or ``None`` when the list cannot be trusted.
+
+    The files endpoint pages at 100 and stops serving at ``FILES_API_CAP``, so a single read
+    judges a truncated list: a risky path on page 2 would never be classified. ``None`` covers
+    a failed read, a PR at or past the cap, and a count that disagrees with ``changed_files``.
+
+    Parameters
+    ----------
+    str_repo : str
+        ``owner/name``.
+    int_pr : int
+        The pull request number.
+    dict_pr : dict or None
+        The PR payload, whose ``changed_files`` is the expected count.
+
+    Returns
+    -------
+    list of dict or None
+        The file entries across every page, or ``None`` when the list is incomplete.
+    """
+    if dict_pr is None or int(dict_pr.get("changed_files", FILES_API_CAP)) >= FILES_API_CAP:
+        return None
+    list_files: list = []
+    for int_page in range(1, FILES_API_CAP // FILES_PER_PAGE + 1):
+        str_url = f"{API}/repos/{str_repo}/pulls/{int_pr}/files"
+        list_page = _api("GET", f"{str_url}?per_page={FILES_PER_PAGE}&page={int_page}")
+        if list_page is None:
+            return None
+        list_files += list_page
+        if len(list_page) < FILES_PER_PAGE:
+            break
+    return list_files if len(list_files) == int(dict_pr["changed_files"]) else None
+
+
 def main() -> int:
     """Run the gate for one PR: classify, label, comment, and arm auto-merge when eligible.
 
@@ -534,12 +572,16 @@ def main() -> int:
     int_max_polls = int(os.environ.get("GATE_MAX_POLLS", "26"))
     int_poll_seconds = int(os.environ.get("GATE_POLL_SECONDS", "30"))
 
-    dict_pr = _api("GET", f"{API}/repos/{str_repo}/pulls/{int_pr}") or {}
+    dict_pr = _api("GET", f"{API}/repos/{str_repo}/pulls/{int_pr}")
+    list_files = fetch_pr_files(str_repo, int_pr, dict_pr)
+    if dict_pr is None or list_files is None:
+        str_msg = "::error::could not read the PR or its complete file list; refusing to classify"
+        print(str_msg, file=sys.stderr)
+        return 1
     str_head_sha = (dict_pr.get("head") or {}).get("sha", "")
     int_changed = int(dict_pr.get("additions", 0)) + int(dict_pr.get("deletions", 0))
     list_labels = [lbl["name"] for lbl in dict_pr.get("labels", [])]
 
-    list_files = _api("GET", f"{API}/repos/{str_repo}/pulls/{int_pr}/files?per_page=100") or []
     list_paths = [f["filename"] for f in list_files]
 
     str_risk = classify_risk(list_paths)
