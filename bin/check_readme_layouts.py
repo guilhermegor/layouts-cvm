@@ -3,15 +3,16 @@
 The writers are derived from ``src/layouts_cvm/__init__.py``, never listed twice: a name is a
 writer when it is in ``__all__`` AND imported from a top-level submodule of the package
 (``from layouts_cvm.cda import Cda`` or ``from .cda import Cda``, aliases and
-``try``/``if`` nesting included). That excludes
-``__version__``, ``main`` and every schema/model name, so the gate neither depends on nor
-breaks when the schemas move.
+``try``/``if`` nesting included; ``TYPE_CHECKING`` blocks, function bodies and ``_private``
+modules are not). That excludes ``__version__``, ``main`` and every schema/model name, so the
+gate neither depends on nor breaks when the schemas move.
 
 The README side is the backticked name in the second column of each row of the layout table.
 """
 
 import argparse
 import ast
+from collections.abc import Iterator
 from pathlib import Path
 import re
 import sys
@@ -19,8 +20,25 @@ import sys
 
 _SET_NOT_WRITERS = frozenset({"__version__", "main"})
 _STR_TABLE_HEADER = "| Layout | Writer |"
-_RE_ROW = re.compile(r"^\|[^|]*\|\s*`(\w+)`\s*\|(?:\s*`(\w+)`\s*\|)?")
+_RE_ROW = re.compile(r"^\|[^|]*\|\s*`(\w+)`\s*\|")
 _RE_SEPARATOR = re.compile(r"^\|[\s:|-]+$")
+
+
+def _iter_statements(list_body: list[ast.stmt]) -> Iterator[ast.stmt]:
+    """Yield the statements that run at import time, descending into ``try``/``if`` only.
+
+    An ``if TYPE_CHECKING:`` body is skipped (its names are not importable at runtime), and
+    function and class bodies are never entered.
+    """
+    for cls_node in list_body:
+        yield cls_node
+        if isinstance(cls_node, ast.Try):
+            list_nested = [*cls_node.body, *cls_node.orelse, *cls_node.finalbody]
+            for cls_handler in cls_node.handlers:
+                list_nested.extend(cls_handler.body)
+            yield from _iter_statements(list_nested)
+        elif isinstance(cls_node, ast.If) and ast.unparse(cls_node.test) != "TYPE_CHECKING":
+            yield from _iter_statements([*cls_node.body, *cls_node.orelse])
 
 
 def _read_literal_names(cls_value: ast.expr) -> set[str]:
@@ -33,8 +51,22 @@ def _read_literal_names(cls_value: ast.expr) -> set[str]:
     raise ValueError("__all__ must be a list or tuple of string literals")
 
 
+def _is_all_name(cls_target: ast.expr) -> bool:
+    """Return whether an assignment target is the bare name ``__all__``."""
+    return isinstance(cls_target, ast.Name) and cls_target.id == "__all__"
+
+
+def _replacement_value(cls_node: ast.stmt) -> ast.expr | None:
+    """Return the value a statement binds to ``__all__`` with ``=``, or ``None``."""
+    if isinstance(cls_node, ast.Assign) and any(_is_all_name(cls_t) for cls_t in cls_node.targets):
+        return cls_node.value
+    if isinstance(cls_node, ast.AnnAssign) and _is_all_name(cls_node.target):
+        return cls_node.value
+    return None
+
+
 def read_all_names(cls_tree: ast.Module) -> set[str]:
-    """Return the names in the top-level ``__all__``.
+    """Return the names in ``__all__``, replayed in source order.
 
     Parameters
     ----------
@@ -44,37 +76,44 @@ def read_all_names(cls_tree: ast.Module) -> set[str]:
     Returns
     -------
     set of str
-        The union of every top-level ``__all__ = [...]`` and ``__all__ += [...]``.
+        What ``__all__`` holds once the module has run: ``=`` replaces, ``+=`` extends.
 
     Raises
     ------
     ValueError
-        When ``__all__`` is absent or any assignment is not a list/tuple of string literals.
+        When ``__all__`` is absent, an assignment is not a list/tuple of string literals, or
+        it is mutated by ``.extend``/``.append``, which the gate cannot read.
     """
     set_names: set[str] = set()
     bool_found = False
-    for cls_node in cls_tree.body:
-        if isinstance(cls_node, ast.Assign):
-            list_targets, cls_value = cls_node.targets, cls_node.value
-        elif (isinstance(cls_node, ast.AnnAssign) and cls_node.value is not None) or (
-            isinstance(cls_node, ast.AugAssign) and isinstance(cls_node.op, ast.Add)
-        ):
-            list_targets, cls_value = [cls_node.target], cls_node.value
-        else:
-            continue
-        if not any(
-            isinstance(cls_t, ast.Name) and cls_t.id == "__all__" for cls_t in list_targets
-        ):
-            continue
-        set_names |= _read_literal_names(cls_value)
-        bool_found = True
+    for cls_node in _iter_statements(cls_tree.body):
+        cls_replaced = _replacement_value(cls_node)
+        if cls_replaced is not None:
+            set_names, bool_found = _read_literal_names(cls_replaced), True
+        elif isinstance(cls_node, ast.AugAssign) and _is_all_name(cls_node.target):
+            if not isinstance(cls_node.op, ast.Add):
+                raise ValueError("__all__ may only be extended with +=")
+            set_names, bool_found = set_names | _read_literal_names(cls_node.value), True
+        elif isinstance(cls_node, ast.Expr) and ast.unparse(cls_node).startswith("__all__."):
+            raise ValueError("__all__ is mutated by a method call; use = or += with literals")
     if not bool_found:
         raise ValueError("no top-level __all__ found")
     return set_names
 
 
+def _is_writer_module(cls_node: ast.ImportFrom, str_package: str) -> bool:
+    """Return whether an import is from a public top-level submodule of the package."""
+    if not cls_node.module:
+        return False
+    list_parts = cls_node.module.split(".")
+    if list_parts[-1].startswith("_"):
+        return False
+    bool_absolute = cls_node.level == 0 and len(list_parts) == 2 and list_parts[0] == str_package  # noqa: PLR2004
+    return bool_absolute or (cls_node.level == 1 and len(list_parts) == 1)
+
+
 def read_top_level_imports(cls_tree: ast.Module, str_package: str) -> set[str]:
-    """Return the names imported from a top-level submodule of the package.
+    """Return the names imported from a public top-level submodule of the package.
 
     Parameters
     ----------
@@ -87,20 +126,13 @@ def read_top_level_imports(cls_tree: ast.Module, str_package: str) -> set[str]:
     -------
     set of str
         The bound name (the ``as`` alias when present) of every ``from <package>.<module>
-        import ...`` or ``from .<module> import ...``, including inside ``try``/``if``.
+        import ...`` or ``from .<module> import ...`` at import time (``try``/``if`` bodies
+        included, ``TYPE_CHECKING`` and function bodies not). A module whose name starts
+        with ``_`` is private and never a writer source.
     """
     set_top: set[str] = set()
-    for cls_node in ast.walk(cls_tree):
-        if not isinstance(cls_node, ast.ImportFrom) or not cls_node.module:
-            continue
-        list_parts = cls_node.module.split(".")
-        bool_absolute = (
-            cls_node.level == 0
-            and len(list_parts) == 2  # noqa: PLR2004
-            and list_parts[0] == str_package
-        )
-        bool_relative = cls_node.level == 1 and len(list_parts) == 1
-        if bool_absolute or bool_relative:
+    for cls_node in _iter_statements(cls_tree.body):
+        if isinstance(cls_node, ast.ImportFrom) and _is_writer_module(cls_node, str_package):
             set_top.update(cls_alias.asname or cls_alias.name for cls_alias in cls_node.names)
     return set_top
 
@@ -126,7 +158,7 @@ def read_writers(path_init: Path, str_package: str) -> set[str]:
     )
 
 
-def read_readme_rows(path_readme: Path) -> list[tuple[str, str | None]]:
+def read_readme_writers(path_readme: Path) -> list[str]:
     """Return the writer names listed in the README layout table.
 
     Parameters
@@ -136,17 +168,17 @@ def read_readme_rows(path_readme: Path) -> list[tuple[str, str | None]]:
 
     Returns
     -------
-    list of tuple
-        ``(writer, document)`` per row of the layout table (the one headed
-        ``| Layout | Writer |``), in order and repeats kept; ``document`` is the backticked
-        third column or ``None``. Other tables are ignored.
+    list of str
+        The backticked name in the second column of each row of the layout table (the one
+        headed ``| Layout | Writer |``), in order and repeats kept; other tables are ignored.
+        Only the Writer column is checked: the Document and Spec columns are hand-copied.
 
     Raises
     ------
     ValueError
         When a body row has no backticked name in its second column.
     """
-    list_rows: list[tuple[str, str | None]] = []
+    list_names: list[str] = []
     bool_in_table = False
     for str_line in path_readme.read_text(encoding="utf-8").splitlines():
         if str_line.startswith(_STR_TABLE_HEADER):
@@ -159,13 +191,8 @@ def read_readme_rows(path_readme: Path) -> list[tuple[str, str | None]]:
         cls_match = _RE_ROW.match(str_line)
         if not cls_match:
             raise ValueError(f"{path_readme}: table row has no backticked writer: {str_line!r}")
-        list_rows.append((cls_match.group(1), cls_match.group(2)))
-    return list_rows
-
-
-def read_readme_writers(path_readme: Path) -> list[str]:
-    """Return the writer names listed in the README layout table, repeats kept."""
-    return [str_writer for str_writer, _ in read_readme_rows(path_readme)]
+        list_names.append(cls_match.group(1))
+    return list_names
 
 
 def main() -> int:
@@ -183,11 +210,10 @@ def main() -> int:
     cls_args = cls_parser.parse_args()
     try:
         set_writers = read_writers(cls_args.init, cls_args.package)
-        list_table = read_readme_rows(cls_args.readme)
+        list_rows = read_readme_writers(cls_args.readme)
     except (OSError, SyntaxError, ValueError) as cls_err:
         print(f"check_readme_layouts: {cls_err}", file=sys.stderr)
         return 1
-    list_rows = [str_writer for str_writer, _ in list_table]
     set_rows = set(list_rows)
     if not set_writers:
         print(
