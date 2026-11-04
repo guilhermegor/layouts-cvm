@@ -186,15 +186,61 @@ def merge_heads() -> list:
     return pathlib.Path(str_path).read_text(encoding="utf-8").split()
 
 
+def base_candidates() -> list:
+    """Return the refs a base may come from, best first.
+
+    A CI checkout of a pull request has neither ``origin/HEAD`` nor a local ``main``, only
+    ``origin/main``, so the remote-tracking ref is tried before the local branch (which is
+    also never staler than the remote one).
+
+    Returns
+    -------
+    list of str
+        ``origin/<name>`` then ``<name>`` for the PR's base branch (``GITHUB_BASE_REF``), the
+        detected default branch, then ``main`` and ``master``; duplicates dropped.
+    """
+    list_names = [os.environ.get("GITHUB_BASE_REF", ""), default_branch(), "main", "master"]
+    list_refs = [
+        str_ref
+        for str_name in list_names
+        if str_name
+        for str_ref in (f"origin/{str_name}", str_name)
+    ]
+    return list(dict.fromkeys(list_refs))
+
+
 def resolve_base() -> str:
     """Return the merge-base of HEAD and the default branch, counting a merge in progress.
 
     Returns
     -------
     str
-        The base commit; empty when none resolves.
+        The base commit; empty when no candidate ref resolves.
     """
-    return _git(["merge-base", default_branch(), "HEAD", *merge_heads()])
+    for str_ref in base_candidates():
+        str_base = _git(["merge-base", str_ref, "HEAD", *merge_heads()])
+        if str_base:
+            return str_base
+    return ""
+
+
+def report_unresolved_base() -> int:
+    """Fail loudly: no base resolved, so nothing could be checked.
+
+    "Could not look" must never print the same verdict as "nothing to check".
+
+    Returns
+    -------
+    int
+        Always 1.
+    """
+    print(
+        "❌ work-ledger check could not resolve a base branch "
+        f"(tried {', '.join(base_candidates())}). In CI, check out with 'fetch-depth: 0' so "
+        "origin/<default> and a common ancestor exist.",
+        file=sys.stderr,
+    )
+    return 1
 
 
 def changed_paths(str_base: str) -> list:
@@ -290,8 +336,10 @@ def main() -> int:
 
     str_base = resolve_base()
     str_head = _git(["rev-parse", "HEAD"])
-    if not str_base or str_base == str_head:
+    if not str_head or str_base == str_head:
         return 0
+    if not str_base:
+        return report_unresolved_base()
 
     list_paths = changed_paths(str_base)
     if not list_paths or not needs_ledger(list_paths, cls_gate):

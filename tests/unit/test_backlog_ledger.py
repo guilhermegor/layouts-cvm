@@ -923,3 +923,69 @@ def path_mid_merge(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 def test_resolve_base_mid_merge_is_the_incoming_tip(path_mid_merge: Path) -> None:
     """Mid-merge the base is main's tip, never the fork point that charges main's delta."""
     assert ledger.resolve_base() == _git_in(path_mid_merge, "rev-parse", "main")
+
+
+def _init_repo(path_repo: Path) -> None:
+    """Create a repo on ``main`` with one commit, then branch ``feature`` adding a src file.
+
+    Parameters
+    ----------
+    path_repo : pathlib.Path
+        An empty directory to initialise.
+    """
+    _git_in(path_repo, "init", "-q", "--initial-branch=main")
+    _git_in(path_repo, "config", "user.email", "t@example.com")
+    _git_in(path_repo, "config", "user.name", "t")
+    _git_in(path_repo, "config", "commit.gpgsign", "false")
+    _git_in(path_repo, "commit", "-q", "--allow-empty", "-m", "seed")
+    _git_in(path_repo, "checkout", "-q", "-b", "feature")
+    (path_repo / "src").mkdir()
+    (path_repo / "src" / "a.py").write_text("x = 1\n", encoding="utf-8")
+    _git_in(path_repo, "add", "src")
+    _git_in(path_repo, "commit", "-q", "-m", "feat")
+
+
+@pytest.fixture
+def path_ci_checkout(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    """Return the CI shape: only ``origin/main``, no local ``main``, no ``origin/HEAD``.
+
+    Parameters
+    ----------
+    tmp_path : pathlib.Path
+        Pytest-provided scratch directory.
+    monkeypatch : pytest.MonkeyPatch
+        Used to run the gate inside the repo with a human, non-Actions environment.
+
+    Returns
+    -------
+    pathlib.Path
+        The repository, on ``feature``.
+    """
+    _init_repo(tmp_path)
+    _git_in(tmp_path, "update-ref", "refs/remotes/origin/main", "main")
+    _git_in(tmp_path, "branch", "-q", "-D", "main")
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("GITHUB_EVENT_PATH", raising=False)
+    monkeypatch.delenv("GITHUB_ACTOR", raising=False)
+    monkeypatch.delenv("GITHUB_BASE_REF", raising=False)
+    return tmp_path
+
+
+def test_resolve_base_with_only_origin_main_is_its_tip(path_ci_checkout: Path) -> None:
+    """The CI shape resolves from ``origin/main`` instead of returning an empty base."""
+    assert ledger.resolve_base() == _git_in(path_ci_checkout, "rev-parse", "origin/main")
+
+
+def test_main_with_only_origin_main_and_no_ledger_fails(
+    path_ci_checkout: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """SHOULD-FAIL WITNESS (#57): the branch changes src/ with no ledger, and the gate says so."""
+    assert (ledger.main(), "adds no work ledger" in capsys.readouterr().out) == (1, True)
+
+
+def test_main_with_no_resolvable_base_fails_loudly(
+    path_ci_checkout: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """With no main anywhere, exiting 0 would hide "could not look" as "nothing to check"."""
+    _git_in(path_ci_checkout, "update-ref", "-d", "refs/remotes/origin/main")
+    assert (ledger.main(), "could not resolve a base" in capsys.readouterr().err) == (1, True)
