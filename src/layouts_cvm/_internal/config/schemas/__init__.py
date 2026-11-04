@@ -63,6 +63,14 @@ from layouts_cvm._internal.config.schemas.cda_v3 import (
     CdaV3Inform,
     CdaV3InvExt,
 )
+from layouts_cvm._internal.config.schemas.cofi_4016 import (
+    AccountField,
+    Cofi4016Account,
+    Cofi4016Block,
+    Cofi4016Document,
+    Cofi4016Fund,
+    SignedValueField,
+)
 from layouts_cvm._internal.config.schemas.extrato import (
     AnbimaCode,
     AtivExter,
@@ -381,6 +389,12 @@ __all__ = [
     "ClasseCotas",
     "ClasseCotistas",
     "ClientCount",
+    "AccountField",
+    "Cofi4016Account",
+    "Cofi4016Block",
+    "Cofi4016Document",
+    "Cofi4016Fund",
+    "SignedValueField",
     "CnpjField",
     "CompetenceField",
     "CompmtDicred",
