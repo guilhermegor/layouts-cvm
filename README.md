@@ -4,7 +4,7 @@
 <p align="center"><img src="https://raw.githubusercontent.com/guilhermegor/layouts-cvm/main/assets/cvm-logo.png" width="200" alt="CVM emblem"></p>
 
 [![Project Status: Active](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
-![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)
+![Python Version](https://img.shields.io/badge/python-3.11%2B-blue.svg)
 ![PyPI Version](https://img.shields.io/pypi/v/layouts-cvm)
 [![Snyk Vulnerabilities](https://snyk.io/test/github/guilhermegor/layouts-cvm/badge.svg)](https://snyk.io/test/github/guilhermegor/layouts-cvm)
 [![Snyk License](https://snyk.io/advisor/python/layouts-cvm/badge.svg)](https://snyk.io/advisor/python/layouts-cvm)
@@ -54,6 +54,7 @@ Build, validate and serialise the files a fund sends to CVM, in CVM's own file l
 | Extrato das Informações sobre o Fundo V3 | `Extrato` | `ExtratoDocument` | [PadraoXMLInfExtratoV3](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfExtratoV3.asp) |
 | Informe de Fundo 157 | `InfFundo157` | `InfFundo157Document` | [PadraoXMLInf157](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInf157.asp) |
 | Informe Mensal FIDC (ICVM 576) | `InfMensalFidc` | `InfMensalFidcDocument` | [PadraoXMLMensalFIDC576](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLMensalFIDC576.asp) |
+| Informe Mensal FIDC (ICVM 489) | `InfMensalFidc489` | `InfMensalFidc489Document` | [PadraoXMLMensalFIDC489](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLMensalFIDC489.asp) |
 | Informe Diário V4 | `InformeDiario` | `InformeDiarioDocument` | [PadraoXMLInfoDiarioNetV4](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNetV4.asp) |
 | Informe Diário V3 | `InformeDiarioV3` | `InformeDiarioV3Document` | [PadraoXMLInfoDiarioNetV3](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNetV3.asp) |
 | Informe Diário V2 | `InformeDiarioV2` | `InformeDiarioV2Document` | [PadraoXMLInfoDiarioNet739](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNet739.asp) |
@@ -76,7 +77,7 @@ The documentation site lives at https://guilhermegor.github.io/layouts-cvm/. Ser
 <!-- slug: getting-started -->
 ## Getting Started
 
-Python 3.10+ is the only prerequisite; `bin/venv.sh` installs [Poetry](https://python-poetry.org/) when it is missing.
+Python 3.11+ is the only prerequisite; `bin/venv.sh` installs [Poetry](https://python-poetry.org/) when it is missing.
 
 <!-- slug: install -->
 ### Install
