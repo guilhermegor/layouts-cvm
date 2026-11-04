@@ -24,6 +24,7 @@ _PLACES: dict[str, int] = {
     "VL_VENDAS_NEGOC": 2,
     "VL_AQUIS_NEGOC": 2,
     "MERC_POS_FIM": 2,
+    "CUSTO_CORREC_POS_FIM": 2,
     "QTDE_VENDAS_NEGOC": 6,
     "QTDE_AQUIS_NEGOC": 6,
     "QTDE_POS_FIM": 6,
