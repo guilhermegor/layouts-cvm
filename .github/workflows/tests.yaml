@@ -25,7 +25,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
     steps:
       - name: Checkout Code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -110,6 +110,10 @@ jobs:
       - name: Run __all__ Export Completeness Check
         if: runner.os == 'Linux'
         run: poetry run python bin/check_all_exports.py
+
+      - name: Run README Layout Table Gate
+        if: runner.os == 'Linux'
+        run: poetry run python bin/check_readme_layouts.py
 
       - name: Run __all__ Exports-Nothing-Internal Check
         if: runner.os == 'Linux'
