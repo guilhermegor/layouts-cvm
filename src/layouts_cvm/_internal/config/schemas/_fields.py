@@ -32,7 +32,7 @@ _PERSON_DOC_RULES = {
 
 @type_checker
 def _quantize(value: DecimalInput, quantum: Decimal) -> Decimal:
-    """Truncate one non-null value to ``quantum`` (ROUND_DOWN).
+    """Truncate one non-null value to ``quantum`` (ROUND_DOWN); a truncated zero is unsigned.
 
     Parameters
     ----------
@@ -55,7 +55,8 @@ def _quantize(value: DecimalInput, quantum: Decimal) -> Decimal:
         as_decimal = value if isinstance(value, Decimal) else Decimal(str(value))
     except (InvalidOperation, ValueError) as exc:
         raise ValueError(f"invalid decimal value: {value!r}") from exc
-    return as_decimal.quantize(quantum, rounding=ROUND_DOWN)
+    truncated = as_decimal.quantize(quantum, rounding=ROUND_DOWN)
+    return truncated.copy_abs() if truncated.is_zero() else truncated
 
 
 @type_checker

@@ -21,6 +21,7 @@ section 1, DRY caveat). Only the neutral helpers in ``_fields`` are shared.
 
 from __future__ import annotations
 
+from datetime import datetime
 from decimal import Decimal
 import re
 from typing import Annotated, Literal
@@ -68,7 +69,7 @@ class InformeDiarioV1Header(BaseModel):
     @field_validator("dt_compt", "dt_gerac_arq")
     @classmethod
     def _check_br_date(cls, v: str) -> str:
-        """Validate a date field follows the DD/MM/AAAA format.
+        """Validate a date field is a real calendar date in DD/MM/AAAA format.
 
         Parameters
         ----------
@@ -83,10 +84,11 @@ class InformeDiarioV1Header(BaseModel):
         Raises
         ------
         ValueError
-                If value does not follow DD/MM/AAAA format.
+                If value does not follow DD/MM/AAAA format or is not a real date.
         """
-        if not _DATE_BR_RE.match(v):
+        if not _DATE_BR_RE.fullmatch(v):
             raise ValueError("date must follow DD/MM/AAAA format.")
+        datetime.strptime(v, "%d/%m/%Y")  # noqa: DTZ007  # calendar check only, no timezone
         return v
 
 

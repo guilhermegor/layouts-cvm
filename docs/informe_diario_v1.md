@@ -30,6 +30,7 @@ Escalas (2 casas; `VL_QUOTA` até 12; `PR_COTST` até 4), `LISTA_INFORM` e o blo
   obrigatoriedade do formato) e o fim (01/07/2012) vêm do catálogo da CVM. O escritor **não**
   confere `DT_COMPT` contra essa janela, de propósito: escolher a versão certa para a
   competência é do chamador, e refazer um arquivo histórico continua possível.
+- O escritor não impõe o piso de 20% em `PR_COTST`, a unicidade de `CNPJ_FDO` nem sinal nos valores: a página não traz essas regras como validação, e a conferência cabe a quem monta o arquivo.
 - `LISTA_COTST_SIGNIF` é opcional e omitida quando vazia.
 - O cabeçalho, o documento, o `INFORM` e o `COTST_SIGNIF` rejeitam campos desconhecidos. Exemplos no `INFORM`: `VL_TOTAL_SAI`, `DATA_PROX_PL`, `COD_SUBCLASSE`; no cabeçalho: `VERSAO`.
 - Excesso de casas decimais é truncado, nunca arredondado; o separador decimal é a vírgula.

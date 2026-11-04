@@ -215,10 +215,16 @@ def test_header_rejects_other_cod_doc() -> None:
         InformeDiarioV1Header(dt_compt="15/01/2011", dt_gerac_arq="15/01/2011", cod_doc=2)
 
 
-def test_header_rejects_malformed_date() -> None:
-    """Reject a competence date that is not DD/MM/AAAA."""
+@pytest.mark.parametrize("str_date", ["2013-01-15", "31/02/2011", "99/99/2011", "15/01/2011\n"])
+def test_header_rejects_malformed_or_impossible_date(str_date: str) -> None:
+    """Reject a date that is not a real DD/MM/AAAA one, trailing newline included."""
     with pytest.raises(ValidationError):
-        InformeDiarioV1Header(dt_compt="2013-01-15", dt_gerac_arq="15/01/2011")
+        InformeDiarioV1Header(dt_compt=str_date, dt_gerac_arq="15/01/2011")
+
+
+def test_truncated_negative_zero_is_emitted_unsigned() -> None:
+    """Emit 0,00, never -0,00, when truncation takes a small negative value to zero."""
+    assert "<VL_TOTAL>0,00</VL_TOTAL>" in _xml(_inform(vl_total="-0.001"))
 
 
 def test_more_than_100_funds_rejected() -> None:
@@ -278,8 +284,8 @@ def test_document_rejects_unknown_field() -> None:
         InformeDiarioV1().export(dict_doc)
 
 
-def test_several_informs_stay_inside_one_lista_inform() -> None:
-    """Emit one INFORM per fund, in order, inside a single LISTA_INFORM."""
+def test_several_informs_keep_their_order() -> None:
+    """Emit one INFORM per fund, in the order given."""
     doc = InformeDiarioV1Document(
         header=_header(), informs=[_inform(), _inform(cnpj_fdo="11444777000161")]
     )
