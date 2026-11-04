@@ -10,7 +10,7 @@ and validators, so the truncation/validation logic lives in exactly one place.
 """
 
 from collections.abc import Callable
-from decimal import ROUND_DOWN, Decimal, InvalidOperation
+from decimal import ROUND_DOWN, Context, Decimal, InvalidOperation
 
 from layouts_cvm._internal.utils.br_identifiers import (
     is_valid_cnpj,
@@ -30,9 +30,12 @@ _PERSON_DOC_RULES = {
 }
 
 
+_TRUNCATION_CONTEXT = Context(prec=28)
+
+
 @type_checker
 def _quantize(value: DecimalInput, quantum: Decimal) -> Decimal:
-    """Truncate one non-null value to ``quantum`` (ROUND_DOWN).
+    """Truncate one non-null value to ``quantum`` (ROUND_DOWN); a truncated zero is unsigned.
 
     Parameters
     ----------
@@ -53,9 +56,10 @@ def _quantize(value: DecimalInput, quantum: Decimal) -> Decimal:
     """
     try:
         as_decimal = value if isinstance(value, Decimal) else Decimal(str(value))
+        truncated = as_decimal.quantize(quantum, rounding=ROUND_DOWN, context=_TRUNCATION_CONTEXT)
     except (InvalidOperation, ValueError) as exc:
         raise ValueError(f"invalid decimal value: {value!r}") from exc
-    return as_decimal.quantize(quantum, rounding=ROUND_DOWN)
+    return truncated.copy_abs() if truncated.is_zero() else truncated
 
 
 @type_checker
