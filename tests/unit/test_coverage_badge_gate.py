@@ -8,6 +8,7 @@ badge off the Pages URL) and stay quiet on the healthy layout; the content guard
 import importlib.util
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 from types import ModuleType
@@ -19,6 +20,7 @@ _STR_GIT = shutil.which("git") or "git"
 
 _STR_SVG_REAL = '<svg><text x="1">coverage</text><text x="2">87%</text></svg>'
 _STR_SVG_NA = '<svg><title>coverage: n/a</title><text x="2">n/a</text></svg>'
+_STR_MSG_NO_README = "README.md is missing or not a regular file: cannot check its badge."
 
 
 def _load_gate() -> ModuleType:
@@ -42,7 +44,8 @@ def _load_gate() -> ModuleType:
 def _clean_git_env(monkeypatch: pytest.MonkeyPatch) -> None:  # complexity-ok: one loop over GIT_*
     """Scrub every ``GIT_`` variable so the gate and fixtures run hermetically.
 
-    This also drops deliberate ones such as ``GIT_CONFIG_GLOBAL``; that is intended here.
+    The scrub also drops ``GIT_CONFIG_GLOBAL`` and ``GIT_CONFIG_NOSYSTEM``, which would let git
+    fall back to the developer's own config, so both are pinned to "no config" afterwards.
 
     Parameters
     ----------
@@ -51,6 +54,8 @@ def _clean_git_env(monkeypatch: pytest.MonkeyPatch) -> None:  # complexity-ok: o
     """
     for str_key in [str_key for str_key in os.environ if str_key.startswith("GIT_")]:
         monkeypatch.delenv(str_key)
+    monkeypatch.setenv("GIT_CONFIG_GLOBAL", os.devnull)
+    monkeypatch.setenv("GIT_CONFIG_NOSYSTEM", "1")
 
 
 @pytest.fixture
@@ -177,9 +182,7 @@ def test_structural_missing_readme_is_a_finding_not_a_traceback(
 ) -> None:
     """A repo without ``README.md`` reports a README-not-found finding instead of raising."""
     subprocess.run([_STR_GIT, "init", "-q"], cwd=tmp_path, check=True)  # noqa: S603
-    assert gate.structural_findings(tmp_path) == [
-        "README.md is missing or not a regular file: cannot check its badge."
-    ]
+    assert gate.structural_findings(tmp_path) == [_STR_MSG_NO_README]
 
 
 def test_readme_badge_url_missing_file_is_none(gate: ModuleType, tmp_path: Path) -> None:
@@ -191,13 +194,47 @@ def test_structural_readme_directory_is_a_finding(gate: ModuleType, tmp_path: Pa
     """A directory named ``README.md`` is reported, not read."""
     subprocess.run([_STR_GIT, "init", "-q"], cwd=tmp_path, check=True)  # noqa: S603
     (tmp_path / "README.md").mkdir()
-    assert len(gate.structural_findings(tmp_path)) == 1
+    assert gate.structural_findings(tmp_path) == [_STR_MSG_NO_README]
 
 
 def test_main_exits_nonzero_without_readme(
-    gate: ModuleType, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    gate: ModuleType,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
 ) -> None:
-    """The structural mode fails the run when the README is absent."""
+    """The structural mode fails the run, naming the missing README, when it is absent."""
     subprocess.run([_STR_GIT, "init", "-q"], cwd=tmp_path, check=True)  # noqa: S603
     monkeypatch.chdir(tmp_path)
-    assert gate.main([]) == 1
+    int_code = gate.main([])
+    assert (int_code, capsys.readouterr().err) == (
+        1,
+        f"check_coverage_badge: {_STR_MSG_NO_README}\n",
+    )
+
+
+def _concurrency_group(str_workflow: str) -> str:
+    """Read the one ``group:`` a workflow file declares.
+
+    Parameters
+    ----------
+    str_workflow : str
+        File name under ``.github/workflows``.
+
+    Returns
+    -------
+    str
+        The concurrency group name.
+    """
+    path_file = Path(__file__).resolve().parents[2] / ".github" / "workflows" / str_workflow
+    (str_group,) = re.findall(r"^\s+group:\s*(\S+)\s*$", path_file.read_text("utf-8"), re.M)
+    return str_group
+
+
+def test_badge_and_docs_deploy_use_separate_concurrency_groups() -> None:
+    """A badge run must not share a group with ``deploy_docs``.
+
+    GitHub keeps one pending run per group and cancels the older one, so a docs deploy
+    queued behind a badge publish was displaced by the next badge run (issue #63).
+    """
+    assert _concurrency_group("coverage-badge.yaml") != _concurrency_group("release-pypi.yaml")
