@@ -16,7 +16,8 @@ def _read_usage_block(path_doc: Path, str_heading: str) -> str:
     str_text = path_doc.read_text(encoding="utf-8")
     int_start = str_text.find(str_heading)
     assert int_start >= 0, f"{path_doc} has no heading {str_heading!r}"  # noqa: S101
-    cls_match = _RE_PYTHON_BLOCK.search(str_text, int_start)
+    int_end = str_text.find("\n#", int_start + len(str_heading))
+    cls_match = _RE_PYTHON_BLOCK.search(str_text[: int_end if int_end > 0 else None], int_start)
     assert cls_match, f"{path_doc} has no python block after {str_heading!r}"  # noqa: S101
     return cls_match.group(1)
 

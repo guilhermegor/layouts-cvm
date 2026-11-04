@@ -80,6 +80,51 @@ def test_read_top_level_imports_keeps_aliases_relative_and_nested() -> None:
     assert _DICT_GATE["read_top_level_imports"](cls_tree, "pkg") == {"Alias", "C", "D", "E"}
 
 
+@pytest.mark.parametrize(
+    "str_src",
+    [
+        'try:\n    __all__ = ["A"]\nexcept ImportError:\n    __all__ = []',
+        'if X:\n    __all__ = ["A"]\nelse:\n    __all__ = []',
+    ],
+)
+def test_read_all_names_rejects_a_branch_assignment(str_src: str) -> None:
+    """Mutually exclusive ``=`` branches cannot be replayed, so they fail loudly."""
+    with pytest.raises(ValueError, match="top level"):
+        _DICT_GATE["read_all_names"](ast.parse(str_src))
+
+
+@pytest.mark.parametrize(
+    ("str_test", "str_expected"),
+    [
+        ("TYPE_CHECKING", {"Run"}),
+        ("typing.TYPE_CHECKING", {"Run"}),
+        ("not TYPE_CHECKING", {"Typed"}),
+    ],
+)
+def test_read_top_level_imports_follows_the_branch_type_checking_leaves_running(
+    str_test: str, str_expected: set[str]
+) -> None:
+    """Only the branch that runs counts: the ``else`` of ``TYPE_CHECKING``, not its body."""
+    cls_tree = ast.parse(
+        f"if {str_test}:\n    from .typed import Typed\nelse:\n    from .run import Run\n"
+    )
+
+    assert _DICT_GATE["read_top_level_imports"](cls_tree, "pkg") == str_expected
+
+
+def test_read_top_level_imports_reads_a_with_body() -> None:
+    """An import inside a ``with`` block runs at import time, so it counts."""
+    cls_tree = ast.parse("with suppress(ImportError):\n    from .w import W\n")
+
+    assert _DICT_GATE["read_top_level_imports"](cls_tree, "pkg") == {"W"}
+
+
+def test_read_top_level_imports_rejects_a_star_import() -> None:
+    """``from .x import *`` hides the writer names from the gate, so it fails."""
+    with pytest.raises(ValueError, match="star import"):
+        _DICT_GATE["read_top_level_imports"](ast.parse("from .x import *"), "pkg")
+
+
 def test_read_top_level_imports_skips_private_type_checking_and_function_imports() -> None:
     """``_private`` modules, ``TYPE_CHECKING`` blocks and function bodies are not writers."""
     cls_tree = ast.parse(

@@ -24,21 +24,34 @@ _RE_ROW = re.compile(r"^\|[^|]*\|\s*`(\w+)`\s*\|")
 _RE_SEPARATOR = re.compile(r"^\|[\s:|-]+$")
 
 
-def _iter_statements(list_body: list[ast.stmt]) -> Iterator[ast.stmt]:
-    """Yield the statements that run at import time, descending into ``try``/``if`` only.
+def _runtime_branches(cls_node: ast.stmt) -> list[ast.stmt]:
+    """Return the nested statements of ``cls_node`` that can run at import time."""
+    if isinstance(cls_node, (ast.Try, ast.TryStar)):
+        list_nested = [*cls_node.body]
+        for cls_handler in cls_node.handlers:
+            list_nested.extend(cls_handler.body)
+        return [*list_nested, *cls_node.orelse, *cls_node.finalbody]
+    if isinstance(cls_node, ast.With):
+        return cls_node.body
+    if not isinstance(cls_node, ast.If):
+        return []
+    str_test = ast.unparse(cls_node.test)
+    if str_test.endswith("TYPE_CHECKING"):
+        return cls_node.orelse if not str_test.startswith("not ") else cls_node.body
+    return [*cls_node.body, *cls_node.orelse]
 
-    An ``if TYPE_CHECKING:`` body is skipped (its names are not importable at runtime), and
-    function and class bodies are never entered.
+
+def _iter_statements(
+    list_body: list[ast.stmt], bool_nested: bool = False
+) -> Iterator[tuple[ast.stmt, bool]]:
+    """Yield ``(statement, is_nested)`` for what runs at import time.
+
+    Descends into ``try``, ``with`` and ``if`` only. The branch a ``TYPE_CHECKING`` test
+    never takes at runtime is skipped, and function and class bodies are never entered.
     """
     for cls_node in list_body:
-        yield cls_node
-        if isinstance(cls_node, ast.Try):
-            list_nested = [*cls_node.body, *cls_node.orelse, *cls_node.finalbody]
-            for cls_handler in cls_node.handlers:
-                list_nested.extend(cls_handler.body)
-            yield from _iter_statements(list_nested)
-        elif isinstance(cls_node, ast.If) and ast.unparse(cls_node.test) != "TYPE_CHECKING":
-            yield from _iter_statements([*cls_node.body, *cls_node.orelse])
+        yield cls_node, bool_nested
+        yield from _iter_statements(_runtime_branches(cls_node), True)
 
 
 def _read_literal_names(cls_value: ast.expr) -> set[str]:
@@ -86,18 +99,20 @@ def read_all_names(cls_tree: ast.Module) -> set[str]:
     """
     set_names: set[str] = set()
     bool_found = False
-    for cls_node in _iter_statements(cls_tree.body):
+    for cls_node, bool_nested in _iter_statements(cls_tree.body):
         cls_replaced = _replacement_value(cls_node)
+        if cls_replaced is not None and bool_nested:
+            raise ValueError("__all__ may only be assigned with = at the top level")
         if cls_replaced is not None:
             set_names, bool_found = _read_literal_names(cls_replaced), True
         elif isinstance(cls_node, ast.AugAssign) and _is_all_name(cls_node.target):
             if not isinstance(cls_node.op, ast.Add):
                 raise ValueError("__all__ may only be extended with +=")
             set_names, bool_found = set_names | _read_literal_names(cls_node.value), True
-        elif isinstance(cls_node, ast.Expr) and ast.unparse(cls_node).startswith("__all__."):
+        elif isinstance(cls_node, ast.Expr) and ast.unparse(cls_node).startswith("__all__"):
             raise ValueError("__all__ is mutated by a method call; use = or += with literals")
     if not bool_found:
-        raise ValueError("no top-level __all__ found")
+        raise ValueError("no __all__ assignment found at import time")
     return set_names
 
 
@@ -131,8 +146,10 @@ def read_top_level_imports(cls_tree: ast.Module, str_package: str) -> set[str]:
         with ``_`` is private and never a writer source.
     """
     set_top: set[str] = set()
-    for cls_node in _iter_statements(cls_tree.body):
+    for cls_node, _ in _iter_statements(cls_tree.body):
         if isinstance(cls_node, ast.ImportFrom) and _is_writer_module(cls_node, str_package):
+            if any(cls_alias.name == "*" for cls_alias in cls_node.names):
+                raise ValueError(f"star import from {cls_node.module}: list the names explicitly")
             set_top.update(cls_alias.asname or cls_alias.name for cls_alias in cls_node.names)
     return set_top
 
