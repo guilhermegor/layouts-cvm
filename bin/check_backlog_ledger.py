@@ -211,8 +211,29 @@ def base_candidates() -> list:
     return list(dict.fromkeys(list_refs))
 
 
+def ref_exists(str_ref: str) -> bool:
+    """Return whether ``str_ref`` names a commit in this repository.
+
+    Parameters
+    ----------
+    str_ref : str
+        Any ref or revision.
+
+    Returns
+    -------
+    bool
+        ``True`` when it resolves to a commit.
+    """
+    return bool(_git(["rev-parse", "--verify", "--quiet", f"{str_ref}^{{commit}}"]))
+
+
 def resolve_base(list_refs: list) -> str:
-    """Return the merge-base of HEAD and the first resolvable ref, counting a merge in progress.
+    """Return the merge-base of HEAD and the first EXISTING ref, counting a merge in progress.
+
+    An existing ref with no common ancestor (a shallow fetch, an orphan branch) is a failure,
+    never a reason to try the next candidate: that would diff against the wrong branch. The
+    one exception is the ``origin/<name>`` / ``<name>`` pair, where the later base wins, so a
+    stale remote-tracking ref cannot charge a newer local branch's commits to this one.
 
     Parameters
     ----------
@@ -222,13 +243,20 @@ def resolve_base(list_refs: list) -> str:
     Returns
     -------
     str
-        The base commit; empty when no candidate ref resolves.
+        The base commit; empty when no candidate exists or the chosen one has no merge-base.
     """
-    for str_ref in list_refs:
+    list_found = [str_ref for str_ref in list_refs if ref_exists(str_ref)]
+    if not list_found:
+        return ""
+    str_name = list_found[0].removeprefix("origin/")
+    str_best = ""
+    for str_ref in list_found:
+        if str_ref.removeprefix("origin/") != str_name:
+            continue
         str_base = _git(["merge-base", str_ref, "HEAD", *merge_heads()])
-        if str_base:
-            return str_base
-    return ""
+        if str_base and (not str_best or _git(["merge-base", str_best, str_base]) == str_best):
+            str_best = str_base
+    return str_best
 
 
 def is_unborn_branch() -> bool:
@@ -248,7 +276,7 @@ def is_unborn_branch() -> bool:
     )
 
 
-def fail_closed(str_cause: str) -> int:
+def fail_closed(str_cause: str, str_remedy: str) -> int:
     """Report that the gate could not look, and fail.
 
     "Could not look" must never print the same verdict as "nothing to check".
@@ -257,6 +285,8 @@ def fail_closed(str_cause: str) -> int:
     ----------
     str_cause : str
         What could not be resolved, e.g. the refs that were tried.
+    str_remedy : str
+        The fix that matches that cause.
 
     Returns
     -------
@@ -264,8 +294,7 @@ def fail_closed(str_cause: str) -> int:
         Always 1.
     """
     print(
-        f"❌ work-ledger check {str_cause}. In CI, check out with 'fetch-depth: 0' so "
-        "the base branch and a common ancestor exist.",
+        f"❌ work-ledger check {str_cause}. {str_remedy}",
         file=sys.stderr,
     )
     return 1
@@ -364,11 +393,23 @@ def main() -> int:
 
     str_head = _git(["rev-parse", "--verify", "--quiet", "HEAD"])
     if not str_head:
-        return 0 if is_unborn_branch() else fail_closed("could not resolve HEAD")
+        return (
+            0
+            if is_unborn_branch()
+            else fail_closed(
+                "could not resolve HEAD",
+                "Run it inside a git checkout, with git installed and the directory trusted "
+                "(safe.directory).",
+            )
+        )
     list_refs = base_candidates()
     str_base = resolve_base(list_refs)
     if not str_base:
-        return fail_closed(f"could not resolve a base branch (tried {', '.join(list_refs)})")
+        return fail_closed(
+            f"could not resolve a base branch (tried {', '.join(list_refs)})",
+            "In CI, check out with 'fetch-depth: 0' so the base branch and a common "
+            "ancestor exist; locally, fetch the base or set origin/HEAD.",
+        )
 
     list_paths = [] if str_base == str_head else changed_paths(str_base)
     if not list_paths or not needs_ledger(list_paths, cls_gate):

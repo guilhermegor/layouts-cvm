@@ -942,6 +942,9 @@ def _isolate_git(monkeypatch: pytest.MonkeyPatch, path_scratch: Path) -> None:
     monkeypatch.delenv("GITHUB_EVENT_PATH", raising=False)
     monkeypatch.delenv("GITHUB_ACTOR", raising=False)
     monkeypatch.delenv("GITHUB_BASE_REF", raising=False)
+    monkeypatch.delenv("GIT_DIR", raising=False)
+    monkeypatch.delenv("GIT_WORK_TREE", raising=False)
+    monkeypatch.delenv("GIT_INDEX_FILE", raising=False)
     monkeypatch.chdir(path_scratch)
 
 
@@ -1047,3 +1050,37 @@ def test_main_on_an_unborn_branch_has_nothing_to_check(
     _isolate_git(monkeypatch, tmp_path)
     _git_in(tmp_path, "init", "-q", "--initial-branch=main")
     assert ledger.main() == 0
+
+
+@pytest.fixture
+def path_orphan_checkout(path_ci_checkout: Path) -> Path:
+    """Return the CI shape with HEAD on an orphan branch and a ``master`` it could fall to."""
+    _git_in(path_ci_checkout, "update-ref", "refs/heads/master", "feature")
+    _git_in(path_ci_checkout, "checkout", "-q", "--orphan", "other")
+    _git_in(path_ci_checkout, "commit", "-q", "--allow-empty", "-m", "orphan")
+    return path_ci_checkout
+
+
+def test_existing_ref_without_a_merge_base_does_not_fall_through(
+    path_orphan_checkout: Path,
+) -> None:
+    """``origin/main`` exists but shares no history: no base, never the next candidate."""
+    assert ledger.resolve_base(["origin/main", "master"]) == ""
+
+
+def test_main_fails_closed_when_the_existing_base_shares_no_history(
+    path_orphan_checkout: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """The gate reports it could not look instead of diffing against ``master``."""
+    assert (ledger.main(), "could not resolve a base" in capsys.readouterr().err) == (1, True)
+
+
+def test_newer_local_branch_beats_a_stale_remote_tracking_ref(path_ci_checkout: Path) -> None:
+    """A stale ``origin/main`` must not make the branch inherit main's newer commits."""
+    _git_in(path_ci_checkout, "checkout", "-q", "-b", "main", "origin/main")
+    _git_in(path_ci_checkout, "commit", "-q", "--allow-empty", "-m", "newer main")
+    _git_in(path_ci_checkout, "checkout", "-q", "feature")
+    _git_in(path_ci_checkout, "merge", "-q", "--no-edit", "main")
+    assert ledger.resolve_base(["origin/main", "main"]) == _git_in(
+        path_ci_checkout, "rev-parse", "main"
+    )
