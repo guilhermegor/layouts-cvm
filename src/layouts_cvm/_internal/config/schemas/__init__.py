@@ -63,6 +63,15 @@ from layouts_cvm._internal.config.schemas.cda_v3 import (
     CdaV3Inform,
     CdaV3InvExt,
 )
+from layouts_cvm._internal.config.schemas.demonstrativo_far import (
+    MOVEMENT_RULES,
+    DemonstrativoFarDescAdm,
+    DemonstrativoFarDocMovMes,
+    DemonstrativoFarDocument,
+    DemonstrativoFarFar,
+    DemonstrativoFarMovimento,
+    DemonstrativoFarRegistro,
+)
 from layouts_cvm._internal.config.schemas.extrato import (
     AnbimaCode,
     AtivExter,
@@ -406,6 +415,13 @@ __all__ = [
     "EntradaSaida",
     "ExtratoBlock",
     "ExtratoDocument",
+    "MOVEMENT_RULES",
+    "DemonstrativoFarDescAdm",
+    "DemonstrativoFarDocMovMes",
+    "DemonstrativoFarDocument",
+    "DemonstrativoFarFar",
+    "DemonstrativoFarMovimento",
+    "DemonstrativoFarRegistro",
     "ExtratoHeader",
     "ExtratoRow",
     "FiveDecimalField",

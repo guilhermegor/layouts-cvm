@@ -1,0 +1,150 @@
+"""Unit tests for the FAR submission writer.
+
+Expected tags, order and the Table A rules are typed from the CVM page
+(``PadraoXMLFAR.asp``), not derived from the models.
+"""
+
+from pathlib import Path
+from xml.etree import ElementTree as ET  # noqa: S405
+
+from pydantic import ValidationError
+import pytest
+
+from layouts_cvm import DemonstrativoFar
+from layouts_cvm._internal.config.schemas.demonstrativo_far import DemonstrativoFarDocument
+
+
+CNPJ_ADM = "11222333000181"
+CNPJ_A = "11444777000161"
+CNPJ_B = "11222333000181"
+DESC = {"cnpj_adm": CNPJ_ADM, "dt_compt": "06/2017", "dt_gerac_arq": "15/07/2017"}
+
+
+def _fund(cnpj: str = CNPJ_A, **over: object) -> dict:
+    base = {
+        "cnpj_fundo": cnpj,
+        "nr_quota_circul_ult_dia_mes": "1000.5",
+        "vl_quota_ult_dia_mes": "12.12345678901",
+        "nr_total_quotst_ult_dia_mes": 40,
+        "doc_mov_mes": {
+            "row_mov_por_fundo": [
+                {"cd_mov": 53, "vl_entr": 10},
+                {"cd_mov": 54, "vl_saida": 4},
+            ]
+        },
+    }
+    base.update(over)
+    return base
+
+
+def _doc(*funds: dict) -> dict:
+    return {"desc_adm": DESC, "far": {"row_registro_movimento": list(funds) or [_fund()]}}
+
+
+def _xml(doc: dict) -> ET.Element:
+    return ET.fromstring(DemonstrativoFar().export(doc).encode("windows-1252"))  # noqa: S314
+
+
+def test_declaration_and_no_namespace() -> None:
+    """Export starts with the windows-1252 declaration; root has no namespace."""
+    text = DemonstrativoFar().export(_doc())
+    assert text.startswith('<?xml version="1.0" encoding="windows-1252"?>\n<DOC_ARQ>')
+
+
+def test_root_children_in_page_order() -> None:
+    """Root children are DESC_ADM then FAR."""
+    assert [c.tag for c in _xml(_doc())] == ["DESC_ADM", "FAR"]
+
+
+def test_desc_adm_tags_and_cod_doc() -> None:
+    """DESC_ADM tags in page order, COD_DOC is 4."""
+    node = _xml(_doc())[0]
+    assert [(c.tag, c.text) for c in node] == [
+        ("COD_DOC", "4"),
+        ("CNPJ_ADM", CNPJ_ADM),
+        ("DT_COMPT", "06/2017"),
+        ("DT_GERAC_ARQ", "15/07/2017"),
+    ]
+
+
+def test_fund_tags_without_distribution() -> None:
+    """Without distribution the three distribution tags are omitted."""
+    row = _xml(_doc())[1][0]
+    assert [c.tag for c in row] == [
+        "CNPJ_FUNDO",
+        "NR_QUOTA_CIRCUL_ULT_DIA_MES",
+        "VL_QUOTA_ULT_DIA_MES",
+        "NR_TOTAL_QUOTST_ULT_DIA_MES",
+        "DOC_MOV_MES",
+    ]
+
+
+def test_fund_tags_with_distribution_in_page_order() -> None:
+    """With distribution: VL_ULT_DISTR_QUOTA, DT_DISTR, VL_QUOTA_DT_ULT_DISTR."""
+    fund = _fund(vl_ult_distr_quota="1", dt_distr="10/06/2017", vl_quota_dt_ult_distr="2")
+    assert [c.tag for c in _xml(_doc(fund))[1][0]][4:7] == [
+        "VL_ULT_DISTR_QUOTA",
+        "DT_DISTR",
+        "VL_QUOTA_DT_ULT_DISTR",
+    ]
+
+
+def test_decimals_use_comma_and_ten_places_truncated() -> None:
+    """Decimals: comma separator, 10 places, truncated."""
+    row = _xml(_doc())[1][0]
+    assert [row[1].text, row[2].text] == ["1000,5000000000", "12,1234567890"]
+
+
+def test_movement_rows() -> None:
+    """Movements serialize under DOC_MOV_MES/ROW_MOV_POR_FUNDO, N columns omitted."""
+    rows = list(_xml(_doc())[1][0].find("DOC_MOV_MES"))
+    assert [[(c.tag, c.text) for c in r] for r in rows] == [
+        [("CD_MOV", "53"), ("VL_ENTR", "10")],
+        [("CD_MOV", "54"), ("VL_SAIDA", "4")],
+    ]
+
+
+def test_several_funds_repeat_row() -> None:
+    """Each fund is one ROW_REGISTRO_MOVIMENTO."""
+    assert len(_xml(_doc(_fund(CNPJ_A), _fund(CNPJ_B)))[1]) == 2
+
+
+def test_mapping_and_model_give_same_bytes() -> None:
+    """A mapping and its model serialise identically."""
+    d = _doc()
+    assert DemonstrativoFar().export(d) == DemonstrativoFar().export(
+        DemonstrativoFarDocument.model_validate(d)
+    )
+
+
+def test_output_path_writes_file_and_returns_none(tmp_path: Path) -> None:
+    """With output_path the file is written and None returned."""
+    path = tmp_path / "far.xml"
+    assert (DemonstrativoFar().export(_doc(), str(path)), path.exists()) == (None, True)
+
+
+def _bad_movements(*rows: dict) -> dict:
+    return _fund(doc_mov_mes={"row_mov_por_fundo": list(rows)})
+
+
+@pytest.mark.parametrize(
+    "doc",
+    [
+        _doc(_bad_movements({"cd_mov": 999, "vl_entr": 1})),
+        _doc(_bad_movements({"cd_mov": 53})),
+        _doc(_bad_movements({"cd_mov": 53, "vl_entr": 1, "vl_saida": 1})),
+        _doc(_bad_movements({"cd_mov": 54, "vl_entr": 1, "vl_saida": 1})),
+        _doc(_bad_movements({"cd_mov": 53, "vl_entr": 1}, {"cd_mov": 53, "vl_entr": 2})),
+        _doc(_fund(vl_ult_distr_quota="1")),
+        _doc(_fund(CNPJ_A), _fund(CNPJ_A)),
+        _doc(_fund(cnpj_fundo="11222333000182")),
+        _doc(_fund(nr_quota_circul_ult_dia_mes=1.5)),
+        {"desc_adm": {**DESC, "dt_compt": "13/2017"}, "far": _doc()["far"]},
+        {"desc_adm": {**DESC, "cod_doc": 5}, "far": _doc()["far"]},
+        {"desc_adm": DESC, "far": {"row_registro_movimento": []}},
+    ],
+)
+def test_invalid_documents_are_rejected(doc: dict) -> None:
+    """Rule violations raise ValidationError."""
+    with pytest.raises(ValidationError):
+        DemonstrativoFar().export(doc)
