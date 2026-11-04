@@ -93,7 +93,7 @@ def _require_finite(value: object) -> object:
     return value
 
 
-AccountField = Annotated[str, AfterValidator(_check_account)]
+Cofi4010AccountField = Annotated[str, AfterValidator(_check_account)]
 CompetenceMMAAAA = Annotated[str, AfterValidator(_check_competence)]
 CnpjField = Annotated[str, AfterValidator(validated_cnpj)]
 ValueField = Annotated[
@@ -113,7 +113,7 @@ class Cofi4010Block(BaseModel):
 class Cofi4010Account(Cofi4010Block):
     """One account record: code plus the three signed value columns."""
 
-    conta: AccountField
+    conta: Cofi4010AccountField
     total: ValueField
     ate_90_dias: ValueField
     apos_90_dias: ValueField
