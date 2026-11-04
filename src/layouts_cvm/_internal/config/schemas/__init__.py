@@ -173,6 +173,17 @@ from layouts_cvm._internal.config.schemas.inf_mensal_fidc import (
     TaxaValorMobili,
     ValoresMob,
 )
+from layouts_cvm._internal.config.schemas.inf_mensal_fidc_489 import (
+    AplicAtivo489,
+    DesempClasse489,
+    Dicred489,
+    InfMensalFidc489Document,
+    InfMensalFidc489Header,
+    InfMensalFidc489Inform,
+    NumCotistas489,
+    OutrasInform489,
+    RentMes489,
+)
 from layouts_cvm._internal.config.schemas.informe_diario import (
     InformeDiarioDocument,
     InformeDiarioHeader,
@@ -422,6 +433,9 @@ __all__ = [
     "InfFundo157Cotista",
     "InfFundo157Document",
     "InfFundo157Header",
+    "InfMensalFidc489Document",
+    "InfMensalFidc489Header",
+    "InfMensalFidc489Inform",
     "InfMensalFidcDocument",
     "InfMensalFidcHeader",
     "InfMensalFidcInform",
@@ -605,4 +619,10 @@ __all__ = [
     "truncate_to_scale",
     "validate_person_doc",
     "validated_cnpj",
+    "AplicAtivo489",
+    "DesempClasse489",
+    "Dicred489",
+    "NumCotistas489",
+    "OutrasInform489",
+    "RentMes489",
 ]
