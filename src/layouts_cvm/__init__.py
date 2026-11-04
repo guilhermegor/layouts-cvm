@@ -23,10 +23,12 @@ from layouts_cvm.inf_mensal_fidc_489 import InfMensalFidc489
 from layouts_cvm.informe_anual_auditor import InformeAnualAuditor
 from layouts_cvm.informe_art12_res33 import InformeArt12Res33
 from layouts_cvm.informe_diario import InformeDiario
+from layouts_cvm.informe_diario_v1 import InformeDiarioV1
 from layouts_cvm.informe_diario_v2 import InformeDiarioV2
 from layouts_cvm.informe_diario_v3 import InformeDiarioV3
 from layouts_cvm.informe_portabilidade import InformePortabilidade
 from layouts_cvm.informe_quadrimestral import InformeQuadrimestral
+from layouts_cvm.informe_semestral_inr_parte2 import InformeSemestralInrParte2
 from layouts_cvm.informe_trimestral_v1 import InformeTrimestralV1
 from layouts_cvm.inr_mensal import InrMensal
 from layouts_cvm.lamina import Lamina
@@ -58,10 +60,12 @@ __all__ = [
     "InfMensalFidc489",
     "InformeArt12Res33",
     "InformeDiario",
+    "InformeDiarioV1",
     "InformeDiarioV2",
     "InformeDiarioV3",
     "InformePortabilidade",
     "InformeQuadrimestral",
+    "InformeSemestralInrParte2",
     "InformeTrimestralV1",
     "InrMensal",
     "Lamina",
