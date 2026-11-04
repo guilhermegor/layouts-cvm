@@ -33,7 +33,7 @@ Build, validate and serialise the files a fund sends to CVM, in CVM's own file l
   [writer issues](https://github.com/guilhermegor/layouts-cvm/issues?q=is%3Aissue+is%3Aopen+writer),
   so they are planned, not forgotten.
 - **Decimals are truncated, never rounded** (`ROUND_DOWN`): a value with more digits than the
-  layout's scale loses the excess, so a reported figure is never inflated.
+  layout's scale loses the excess, so a reported figure never grows in magnitude.
 - **CNPJ and CPF check digits are validated** before anything is serialised.
 
 <!-- optional section: delete it when the project has no feature list -->
@@ -54,6 +54,7 @@ Build, validate and serialise the files a fund sends to CVM, in CVM's own file l
 | Extrato das Informações sobre o Fundo V3 | `Extrato` | `ExtratoDocument` | [PadraoXMLInfExtratoV3](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfExtratoV3.asp) |
 | Informe de Fundo 157 | `InfFundo157` | `InfFundo157Document` | [PadraoXMLInf157](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInf157.asp) |
 | Informe Mensal FIDC (ICVM 576) | `InfMensalFidc` | `InfMensalFidcDocument` | [PadraoXMLMensalFIDC576](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLMensalFIDC576.asp) |
+| Informe Anual de Auditor | `InformeAnualAuditor` | `InformeAnualAuditorDocument` | [PadraoXMLAuditorAnual](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLAuditorAnual.asp) |
 | Informe Mensal FIDC (ICVM 489) | `InfMensalFidc489` | `InfMensalFidc489Document` | [PadraoXMLMensalFIDC489](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLMensalFIDC489.asp) |
 | Informe Art. 12 Res. CVM 33 | `InformeArt12Res33` | `InformeArt12Res33Document` | [PadraoXMLPrest](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLPrest.asp) |
 | Informe Diário V4 | `InformeDiario` | `InformeDiarioDocument` | [PadraoXMLInfoDiarioNetV4](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNetV4.asp) |
