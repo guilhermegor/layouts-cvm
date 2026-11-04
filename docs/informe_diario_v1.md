@@ -28,6 +28,6 @@ Escalas (2 casas; `VL_QUOTA` até 12; `PR_COTST` até 4), `LISTA_INFORM` e o blo
 - A página não traz número de versão nem período de vigência; o início da vigência (05/04/2004,
   obrigatoriedade do formato) e o fim (01/07/2012) vêm do catálogo da CVM.
 - `LISTA_COTST_SIGNIF` é opcional e omitida quando vazia.
-- O `INFORM` rejeita campos desconhecidos (`VL_TOTAL_SAI`, `DATA_PROX_PL`, `COD_SUBCLASSE`).
+- O cabeçalho, o documento, o `INFORM` e o `COTST_SIGNIF` rejeitam campos desconhecidos (`VL_TOTAL_SAI`, `DATA_PROX_PL`, `COD_SUBCLASSE`).
 - Excesso de casas decimais é truncado, nunca arredondado; o separador decimal é a vírgula.
 - A escrita em arquivo é atômica.

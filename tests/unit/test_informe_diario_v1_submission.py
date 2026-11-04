@@ -11,11 +11,11 @@ import re
 from pydantic import ValidationError
 import pytest
 
-from layouts_cvm._internal.config.schemas.informe_diario import SignificantShareholder
 from layouts_cvm._internal.config.schemas.informe_diario_v1 import (
     InformeDiarioV1Document,
     InformeDiarioV1Header,
     InformeDiarioV1Inform,
+    InformeDiarioV1Shareholder,
 )
 from layouts_cvm.informe_diario_v1 import InformeDiarioV1
 
@@ -43,7 +43,9 @@ def _inform(**overrides: object) -> InformeDiarioV1Inform:
         "resg_dia": "4",
         "nr_cotst": 7,
         "lista_cotst_signif": [
-            SignificantShareholder(tp_pessoa="PJ", cpf_cnpj_cotst=VALID_CNPJ, pr_cotst="20.12345")
+            InformeDiarioV1Shareholder(
+                tp_pessoa="PJ", cpf_cnpj_cotst=VALID_CNPJ, pr_cotst="20.12345"
+            )
         ],
     }
     fields.update(overrides)
@@ -253,9 +255,12 @@ def test_document_rejects_unknown_field() -> None:
 
 def test_several_informs_stay_inside_one_lista_inform() -> None:
     """Emit one INFORM per fund, in order, inside a single LISTA_INFORM."""
-    doc = InformeDiarioV1Document(header=_header(), informs=[_inform(), _inform()])
+    doc = InformeDiarioV1Document(
+        header=_header(), informs=[_inform(), _inform(cnpj_fdo="11444777000161")]
+    )
+    xml = InformeDiarioV1().export(doc)
 
-    assert InformeDiarioV1().export(doc).count("<INFORM>") == 2
+    assert re.findall(r"<CNPJ_FDO>(\d+)</CNPJ_FDO>", xml) == [VALID_CNPJ, "11444777000161"]
 
 
 def test_exactly_100_funds_are_accepted() -> None:
@@ -263,3 +268,18 @@ def test_exactly_100_funds_are_accepted() -> None:
     doc = InformeDiarioV1Document(header=_header(), informs=[_inform()] * 100)
 
     assert len(doc.informs) == 100
+
+
+def test_shareholder_rejects_unknown_field() -> None:
+    """Reject a stray key on a shareholder instead of dropping it from the XML."""
+    dict_inform = _inform().model_dump()
+    dict_inform["lista_cotst_signif"][0]["foo"] = 1
+    with pytest.raises(ValidationError):
+        InformeDiarioV1Inform(**dict_inform)
+
+
+def test_several_informs_share_one_lista_inform_wrapper() -> None:
+    """Open LISTA_INFORM exactly once however many funds follow."""
+    doc = InformeDiarioV1Document(header=_header(), informs=[_inform(), _inform()])
+
+    assert InformeDiarioV1().export(doc).count("<LISTA_INFORM>") == 1

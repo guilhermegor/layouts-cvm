@@ -41,6 +41,12 @@ class InformeDiarioV1Header(InformeDiarioHeader):
     versao: None = None  # type: ignore[assignment]  # V1 has no VERSAO; None is omitted
 
 
+class InformeDiarioV1Shareholder(SignificantShareholder):
+    """COTST_SIGNIF — V1 shareholder, closed so a stray key is rejected, not dropped."""
+
+    model_config = ConfigDict(extra="forbid")
+
+
 class InformeDiarioV1Inform(BaseModel):
     """INFORM — one fund's daily movement, keyed by ``CNPJ_FDO`` only.
 
@@ -57,7 +63,7 @@ class InformeDiarioV1Inform(BaseModel):
     captc_dia: TwoDecimalField
     resg_dia: TwoDecimalField
     nr_cotst: int = Field(ge=0)
-    lista_cotst_signif: list[SignificantShareholder] | None = None
+    lista_cotst_signif: list[InformeDiarioV1Shareholder] | None = None
 
     @field_validator("cnpj_fdo")
     @classmethod
