@@ -534,12 +534,16 @@ def main() -> int:
     int_max_polls = int(os.environ.get("GATE_MAX_POLLS", "26"))
     int_poll_seconds = int(os.environ.get("GATE_POLL_SECONDS", "30"))
 
-    dict_pr = _api("GET", f"{API}/repos/{str_repo}/pulls/{int_pr}") or {}
+    dict_pr = _api("GET", f"{API}/repos/{str_repo}/pulls/{int_pr}")
+    list_files = _api("GET", f"{API}/repos/{str_repo}/pulls/{int_pr}/files?per_page=100")
+    if dict_pr is None or list_files is None:
+        str_msg = "::error::could not read the PR or its files; refusing to classify blind"
+        print(str_msg, file=sys.stderr)
+        return 1
     str_head_sha = (dict_pr.get("head") or {}).get("sha", "")
     int_changed = int(dict_pr.get("additions", 0)) + int(dict_pr.get("deletions", 0))
     list_labels = [lbl["name"] for lbl in dict_pr.get("labels", [])]
 
-    list_files = _api("GET", f"{API}/repos/{str_repo}/pulls/{int_pr}/files?per_page=100") or []
     list_paths = [f["filename"] for f in list_files]
 
     str_risk = classify_risk(list_paths)

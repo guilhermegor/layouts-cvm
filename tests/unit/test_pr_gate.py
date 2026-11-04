@@ -444,3 +444,20 @@ def test_main_returns_zero_when_every_axis_is_green(
     monkeypatch.setattr(gate, "_enable_auto_merge", lambda *a, **k: None)
 
     assert gate.main() == 0
+
+
+@pytest.mark.parametrize("str_dropped", list(_DICT_MAIN_API_RESPONSES)[:2])
+def test_main_fails_closed_when_a_pr_read_returns_nothing(
+    monkeypatch: pytest.MonkeyPatch, str_dropped: str
+) -> None:
+    """A failed PR or files read must not classify as an empty docs PR and arm auto-merge."""
+    monkeypatch.setenv("GITHUB_TOKEN", "tkn")
+    monkeypatch.setenv("GITHUB_REPOSITORY", "o/r")
+    monkeypatch.setenv("PR_NUMBER", "7")
+    list_calls: list = []
+    dict_responses = {k: v for k, v in _DICT_MAIN_API_RESPONSES.items() if k != str_dropped}
+
+    monkeypatch.setattr(gate, "_api", lambda m, u, p=None: dict_responses.get(u))
+    monkeypatch.setattr(gate, "_enable_auto_merge", _CallRecorder(list_calls, "enable"))
+
+    assert (gate.main(), list_calls) == (1, [])
