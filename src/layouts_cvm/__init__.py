@@ -27,6 +27,7 @@ from layouts_cvm.informe_quadrimestral import InformeQuadrimestral
 from layouts_cvm.informe_trimestral_v1 import InformeTrimestralV1
 from layouts_cvm.inr_mensal import InrMensal
 from layouts_cvm.lamina import Lamina
+from layouts_cvm.lamina_v1 import LaminaV1
 from layouts_cvm.lamina_v2 import LaminaV2
 from layouts_cvm.main import main
 from layouts_cvm.perfil_mensal import PerfilMensal
@@ -58,6 +59,7 @@ __all__ = [
     "InformeTrimestralV1",
     "InrMensal",
     "Lamina",
+    "LaminaV1",
     "LaminaV2",
     "PerfilMensal",
     "PerfilMensalOriginal",
