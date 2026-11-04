@@ -3,7 +3,7 @@
 Envio (→ CVM) do padrão **Informe Diário V1**, vigente até 01/07/2012
 ([`PadraoXMLInfoDiarioNet.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNet.asp)).
 
-> **Veja também:** [Informe Diário (V2)](informe_diario_v2.md) · [Informe Diário (V4)](informe_diario.md) · [Referência da API](api/index.md)
+> **Veja também:** [Informe Diário (V2)](informe_diario_v2.md) · [Informe Diário (V3)](informe_diario_v3.md) · [Informe Diário (V4)](informe_diario.md) · [Referência da API](api/index.md)
 
 ## Descrição
 
@@ -21,7 +21,7 @@ Ordem das tags do `INFORM`: `CNPJ_FDO`, `VL_TOTAL`, `VL_QUOTA`, `PATRIM_LIQ`, `C
 `RESG_DIA`, `NR_COTST`, `LISTA_COTST_SIGNIF`.
 
 Escalas (2 casas; `VL_QUOTA` até 12; `PR_COTST` até 4), `LISTA_INFORM` e o bloco
-`COTST_SIGNIF` são idênticos ao V2 e importados dele.
+`COTST_SIGNIF` são idênticos ao V2 e importados do módulo do V4.
 
 ## Decisões
 

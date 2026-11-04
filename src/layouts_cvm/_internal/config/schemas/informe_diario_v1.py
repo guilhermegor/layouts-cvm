@@ -12,7 +12,7 @@ Measured against the V2 schema in
 
 Fund identification (``CNPJ_FDO`` only), the ``LISTA_INFORM`` wrapper, the decimal scales
 (2 places; ``VL_QUOTA`` up to 12; ``PR_COTST`` up to 4) and the ``COTST_SIGNIF`` block are
-identical, so they are imported rather than copied.
+identical, so they are imported (from the V4 module) rather than copied.
 
 **Field order is the XML order**: the writer walks ``model_fields`` in declaration order.
 """

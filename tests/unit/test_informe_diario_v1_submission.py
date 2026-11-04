@@ -1,7 +1,7 @@
 """Unit tests for the Informe Diário V1 submission writer.
 
 Pin the tag order, the LISTA_INFORM wrapper and the decimal scales to
-PadraoXMLInfoDiarioNet.asp, and cover the V1-only rules (VERSAO 1.0, CNPJ_FDO only,
+PadraoXMLInfoDiarioNet.asp, and cover the V1-only rules (no VERSAO, CNPJ_FDO only,
 no DATA_PROX_PL).
 """
 
@@ -112,7 +112,7 @@ def test_decimal_scales_follow_page(tag: str) -> None:
     "tag",
     ["VERSAO", "VL_TOTAL_SAI", "VL_TOTAL_ATV", "DATA_PROX_PL", "COD_SUBCLASSE", "NOME_FUNDO"],
 )
-def test_tags_absent_from_v2_are_not_emitted(tag: str) -> None:
+def test_tags_absent_from_v1_are_not_emitted(tag: str) -> None:
     """Never emit tags the V1 sample file lacks."""
     assert tag not in _xml()
 
@@ -124,9 +124,10 @@ def test_cotst_signif_block_nests_under_lista() -> None:
     assert re.findall(r"<([A-Z_]+)>", block) == ["TP_PESSOA", "CPF_CNPJ_COTST", "PR_COTST"]
 
 
-def test_lista_cotst_signif_omitted_when_empty() -> None:
+@pytest.mark.parametrize("list_cotst", [None, []])
+def test_lista_cotst_signif_omitted_when_empty(list_cotst: list | None) -> None:
     """Omit the optional shareholder list when no shareholder reaches 20%."""
-    assert "LISTA_COTST_SIGNIF" not in _xml(_inform(lista_cotst_signif=None))
+    assert "LISTA_COTST_SIGNIF" not in _xml(_inform(lista_cotst_signif=list_cotst))
 
 
 def test_cod_subclasse_is_rejected() -> None:
@@ -143,8 +144,10 @@ def test_data_prox_pl_is_rejected() -> None:
 
 def test_cnpj_is_required() -> None:
     """Reject an informe without CNPJ_FDO."""
+    dict_inform = _inform().model_dump()
+    del dict_inform["cnpj_fdo"]
     with pytest.raises(ValidationError):
-        _inform(cnpj_fdo=None)
+        InformeDiarioV1Inform(**dict_inform)
 
 
 def test_invalid_cnpj_check_digit_is_rejected() -> None:
@@ -215,7 +218,7 @@ def test_export_file_matches_returned_string(tmp_path: Path) -> None:
     assert out.read_bytes().decode("windows-1252") == _xml()
 
 
-def test_writer_rejects_a_non_v2_document() -> None:
+def test_writer_rejects_a_non_v1_document() -> None:
     """Refuse an object that is not an InformeDiarioV1Document (runtime type check)."""
     with pytest.raises(TypeError):
         InformeDiarioV1().export("not a document")  # type: ignore[arg-type]
