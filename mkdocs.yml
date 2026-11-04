@@ -10,10 +10,12 @@ nav:
       - "Atualização do Cadastro de Ativos": cadastro_ativos.md
       - "CDA — V4": cda.md
       - "CDA — V3": cda_v3.md
+      - "CDA — V2": cda_v2.md
       - "Extrato das Informações sobre o Fundo — V3": extrato.md
       - "Informe de Fundo 157": inf_fundo_157.md
       - "Informe Mensal FIDC — ICVM 576": inf_mensal_fidc.md
       - "Informe Mensal FIDC — ICVM 489": inf_mensal_fidc_489.md
+      - "Informe Art. 12 Res. CVM 33": informe_art12_res33.md
       - "Informe Diário — V4": informe_diario.md
       - "Informe Diário — V3": informe_diario_v3.md
       - "Informe Diário — V2": informe_diario_v2.md

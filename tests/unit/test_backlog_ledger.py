@@ -6,6 +6,7 @@ Only the path-classification and ledger-validation seams are tested here — the
 
 import importlib.util
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -922,4 +923,164 @@ def path_mid_merge(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 
 def test_resolve_base_mid_merge_is_the_incoming_tip(path_mid_merge: Path) -> None:
     """Mid-merge the base is main's tip, never the fork point that charges main's delta."""
-    assert ledger.resolve_base() == _git_in(path_mid_merge, "rev-parse", "main")
+    assert ledger.resolve_base(["main"]) == _git_in(path_mid_merge, "rev-parse", "main")
+
+
+def _isolate_git(monkeypatch: pytest.MonkeyPatch, path_scratch: Path) -> None:
+    """Cut git off from the operator's config, hooks and any enclosing repository.
+
+    Parameters
+    ----------
+    monkeypatch : pytest.MonkeyPatch
+        Used to set the git environment and run the gate from ``path_scratch``.
+    path_scratch : pathlib.Path
+        The directory the test works in; its parent becomes git's discovery ceiling.
+    """
+    monkeypatch.setenv("GIT_CONFIG_GLOBAL", os.devnull)
+    monkeypatch.setenv("GIT_CONFIG_NOSYSTEM", "1")
+    monkeypatch.setenv("GIT_CEILING_DIRECTORIES", str(path_scratch.parent))
+    monkeypatch.delenv("GITHUB_EVENT_PATH", raising=False)
+    monkeypatch.delenv("GITHUB_ACTOR", raising=False)
+    monkeypatch.delenv("GITHUB_BASE_REF", raising=False)
+    monkeypatch.delenv("GIT_DIR", raising=False)
+    monkeypatch.delenv("GIT_WORK_TREE", raising=False)
+    monkeypatch.delenv("GIT_INDEX_FILE", raising=False)
+    monkeypatch.chdir(path_scratch)
+
+
+def _init_repo(path_repo: Path) -> None:
+    """Create a repo on ``main`` with one commit, then branch ``feature`` adding a src file.
+
+    Parameters
+    ----------
+    path_repo : pathlib.Path
+        An empty directory to initialise.
+    """
+    _git_in(path_repo, "init", "-q", "--initial-branch=main")
+    _git_in(path_repo, "config", "user.email", "t@example.com")
+    _git_in(path_repo, "config", "user.name", "t")
+    _git_in(path_repo, "config", "commit.gpgsign", "false")
+    _git_in(path_repo, "commit", "-q", "--allow-empty", "-m", "seed")
+    _git_in(path_repo, "checkout", "-q", "-b", "feature")
+    (path_repo / "src").mkdir()
+    (path_repo / "src" / "a.py").write_text("x = 1\n", encoding="utf-8")
+    _git_in(path_repo, "add", "src")
+    _git_in(path_repo, "commit", "-q", "-m", "feat")
+
+
+@pytest.fixture
+def path_ci_checkout(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    """Return the CI shape: only ``origin/main``, no local ``main``, no ``origin/HEAD``.
+
+    Parameters
+    ----------
+    tmp_path : pathlib.Path
+        Pytest-provided scratch directory.
+    monkeypatch : pytest.MonkeyPatch
+        Used to run the gate inside the repo with a human, non-Actions environment.
+
+    Returns
+    -------
+    pathlib.Path
+        The repository, on ``feature``.
+    """
+    _isolate_git(monkeypatch, tmp_path)
+    _init_repo(tmp_path)
+    _git_in(tmp_path, "update-ref", "refs/remotes/origin/main", "main")
+    _git_in(tmp_path, "branch", "-q", "-D", "main")
+    return tmp_path
+
+
+def test_resolve_base_with_only_origin_main_is_its_tip(path_ci_checkout: Path) -> None:
+    """The CI shape resolves from ``origin/main`` instead of returning an empty base."""
+    assert ledger.resolve_base(ledger.base_candidates()) == _git_in(
+        path_ci_checkout, "rev-parse", "origin/main"
+    )
+
+
+def test_main_with_only_origin_main_and_no_ledger_fails(
+    path_ci_checkout: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """SHOULD-FAIL WITNESS (#57): the branch changes src/ with no ledger, and the gate says so."""
+    assert (ledger.main(), "adds no work ledger" in capsys.readouterr().out) == (1, True)
+
+
+def test_main_with_no_resolvable_base_fails_loudly(
+    path_ci_checkout: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """With no main anywhere, exiting 0 would hide "could not look" as "nothing to check"."""
+    _git_in(path_ci_checkout, "update-ref", "-d", "refs/remotes/origin/main")
+    assert (ledger.main(), "could not resolve a base" in capsys.readouterr().err) == (1, True)
+
+
+def test_github_base_ref_wins_over_the_default_branch(
+    path_ci_checkout: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A PR into ``develop`` is diffed against ``develop``, not against ``main``."""
+    _git_in(path_ci_checkout, "update-ref", "refs/remotes/origin/develop", "HEAD")
+    monkeypatch.setenv("GITHUB_BASE_REF", "develop")
+    assert ledger.resolve_base(ledger.base_candidates()) == _git_in(
+        path_ci_checkout, "rev-parse", "HEAD"
+    )
+
+
+def test_unresolved_github_base_ref_does_not_fall_back_to_main(
+    path_ci_checkout: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """``origin/main`` exists, but the PR targets an unfetched ``develop``: fail, name it."""
+    monkeypatch.setenv("GITHUB_BASE_REF", "develop")
+    assert (ledger.main(), "tried origin/develop, develop)" in capsys.readouterr().err) == (
+        1,
+        True,
+    )
+
+
+def test_main_outside_a_git_checkout_fails_loudly(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """Not-a-repo is "could not look", never "nothing to check"."""
+    _isolate_git(monkeypatch, tmp_path)
+    assert (ledger.main(), "could not resolve HEAD" in capsys.readouterr().err) == (1, True)
+
+
+def test_main_on_an_unborn_branch_has_nothing_to_check(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A repository with no commit yet is the one legitimate empty HEAD."""
+    _isolate_git(monkeypatch, tmp_path)
+    _git_in(tmp_path, "init", "-q", "--initial-branch=main")
+    assert ledger.main() == 0
+
+
+@pytest.fixture
+def path_orphan_checkout(path_ci_checkout: Path) -> Path:
+    """Return the CI shape with HEAD on an orphan branch and a ``master`` it could fall to."""
+    _git_in(path_ci_checkout, "update-ref", "refs/heads/master", "feature")
+    _git_in(path_ci_checkout, "checkout", "-q", "--orphan", "other")
+    _git_in(path_ci_checkout, "commit", "-q", "--allow-empty", "-m", "orphan")
+    return path_ci_checkout
+
+
+def test_existing_ref_without_a_merge_base_does_not_fall_through(
+    path_orphan_checkout: Path,
+) -> None:
+    """``origin/main`` exists but shares no history: no base, never the next candidate."""
+    assert ledger.resolve_base(["origin/main", "master"]) == ""
+
+
+def test_main_fails_closed_when_the_existing_base_shares_no_history(
+    path_orphan_checkout: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """The gate reports it could not look instead of diffing against ``master``."""
+    assert (ledger.main(), "could not resolve a base" in capsys.readouterr().err) == (1, True)
+
+
+def test_newer_local_branch_beats_a_stale_remote_tracking_ref(path_ci_checkout: Path) -> None:
+    """A stale ``origin/main`` must not make the branch inherit main's newer commits."""
+    _git_in(path_ci_checkout, "checkout", "-q", "-b", "main", "origin/main")
+    _git_in(path_ci_checkout, "commit", "-q", "--allow-empty", "-m", "newer main")
+    _git_in(path_ci_checkout, "checkout", "-q", "feature")
+    _git_in(path_ci_checkout, "merge", "-q", "--no-edit", "main")
+    assert ledger.resolve_base(["origin/main", "main"]) == _git_in(
+        path_ci_checkout, "rev-parse", "main"
+    )
