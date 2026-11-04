@@ -70,7 +70,7 @@ def test_export_emits_participant_blocks_without_aplicacoes() -> None:
 def test_aplicacoes_is_rejected() -> None:
     """Part II applications are refused in Part I."""
     bad = _data(aplicacoes=[{"cd_aplic": 1, "vl_mercado_aplic": 5}])
-    with pytest.raises(ValidationError, match="APLICACOES"):
+    with pytest.raises(ValidationError, match="Extra inputs"):
         InformeSemestralInr().export(bad)
 
 
@@ -127,3 +127,26 @@ def test_1000_participants_is_accepted() -> None:
     """The upper bound itself is valid."""
     xml = InformeSemestralInr().export(_with_participants(1000))
     assert xml.count("<PARTICIPANTE>") == 1000
+
+
+@pytest.mark.parametrize("name", ["Header", "Participante", "Document"])
+def test_part_one_models_do_not_inherit_the_live_monthly_models(name: str) -> None:
+    """A frozen layout version must not move when the monthly layout does (PRINCIPLES 1)."""
+    from layouts_cvm._internal.config.schemas import informe_semestral_inr, inr_mensal
+
+    monthly = {
+        "Header": inr_mensal.InrMensalHeader,
+        "Participante": inr_mensal.Participante,
+        "Document": inr_mensal.InrMensalDocument,
+    }[name]
+    part_one = getattr(informe_semestral_inr, f"InformeSemestralInr{name}")
+    assert not issubclass(part_one, monthly)
+
+
+def test_participant_cannot_carry_aplicacoes_at_all() -> None:
+    """The field does not exist, so no mutation or model_construct can emit the tag."""
+    from layouts_cvm._internal.config.schemas.informe_semestral_inr import (
+        InformeSemestralInrParticipante,
+    )
+
+    assert "aplicacoes" not in InformeSemestralInrParticipante.model_fields

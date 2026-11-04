@@ -3,7 +3,7 @@
 Envio (→ CVM) da **Parte I** do Informe Semestral INR
 ([`PadraoXMLInfoSemestralINRParte1.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoSemestralINRParte1.asp)).
 
-> **Veja também:** [Informe Mensal INR](inr_mensal.md), de que a Parte I herda os modelos ·
+> **Veja também:** [Informe Mensal INR](inr_mensal.md), de que a Parte I copia a estrutura (modelos próprios, congelados) ·
 > [Referência da API](api/index.md) · [Uso](usage.md).
 
 !!! warning "A Parte II NÃO está implementada"
@@ -31,6 +31,7 @@ descritos em [Informe Mensal INR](inr_mensal.md). `aplicacoes` é recusado nesta
 
 - **A Parte II** (ver aviso acima) e a consistência entre as duas partes (mesmos investidores,
   mesma competência).
+- Que a competência (`DT_COMPT`) seja de fim de semestre: não confirmado na página da Parte I, nada é imposto além do formato `MM/AAAA`.
 - O dígito verificador de `COD_PARTIC` (a página não publica o algoritmo); só se checa que é um
   dígito.
 - Nenhuma checagem da CVM foi executada; o teste de sintaxe da própria CVM
