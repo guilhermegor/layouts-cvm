@@ -46,4 +46,4 @@ class PerfilMensal739(PerfilMensal):
                 XML string when output_path is None, else None.
         """
         document = coerce_document(PerfilMensal739Document, doc)
-        return super().export(document, output_path, versao="1.0")
+        return super().export(document, output_path, versao=document.header.versao)
