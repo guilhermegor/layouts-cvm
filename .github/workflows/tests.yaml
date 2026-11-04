@@ -25,7 +25,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
     steps:
       - name: Checkout Code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -33,6 +33,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set Up Python ${{ matrix.python-version }}
+        id: setup-python
         uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: ${{ matrix.python-version }}
@@ -62,7 +63,7 @@ jobs:
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: .venv
-          key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('poetry.lock', 'pyproject.toml') }}
+          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('poetry.lock', 'pyproject.toml') }}
 
       - name: Install Dependencies
         if: steps.cached-venv.outputs.cache-hit != 'true'
@@ -109,6 +110,10 @@ jobs:
       - name: Run __all__ Export Completeness Check
         if: runner.os == 'Linux'
         run: poetry run python bin/check_all_exports.py
+
+      - name: Run README Layout Table Gate
+        if: runner.os == 'Linux'
+        run: poetry run python bin/check_readme_layouts.py
 
       - name: Run __all__ Exports-Nothing-Internal Check
         if: runner.os == 'Linux'
