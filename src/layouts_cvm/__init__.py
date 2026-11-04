@@ -18,6 +18,7 @@ from layouts_cvm.cda_v3 import CdaV3
 from layouts_cvm.extrato import Extrato
 from layouts_cvm.inf_fundo_157 import InfFundo157
 from layouts_cvm.inf_mensal_fidc import InfMensalFidc
+from layouts_cvm.inf_mensal_fidc_489 import InfMensalFidc489
 from layouts_cvm.informe_diario import InformeDiario
 from layouts_cvm.informe_diario_v2 import InformeDiarioV2
 from layouts_cvm.informe_diario_v3 import InformeDiarioV3
@@ -50,6 +51,7 @@ __all__ = [
     "Extrato",
     "InfFundo157",
     "InfMensalFidc",
+    "InfMensalFidc489",
     "InformeDiario",
     "InformeDiarioV2",
     "InformeDiarioV3",
