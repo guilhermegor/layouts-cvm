@@ -23,37 +23,50 @@
 
 Build, validate and serialise the files a fund sends to CVM, in CVM's own file layouts.
 
+> **Source of truth.** Field names, decimal scales and cardinalities come from the official
+> [CVM catalog of XML standards](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadroesXML.asp), not from this documentation. When the two disagree,
+> the catalog wins; please open an issue.
+
+- **Direction: submission only** (build, then send to CVM). Reading CVM files back is out of
+  scope today.
+- **Coverage:** the layouts in the table below are implemented. The rest are tracked as open
+  [writer issues](https://github.com/guilhermegor/layouts-cvm/issues?q=is%3Aissue+is%3Aopen+writer),
+  so they are planned, not forgotten.
+- **Decimals are truncated, never rounded** (`ROUND_DOWN`): a value with more digits than the
+  layout's scale loses the excess, so a reported figure is never inflated.
+- **CNPJ and CPF check digits are validated** before anything is serialised.
+
 <!-- optional section: delete it when the project has no feature list -->
 <!-- slug: features -->
 ## Features
 
-- Pydantic models for 19 CVM XML layouts, validated before anything is serialised.
+- Pydantic models for every CVM XML layout listed below, validated before anything is serialised.
 - One writer per layout (`export(doc, output_path=None)`), producing windows-1252 XML.
 - Byte-identical to the original `filings-cvm` writers, pinned by a golden-file test.
 - Runtime dependencies: `pydantic` and `beartype`. No network.
 
-| Layout | Writer | Document |
-|---|---|---|
-| Atualização do Cadastro de Ativos | `CadastroAtivos` | `CadastroAtivosDocument` |
-| CDA V4 | `Cda` | `CdaDocument` |
-| CDA V3 | `CdaV3` | `CdaV3Document` |
-| COFI 4016 (Balanço, largura fixa) | `Cofi4016` | `Cofi4016Document` |
-| Extrato das Informações sobre o Fundo V3 | `Extrato` | `ExtratoDocument` |
-| Informe de Fundo 157 | `InfFundo157` | `InfFundo157Document` |
-| Informe Mensal FIDC (ICVM 576) | `InfMensalFidc` | `InfMensalFidcDocument` |
-| Informe Diário V4 | `InformeDiario` | `InformeDiarioDocument` |
-| Informe Diário V3 | `InformeDiarioV3` | `InformeDiarioV3Document` |
-| Informe Diário V2 | `InformeDiarioV2` | `InformeDiarioV2Document` |
-| Informe de Portabilidade | `InformePortabilidade` | `InformePortabilidadeDocument` |
-| Informe Quadrimestral V2 | `InformeQuadrimestral` | `InformeQuadrimestralDocument` |
-| Informe Trimestral V1 | `InformeTrimestralV1` | `InformeTrimestralV1Document` |
-| Informe Mensal de Investidor Não Residente | `InrMensal` | `InrMensalDocument` |
-| Lâmina de Fundos V3 | `Lamina` | `LaminaDocument` |
-| Lâmina de Fundos V1 | `LaminaV1` | `LaminaV1Document` |
-| Lâmina de Fundos V2 | `LaminaV2` | `LaminaV2Document` |
-| Perfil Mensal V4 | `PerfilMensal` | `PerfilMensalDocument` |
-| Perfil Mensal (original) | `PerfilMensalOriginal` | `PerfilMensalOriginalDocument` |
-| Perfil Mensal V3 | `PerfilMensalV3` | `PerfilMensalV3Document` |
+| Layout | Writer | Document model (private) | Spec |
+|---|---|---|---|
+| Atualização do Cadastro de Ativos | `CadastroAtivos` | `CadastroAtivosDocument` | [PadraoXMLAtivos](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLAtivos.asp) |
+| CDA V4 | `Cda` | `CdaDocument` | [PadraoXMLCDANetV4](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLCDANetV4.aspx) |
+| CDA V3 | `CdaV3` | `CdaV3Document` | [PadraoXMLCDANetV3](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLCDANetV3.aspx) |
+| COFI 4016 (Balanço, largura fixa) | `Cofi4016` | `Cofi4016Document` | [PadraoCOFI](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoCOFI.aspx) |
+| Extrato das Informações sobre o Fundo V3 | `Extrato` | `ExtratoDocument` | [PadraoXMLInfExtratoV3](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfExtratoV3.asp) |
+| Informe de Fundo 157 | `InfFundo157` | `InfFundo157Document` | [PadraoXMLInf157](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInf157.asp) |
+| Informe Mensal FIDC (ICVM 576) | `InfMensalFidc` | `InfMensalFidcDocument` | [PadraoXMLMensalFIDC576](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLMensalFIDC576.asp) |
+| Informe Diário V4 | `InformeDiario` | `InformeDiarioDocument` | [PadraoXMLInfoDiarioNetV4](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNetV4.asp) |
+| Informe Diário V3 | `InformeDiarioV3` | `InformeDiarioV3Document` | [PadraoXMLInfoDiarioNetV3](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNetV3.asp) |
+| Informe Diário V2 | `InformeDiarioV2` | `InformeDiarioV2Document` | [PadraoXMLInfoDiarioNet739](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNet739.asp) |
+| Informe de Portabilidade | `InformePortabilidade` | `InformePortabilidadeDocument` | [PadraoXMLInfoPortabilidade](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoPortabilidade.asp) |
+| Informe Quadrimestral V2 | `InformeQuadrimestral` | `InformeQuadrimestralDocument` | [PadraoXMLInfoTrimV2](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoTrimV2.asp) |
+| Informe Trimestral V1 | `InformeTrimestralV1` | `InformeTrimestralV1Document` | [PadraoXMLInfoTrim](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoTrim.asp) |
+| Informe Mensal de Investidor Não Residente | `InrMensal` | `InrMensalDocument` | [PadraoXMLInfoMensalINR](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoMensalINR.asp) |
+| Lâmina de Fundos V3 | `Lamina` | `LaminaDocument` | [PadraoXMLLaminaV3](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLLaminaV3.asp) |
+| Lâmina de Fundos V1 | `LaminaV1` | `LaminaV1Document` | [PadraoXMLLamina](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLLamina.asp) |
+| Lâmina de Fundos V2 | `LaminaV2` | `LaminaV2Document` | [PadraoXMLLaminaV2](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLLaminaV2.asp) |
+| Perfil Mensal V4 | `PerfilMensal` | `PerfilMensalDocument` | [PadraoXMLPerfilV4](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLPerfilV4.asp) |
+| Perfil Mensal (original) | `PerfilMensalOriginal` | `PerfilMensalOriginalDocument` | [PadraoXMLPerfil](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLPerfil.asp) |
+| Perfil Mensal V3 | `PerfilMensalV3` | `PerfilMensalV3Document` | [PadraoXMLPerfilV3](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLPerfilV3.asp) |
 
 <!-- slug: documentation -->
 ## Documentation
@@ -67,6 +80,12 @@ Python 3.10+ is the only prerequisite; `bin/venv.sh` installs [Poetry](https://p
 
 <!-- slug: install -->
 ### Install
+
+```bash
+pip install layouts-cvm
+```
+
+Or from source:
 
 ```bash
 git clone https://github.com/guilhermegor/layouts-cvm.git
@@ -85,13 +104,31 @@ does the same.
 ```python
 from layouts_cvm import InformeDiario
 
+dict_payload = {
+    "header": {"dt_compt": "15/01/2025", "dt_gerac_arq": "15/01/2025"},
+    "informs": [
+        {
+            "cnpj_fdo": "11222333000181",
+            "data_prox_pl": "16/01/2025",
+            "vl_total": "0",
+            "vl_quota": "0",
+            "patrim_liq": "0",
+            "captc_dia": "0",
+            "resg_dia": "0",
+            "vl_total_sai": "0",
+            "vl_total_atv": "0",
+            "nr_cotst": 0,
+        }
+    ],
+}
+
 xml = InformeDiario().export(dict_payload)                  # returns the XML text
 InformeDiario().export(dict_payload, "informe_diario.xml")  # or writes it, atomically
 ```
 
-`dict_payload` is plain data: the writer validates it against the layout's document model
+The payload is plain data: the writer validates it against the layout's document model
 before serialising. The document models are private (`layouts_cvm._internal`) and not part of
-the public API.
+the public API; each layout's page in the documentation lists its fields.
 
 Each layout has its own page under the Layouts section of the documentation.
 
@@ -104,10 +141,13 @@ layouts-cvm/
 ├── .specs/         feature specs and backlog trackers
 ├── bin/            gate scripts and helpers
 ├── docs/           published documentation
-├── src/            application code
+├── src/layouts_cvm/
+│   ├── <layout>.py one writer module per layout, exported in __init__.py
+│   └── _internal/  private: config/schemas/ (the document models), utils/
 ├── tests/
 │   ├── unit/
-│   └── integration/
+│   ├── integration/
+│   └── golden/     byte-parity fixture against the original filings-cvm writers
 ├── pyproject.toml
 └── poe_tasks.toml  task runner entry points
 ```
