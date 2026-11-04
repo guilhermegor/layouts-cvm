@@ -94,11 +94,9 @@ no V2: `PUBLICO_ALVO`, `COD_DISTR_FDO`, `APLICACAO_MINIMA_FUNDO`, `TIPO_VALOR_CO
 ```python
 from layouts_cvm import ExtratoV2
 
-row = {
-    "cnpj_fdo": "11222333000181",
-    # demais campos obrigatórios da linha: ver acima e `_row()` em
-    # tests/unit/test_extrato_v2_submission.py (um dict completo e válido)
-}
+# ESQUELETO, não executável como está: `row` precisa de todos os campos obrigatórios da linha
+# (ver acima); um dict completo e válido é `_row()` em tests/unit/test_extrato_v2_submission.py
+row = {"cnpj_fdo": "11222333000181"}
 doc = dict(
     header=dict(dt_gerac_arq="31/10/2026"),
     rows=[row],  # row: um dict com os campos acima, uma linha por fundo

@@ -316,6 +316,12 @@ def test_oversize_file_is_refused(tmp_path: Path) -> None:
         ExtratoV2().export(_oversize_doc(), str(tmp_path / "e.xml"))
 
 
+def test_oversize_fixture_has_margin_over_the_limit() -> None:
+    """The oversize fixture stays well above 1 MB, so the limit test cannot pass by accident."""
+    xml = ExtratoV2().export(_doc())
+    assert len((xml or "").encode("windows-1252")) * 1000 > 1_200_000
+
+
 def test_oversize_file_leaves_the_target_alone(tmp_path: Path) -> None:
     """A refused oversize file does not truncate an existing one."""
     target = tmp_path / "e.xml"
