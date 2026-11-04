@@ -12,6 +12,7 @@ from xml.etree import ElementTree as ET  # noqa: S405  # parses this suite's own
 from pydantic import ValidationError
 import pytest
 
+from layouts_cvm._internal.config.schemas import informe_diario as v4
 from layouts_cvm._internal.config.schemas.informe_diario_v1 import (
     InformeDiarioV1Document,
     InformeDiarioV1Header,
@@ -90,7 +91,7 @@ def test_header_model_pins_the_full_field_set() -> None:
     """Pin the V1 header fields so a field added to the V4 header cannot leak into V1."""
     list_fields = list(InformeDiarioV1Header.model_fields)
 
-    assert list_fields == ["cod_doc", "dt_compt", "dt_gerac_arq", "versao"]
+    assert list_fields == ["cod_doc", "dt_compt", "dt_gerac_arq"]
 
 
 def test_header_stamps_doc_code() -> None:
@@ -138,6 +139,16 @@ def test_cotst_signif_block_nests_under_lista() -> None:
     block = _xml().split("<COTST_SIGNIF>")[1].split("</COTST_SIGNIF>")[0]
 
     assert re.findall(r"<([A-Z_]+)>", block) == ["TP_PESSOA", "CPF_CNPJ_COTST", "PR_COTST"]
+
+
+@pytest.mark.parametrize(
+    "cls_v1", [InformeDiarioV1Header, InformeDiarioV1Shareholder, InformeDiarioV1Inform]
+)
+def test_v1_models_do_not_subclass_v4_models(cls_v1: type) -> None:
+    """Keep V1 standalone so a validator or type added to a V4 model cannot reach it."""
+    set_v4 = {v4.InformeDiarioHeader, v4.SignificantShareholder, v4.InformeDiarioInform}
+
+    assert not set_v4 & set(cls_v1.__mro__)
 
 
 def test_shareholder_model_pins_the_full_field_set() -> None:

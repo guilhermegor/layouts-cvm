@@ -22,7 +22,7 @@ Ordem das tags do `INFORM`: `CNPJ_FDO`, `VL_TOTAL`, `VL_QUOTA`, `PATRIM_LIQ`, `C
 `RESG_DIA`, `NR_COTST`, `LISTA_COTST_SIGNIF`.
 
 Escalas (2 casas; `VL_QUOTA` até 12; `PR_COTST` até 4), `LISTA_INFORM` e o bloco
-`COTST_SIGNIF` são idênticos ao V2 e importados do módulo do V4.
+`COTST_SIGNIF` são hoje idênticos ao V2, mas os modelos do V1 são independentes (cópias, sem herdar do V4): o V1 é um padrão histórico fechado e uma mudança no V4 não deve alcançá-lo.
 
 ## Decisões
 
