@@ -16,7 +16,9 @@ never rounded. What the page leaves unsaid is listed on ``docs/demonstrativo_far
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from decimal import Decimal
+from types import MappingProxyType
 from typing import Annotated, Literal
 
 from pydantic import AfterValidator, BaseModel, BeforeValidator, ConfigDict, Field, model_validator
@@ -35,42 +37,44 @@ _PLACES = 10
 _INTEGER_DIGITS = 18
 _INT_MAX = 999_999_999_999
 
-MOVEMENT_RULES: dict[int, tuple[bool, bool]] = {
-    37: (True, True),
-    48: (True, True),
-    53: (True, False),
-    54: (False, True),
-    55: (True, True),
-    56: (True, False),
-    57: (True, False),
-    58: (True, False),
-    60: (True, False),
-    61: (False, True),
-    62: (False, True),
-    63: (False, True),
-    64: (False, True),
-    65: (False, True),
-    66: (False, True),
-    67: (True, False),
-    68: (False, True),
-    69: (False, True),
-    70: (True, True),
-    71: (True, False),
-    72: (False, True),
-    73: (False, True),
-    74: (True, True),
-    75: (True, True),
-    77: (True, True),
-    78: (True, True),
-    144: (True, False),
-    145: (True, True),
-    150: (False, True),
-}
+_TABLE_A: Mapping[int, tuple[bool, bool]] = MappingProxyType(
+    {
+        37: (True, True),
+        48: (True, True),
+        53: (True, False),
+        54: (False, True),
+        55: (True, True),
+        56: (True, False),
+        57: (True, False),
+        58: (True, False),
+        60: (True, False),
+        61: (False, True),
+        62: (False, True),
+        63: (False, True),
+        64: (False, True),
+        65: (False, True),
+        66: (False, True),
+        67: (True, False),
+        68: (False, True),
+        69: (False, True),
+        70: (True, True),
+        71: (True, False),
+        72: (False, True),
+        73: (False, True),
+        74: (True, True),
+        75: (True, True),
+        77: (True, True),
+        78: (True, True),
+        144: (True, False),
+        145: (True, True),
+        150: (False, True),
+    }
+)
 
 _Decimal10 = Annotated[
     Decimal,
     BeforeValidator(strict_decimal(_PLACES)),
-    Field(max_digits=_INTEGER_DIGITS + _PLACES, decimal_places=_PLACES),
+    Field(ge=0, max_digits=_INTEGER_DIGITS + _PLACES, decimal_places=_PLACES),
 ]
 _Count = Annotated[int, Field(strict=True, ge=0, le=_INT_MAX)]
 _Competence = Annotated[str, AfterValidator(check_month_year)]
@@ -96,7 +100,7 @@ class DemonstrativoFarDescAdm(_Block):
 class DemonstrativoFarMovimento(_Block):
     """ROW_MOV_POR_FUNDO — one movement code with its inflow and outflow, in R$ 1000."""
 
-    cd_mov: int
+    cd_mov: Annotated[int, Field(strict=True)]
     vl_entr: _Count | None = None
     vl_saida: _Count | None = None
 
@@ -114,7 +118,7 @@ class DemonstrativoFarMovimento(_Block):
         ValueError
                 If the code is not in Table A or a column breaks its ``S``/``N`` rule.
         """
-        rules = MOVEMENT_RULES.get(self.cd_mov)
+        rules = _TABLE_A.get(self.cd_mov)
         require(rules is not None, f"cd_mov {self.cd_mov} is not in Table A")
         filled = (self.vl_entr is not None, self.vl_saida is not None)
         require(

@@ -1,9 +1,11 @@
 """Unit tests for the FAR submission writer.
 
-Expected tags, order and the Table A rules are typed from the CVM page
-(``PadraoXMLFAR.asp``), not derived from the models.
+Expected tags and order are typed from the CVM page (``PadraoXMLFAR.asp``). ``TABLE_A``
+below pins the schema's Table A as a literal copy (it is not imported), so an edit to either
+side fails here; it was not re-checked against the live page.
 """
 
+import contextlib
 from pathlib import Path
 from xml.etree import ElementTree as ET  # noqa: S405
 
@@ -121,6 +123,68 @@ def test_output_path_writes_file_and_returns_none(tmp_path: Path) -> None:
     """With output_path the file is written and None returned."""
     path = tmp_path / "far.xml"
     assert (DemonstrativoFar().export(_doc(), str(path)), path.exists()) == (None, True)
+
+
+TABLE_A = {
+    37: "ES", 48: "ES", 53: "E-", 54: "-S", 55: "ES", 56: "E-", 57: "E-", 58: "E-",
+    60: "E-", 61: "-S", 62: "-S", 63: "-S", 64: "-S", 65: "-S", 66: "-S", 67: "E-",
+    68: "-S", 69: "-S", 70: "ES", 71: "E-", 72: "-S", 73: "-S", 74: "ES", 75: "ES",
+    77: "ES", 78: "ES", 144: "E-", 145: "ES", 150: "-S",
+}  # fmt: skip
+
+
+def _movement(code: int, has_in: bool, has_out: bool) -> dict:
+    return {
+        "cd_mov": code,
+        **dict([("vl_entr", 1)][: int(has_in)]),
+        **dict([("vl_saida", 1)][: int(has_out)]),
+    }
+
+
+def _accepts(row: dict) -> bool:
+    doc = _doc(_fund(doc_mov_mes={"row_mov_por_fundo": [row]}))
+    return not _raises_validation(doc)
+
+
+def _raises_validation(doc: dict) -> bool:
+    with contextlib.suppress(ValidationError):
+        DemonstrativoFar().export(doc)
+        return False
+    return True
+
+
+def test_table_a_has_29_codes() -> None:
+    """The pinned table has the 29 codes of Table A."""
+    assert len(TABLE_A) == 29
+
+
+@pytest.mark.parametrize("code", sorted(TABLE_A))
+def test_table_a_accepts_only_the_declared_columns(code: int) -> None:
+    """Each code accepts exactly its (entrada, saida) pattern and no other."""
+    want = (TABLE_A[code][0] == "E", TABLE_A[code][1] == "S")
+    got = {(i, o) for i in (False, True) for o in (False, True) if _accepts(_movement(code, i, o))}
+    assert got == {want}
+
+
+@pytest.mark.parametrize("bad", ["-1", "-0.5"])
+def test_negative_decimal_is_rejected(bad: str) -> None:
+    """Quota counts and values cannot be negative."""
+    with pytest.raises(ValidationError):
+        DemonstrativoFar().export(_doc(_fund(vl_quota_ult_dia_mes=bad)))
+
+
+@pytest.mark.parametrize("bad", ["1" + "0" * 30, "1" + "0" * 19])
+def test_oversized_decimal_is_a_validation_error(bad: str) -> None:
+    """Too many integer digits raises ValidationError, not decimal.InvalidOperation."""
+    with pytest.raises(ValidationError):
+        DemonstrativoFar().export(_doc(_fund(nr_quota_circul_ult_dia_mes=bad)))
+
+
+@pytest.mark.parametrize("bad", ["53", 53.0])
+def test_cd_mov_is_strict(bad: object) -> None:
+    """cd_mov rejects strings and floats like the other integers."""
+    row = {"cd_mov": bad, "vl_entr": 1}
+    assert not _accepts(row)
 
 
 def _bad_movements(*rows: dict) -> dict:
