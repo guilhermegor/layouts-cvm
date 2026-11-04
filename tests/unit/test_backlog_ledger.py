@@ -1040,6 +1040,15 @@ def test_unresolved_github_base_ref_does_not_fall_back_to_main(
     )
 
 
+def test_pr_base_known_stale_local_branch_alone_is_not_a_base(
+    path_ci_checkout: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """``origin/develop`` unfetched but a stale local ``develop`` exists: no base, fail closed."""
+    _git_in(path_ci_checkout, "branch", "-q", "develop", "origin/main")
+    monkeypatch.setenv("GITHUB_BASE_REF", "develop")
+    assert ledger.resolve_base(ledger.base_candidates()) == ""
+
+
 def test_main_outside_a_git_checkout_fails_loudly(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -1076,7 +1085,7 @@ def test_existing_ref_without_a_merge_base_does_not_fall_through(
 def test_main_fails_closed_when_the_existing_base_shares_no_history(
     path_orphan_checkout: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    """The gate says the base shares no history, not that ``fetch-depth`` is missing."""
+    """The gate reports a base that shares no history (the remedy also covers shallow clones)."""
     assert (ledger.main(), "shares no history with HEAD" in capsys.readouterr().err) == (1, True)
 
 

@@ -238,9 +238,10 @@ def competing_refs(list_refs: list) -> list:
       remote ref OVER-reports, charging main's newer commits to this branch.
 
     With ``GITHUB_BASE_REF`` set the PR's base is known and CI has just fetched it, so the
-    remote-tracking ref is the truth and wins alone; a persistent runner's stale local branch
-    must not shrink the diff. Without it (a local run) the stale remote is the likelier
-    hazard, so the later of the two bases wins (see ``latest_base``).
+    remote-tracking ref is the truth and the only candidate; a stale local branch of the same
+    name, with ``origin/<base>`` unfetched, is no base at all (fail closed).
+    Without it (a local run) the stale remote is the likelier hazard, so the later of the
+    two bases wins (see ``latest_base``).
 
     Parameters
     ----------
@@ -250,20 +251,25 @@ def competing_refs(list_refs: list) -> list:
     Returns
     -------
     list of str
-        Empty when no candidate exists; one ref when the PR base is known; else every existing
+        Empty when no candidate exists; ``origin/<GITHUB_BASE_REF>`` alone (or empty) when the
+        PR base is known; else every existing
         ``origin/<name>`` / ``<name>`` for the first existing name.
     """
     list_found = [str_ref for str_ref in list_refs if ref_exists(str_ref)]
     if not list_found:
         return []
-    if os.environ.get("GITHUB_BASE_REF"):
-        return list_found[:1]
+    str_base_ref = os.environ.get("GITHUB_BASE_REF")
+    if str_base_ref:
+        return [str_ref for str_ref in list_found if str_ref == f"origin/{str_base_ref}"]
     str_name = list_found[0].removeprefix("origin/")
     return [str_ref for str_ref in list_found if str_ref.removeprefix("origin/") == str_name]
 
 
 def latest_base(list_refs: list) -> str:
     """Return the merge-base of HEAD and each ref, keeping the later one.
+
+    When two merge-bases are not ancestors of each other (HEAD merged both sides of a diverged
+    branch) neither is later, and the first candidate's is kept.
 
     Parameters
     ----------
@@ -313,6 +319,8 @@ def is_unborn_branch() -> bool:
 
     The first commit of a new repository therefore passes the gate unchecked: HEAD does not
     resolve, no base exists to diff against, and failing would block every repo's first commit.
+    Known gap: the first commit of ``git checkout --orphan`` in an established repo takes the
+    same path and is also unchecked.
 
     Returns
     -------
