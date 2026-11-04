@@ -33,7 +33,7 @@ Build, validate and serialise the files a fund sends to CVM, in CVM's own file l
   [writer issues](https://github.com/guilhermegor/layouts-cvm/issues?q=is%3Aissue+is%3Aopen+writer),
   so they are planned, not forgotten.
 - **Decimals are truncated, never rounded** (`ROUND_DOWN`): a value with more digits than the
-  layout's scale loses the excess, so a reported figure is never inflated.
+  layout's scale loses the excess, so a reported figure never grows in magnitude.
 - **CNPJ and CPF check digits are validated** before anything is serialised.
 
 <!-- optional section: delete it when the project has no feature list -->
