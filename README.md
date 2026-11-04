@@ -45,6 +45,7 @@ Build, validate and serialise the files a fund sends to CVM, in CVM's own file l
 | Informe Diário V2 | `InformeDiarioV2` | `InformeDiarioV2Document` |
 | Informe de Portabilidade | `InformePortabilidade` | `InformePortabilidadeDocument` |
 | Informe Quadrimestral V2 | `InformeQuadrimestral` | `InformeQuadrimestralDocument` |
+| Informe Sintético (FCCE, FITVM, FIC-FITVM, Outros) | `InformeSintetico` | `InformeSinteticoFcceDocument`, `InformeSinteticoFitvmDocument`, `InformeSinteticoFicDocument`, `InformeSinteticoOutrosDocument` |
 | Informe Trimestral V1 | `InformeTrimestralV1` | `InformeTrimestralV1Document` |
 | Informe Mensal de Investidor Não Residente | `InrMensal` | `InrMensalDocument` |
 | Lâmina de Fundos V3 | `Lamina` | `LaminaDocument` |
