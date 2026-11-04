@@ -111,6 +111,10 @@ jobs:
         if: runner.os == 'Linux'
         run: poetry run python bin/check_all_exports.py
 
+      - name: Run README Layout Table Gate
+        if: runner.os == 'Linux'
+        run: poetry run python bin/check_readme_layouts.py
+
       - name: Run __all__ Exports-Nothing-Internal Check
         if: runner.os == 'Linux'
         run: poetry run python bin/check_public_all_not_internal.py
