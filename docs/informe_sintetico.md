@@ -39,7 +39,7 @@ Cada campo do schema é a tag da página em minúsculas, declarado na ordem do X
 - `NR_TOT_QUOTST_ULT_DIA_MES`: inteiro ≥ 0.
 - `VL_QUOTA_ULT_DIA_MES`: `Decimal` marcado "(decimal)" na página, **12 casas** na saída
   (escala decidida aqui, ver abaixo); `float` recusado, casas excedentes **truncadas**, vírgula
-  decimal. Deve ser > 0 (como o `VL_QUOTA` do Informe Diário); zero e negativos são recusados.
+  decimal. Deve ser > 0 (como o `VL_QUOTA` do Informe Diário); zero e negativos são recusados, inclusive um valor positivo que o truncamento em 12 casas reduz a zero.
 - Inteiros são `int` estrito: `numpy.int64` é recusado, converta com `int()` antes.
 - `CNPJ_ADM` e `CNPJ_FUNDO`: CNPJ com dígitos verificadores, gravado sem máscara.
 - `DT_COMPT`: `MM/AAAA` real; `DT_GERAC_ARQ`: data real `DD/MM/AAAA`.

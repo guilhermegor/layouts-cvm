@@ -44,7 +44,9 @@ _DOCUMENTS_BY_COD_DOC: dict[tuple[type, object], type] = {
 def _read_cod_doc(doc: Mapping[str, object]) -> object:
     """Return ``doc["header"]["cod_doc"]``, or ``None`` when the header is missing."""
     header = doc.get("header")
-    return header.get("cod_doc") if isinstance(header, Mapping) else None
+    if isinstance(header, Mapping):
+        return header.get("cod_doc")
+    return getattr(header, "cod_doc", None)
 
 
 @type_checker
@@ -75,6 +77,8 @@ def _resolve_document(doc: _SinteticoDocument | Mapping[str, object]) -> _Sintet
     ------
     ValueError
             If a mapping carries no ``header.cod_doc`` of 5, 7, 8 or 9.
+    TypeError
+            If ``doc`` is a model of another standard.
     """
     if not isinstance(doc, Mapping):
         return doc

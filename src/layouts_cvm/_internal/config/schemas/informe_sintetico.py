@@ -25,7 +25,7 @@ unsaid is decided here and stated on ``docs/informe_sintetico.md``.
 from __future__ import annotations
 
 from decimal import Decimal
-from typing import Annotated, Literal
+from typing import Annotated
 
 from pydantic import AfterValidator, BaseModel, BeforeValidator, ConfigDict, Field
 
@@ -39,7 +39,7 @@ from layouts_cvm._internal.utils.xml_fields import (
 
 
 _QUOTA_VALUE_PLACES = 12
-_INTEGER_DIGITS = 18
+_QUOTA_INTEGER_DIGITS = 18
 _INT_MAX = 999_999_999_999
 
 _Amount = Annotated[int, Field(strict=True, ge=-_INT_MAX, le=_INT_MAX)]
@@ -48,7 +48,9 @@ _QuotaValue = Annotated[
     Decimal,
     BeforeValidator(strict_decimal(_QUOTA_VALUE_PLACES)),
     Field(
-        max_digits=_INTEGER_DIGITS + _QUOTA_VALUE_PLACES, decimal_places=_QUOTA_VALUE_PLACES, gt=0
+        max_digits=_QUOTA_INTEGER_DIGITS + _QUOTA_VALUE_PLACES,
+        decimal_places=_QUOTA_VALUE_PLACES,
+        gt=0,
     ),
 ]
 _Competence = Annotated[str, AfterValidator(check_month_year)]
@@ -74,25 +76,25 @@ class _Header(_Block):
 class InformeSinteticoFcceHeader(_Header):
     """DESC_ADM of the FCCE variant."""
 
-    cod_doc: Literal[5] = 5
+    cod_doc: Annotated[int, Field(strict=True, ge=5, le=5)] = 5
 
 
 class InformeSinteticoFitvmHeader(_Header):
     """DESC_ADM of the FITVM variant."""
 
-    cod_doc: Literal[7] = 7
+    cod_doc: Annotated[int, Field(strict=True, ge=7, le=7)] = 7
 
 
 class InformeSinteticoFicHeader(_Header):
     """DESC_ADM of the FIC-FITVM variant."""
 
-    cod_doc: Literal[8] = 8
+    cod_doc: Annotated[int, Field(strict=True, ge=8, le=8)] = 8
 
 
 class InformeSinteticoOutrosHeader(_Header):
     """DESC_ADM of the Outros variant."""
 
-    cod_doc: Literal[9] = 9
+    cod_doc: Annotated[int, Field(strict=True, ge=9, le=9)] = 9
 
 
 class FitvmOutras(_Block):

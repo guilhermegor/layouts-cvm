@@ -307,6 +307,26 @@ def test_mapping_without_header_rejected() -> None:
         InformeSintetico().export({"rows": []})
 
 
+def test_header_model_inside_a_mapping_picks_the_variant() -> None:
+    """A header built as a model inside a plain mapping still selects its variant."""
+    data = _data(5)
+    data["header"] = InformeSinteticoFcceHeader(**_header(5))
+    assert InformeSintetico().export(data).startswith("<?xml")
+
+
+@pytest.mark.parametrize("bad", [5.0, "5", True])
+def test_header_model_cod_doc_is_strict(bad: object) -> None:
+    """The header model refuses look-alikes of its code, like the mapping path."""
+    with pytest.raises(ValidationError):
+        InformeSinteticoFcceHeader(**{**_header(5), "cod_doc": bad})
+
+
+def test_quota_truncating_to_zero_rejected() -> None:
+    """A positive quota that truncates to zero at 12 places is refused."""
+    with pytest.raises(ValidationError):
+        InformeSintetico().export(_data(7, _row(7, vl_quota_ult_dia_mes="0.0000000000001")))
+
+
 def test_cod_doc_must_match_the_variant() -> None:
     """A model for one variant refuses another variant's code."""
     with pytest.raises(ValidationError):
