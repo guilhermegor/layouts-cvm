@@ -1104,6 +1104,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../lamina_v1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lâmina de Fundos — V1
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../perfil_mensal/" class="md-nav__link">
         
   
@@ -1621,35 +1649,52 @@
 </blockquote>
 <hr />
 <h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span>&lt;package-name&gt;
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span>layouts-cvm
 </span></code></pre></div>
 <p>Or with Poetry:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>poetry<span class="w"> </span>add<span class="w"> </span>&lt;package-name&gt;
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>poetry<span class="w"> </span>add<span class="w"> </span>layouts-cvm
 </span></code></pre></div>
-<p>With an optional extra, keep the extras identical on both sides:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"&lt;package-name&gt;[&lt;extra&gt;]"</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>poetry<span class="w"> </span>add<span class="w"> </span><span class="s2">"&lt;package-name&gt;[&lt;extra&gt;]"</span>
-</span></code></pre></div>
-<p>Every <code>pip install</code> line has a Poetry twin.</p>
 <hr />
 <h2 id="basic-usage">Basic usage<a class="headerlink" href="#basic-usage" title="Permanent link">&para;</a></h2>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="o">&lt;</span><span class="n">package_name</span><span class="o">&gt;.</span><span class="n">main</span> <span class="kn">import</span><span class="w"> </span><span class="nn">main</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">main</span><span class="p">()</span>
+<p>Each layout has one writer. It takes a plain dict, validates it against the layout, and
+returns the XML text or writes it atomically. The field names, scales and cardinalities
+come from the <a href="https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadroesXML.asp">CVM catalog</a>, not from this page.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">layouts_cvm</span><span class="w"> </span><span class="kn">import</span> <span class="n">InformeDiario</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">dict_payload</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="s2">"header"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"dt_compt"</span><span class="p">:</span> <span class="s2">"15/01/2025"</span><span class="p">,</span> <span class="s2">"dt_gerac_arq"</span><span class="p">:</span> <span class="s2">"15/01/2025"</span><span class="p">},</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="s2">"informs"</span><span class="p">:</span> <span class="p">[</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>        <span class="p">{</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>            <span class="s2">"cnpj_fdo"</span><span class="p">:</span> <span class="s2">"11222333000181"</span><span class="p">,</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>            <span class="s2">"data_prox_pl"</span><span class="p">:</span> <span class="s2">"16/01/2025"</span><span class="p">,</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>            <span class="s2">"vl_total"</span><span class="p">:</span> <span class="s2">"0"</span><span class="p">,</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>            <span class="s2">"vl_quota"</span><span class="p">:</span> <span class="s2">"0"</span><span class="p">,</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>            <span class="s2">"patrim_liq"</span><span class="p">:</span> <span class="s2">"0"</span><span class="p">,</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>            <span class="s2">"captc_dia"</span><span class="p">:</span> <span class="s2">"0"</span><span class="p">,</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>            <span class="s2">"resg_dia"</span><span class="p">:</span> <span class="s2">"0"</span><span class="p">,</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>            <span class="s2">"vl_total_sai"</span><span class="p">:</span> <span class="s2">"0"</span><span class="p">,</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>            <span class="s2">"vl_total_atv"</span><span class="p">:</span> <span class="s2">"0"</span><span class="p">,</span>
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>            <span class="s2">"nr_cotst"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>        <span class="p">}</span>
+</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>    <span class="p">],</span>
+</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="p">}</span>
+</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>
+</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a><span class="n">xml</span> <span class="o">=</span> <span class="n">InformeDiario</span><span class="p">()</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">dict_payload</span><span class="p">)</span>
+</span><span id="__span-2-22"><a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a><span class="n">InformeDiario</span><span class="p">()</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">dict_payload</span><span class="p">,</span> <span class="s2">"informe_diario.xml"</span><span class="p">)</span>
 </span></code></pre></div>
 <hr />
 <h2 id="running-from-the-makefile">Running from the Makefile<a class="headerlink" href="#running-from-the-makefile" title="Permanent link">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>poe<span class="w"> </span>run<span class="w">            </span><span class="c1"># runs src/&lt;package_name&gt;/main.py</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>poe<span class="w"> </span>run<span class="w">            </span><span class="c1"># runs src/&lt;package_name&gt;/main.py</span>
 </span></code></pre></div>
 <hr />
 <h2 id="running-tests">Running tests<a class="headerlink" href="#running-tests" title="Permanent link">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>poe<span class="w"> </span>unit_tests<span class="w">         </span><span class="c1"># unit tests only</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>poe<span class="w"> </span>integration_tests<span class="w">  </span><span class="c1"># integration tests only</span>
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>poe<span class="w"> </span>test_cov<span class="w">           </span><span class="c1"># unit tests + coverage report + badge</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>poe<span class="w"> </span>unit_tests<span class="w">         </span><span class="c1"># unit tests only</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>poe<span class="w"> </span>integration_tests<span class="w">  </span><span class="c1"># integration tests only</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>poe<span class="w"> </span>test_cov<span class="w">           </span><span class="c1"># unit tests + coverage report + badge</span>
 </span></code></pre></div>
 <hr />
 <h2 id="linting-and-formatting">Linting and formatting<a class="headerlink" href="#linting-and-formatting" title="Permanent link">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>poe<span class="w"> </span>lint<span class="w">          </span><span class="c1"># ruff check + ruff format + codespell + pydocstyle</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>poe<span class="w"> </span>lint<span class="w">          </span><span class="c1"># ruff check + ruff format + codespell + pydocstyle</span>
 </span></code></pre></div>
 <hr />
 <h2 id="publishing-to-pypi">Publishing to PyPI<a class="headerlink" href="#publishing-to-pypi" title="Permanent link">&para;</a></h2>
