@@ -1,8 +1,10 @@
 """CVM Perfil Mensal ICVM 739 — submission (envio) writer.
 
 Produces CVM-compliant Monthly Profile XML (``VERSAO`` 1.0) from validated schema models.
-The layout shares the V4 tag order; it differs only in the scale of four tags and in the
-absence of two, so this writer reuses the V4 builder with the stress scale set to 2.
+The layout has the V4 tag order (the V3 page differs from it in the same way, so the models
+extend V3) and differs only in the scale of four tags and in the absence of two. The V4
+builder reads none of the V3-only tags, so this writer subclasses ``PerfilMensal`` and sets
+the stress scale to 2 instead of duplicating the builder under ``PerfilMensalV3``.
 """
 
 from collections.abc import Mapping

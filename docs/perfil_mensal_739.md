@@ -51,10 +51,13 @@ modelado fica sem validação:
   fundo de cotas"): o modelo não distingue o tipo do fundo e os trata como opcionais.
 - Que `RESM_TEOR_VT_PROFRD`, `JUST_SUM_VT_PROFRD` e `RES_DELIB` sejam obrigatórios quando houve
   assembleia no período.
-- Que as tags de `PERC_PL_MAIOR_COTST`, `PRINC_FAT_RISC`, `NR_DIAS_NEGOC` e `EMP_CLASSF_RISCO`
-  apareçam na descrição, mas estão comentadas (`-->`) e ausentes do exemplo: não são emitidas.
 - A tabela de tags da página cita `CNPJ_FUNDO` e `PR_ENT_AB_FC_PREV_COMPL` (herança do layout
   original); o exemplo usa `CNPJ_FDO` e as duas tags de previdência separadas, e o writer segue o
   exemplo.
 - Que os fundos do arquivo tenham a mesma competência e o mesmo administrador, e o tamanho máximo de 1 MB.
 - Que a soma dos `PR_*` seja 100.
+
+## Não emitidas
+
+As tags `PERC_PL_MAIOR_COTST`, `PRINC_FAT_RISC`, `NR_DIAS_NEGOC` e `EMP_CLASSF_RISCO` constam
+da descrição da página, mas estão comentadas (`-->`) e ausentes do exemplo; o writer não as emite.

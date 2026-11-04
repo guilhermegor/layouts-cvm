@@ -10,7 +10,7 @@ import re
 from pydantic import ValidationError
 import pytest
 
-from layouts_cvm import PerfilMensal739, PerfilMensalV3
+from layouts_cvm import PerfilMensal739
 from layouts_cvm._internal.config.schemas.perfil_mensal import (
     ClientCount,
     NominalRiskBlock,
@@ -28,6 +28,7 @@ from layouts_cvm._internal.config.schemas.perfil_mensal_739 import (
     PerfilMensal739VarOutros,
 )
 from layouts_cvm._internal.config.schemas.perfil_mensal_v3 import (
+    PerfilMensalV3Document,
     PerfilMensalV3PatrimonyDistribution,
 )
 
@@ -307,9 +308,20 @@ def test_export_writes_windows_1252_file(tmp_path: Path) -> None:
 
 
 def test_739_writer_rejects_a_v3_document() -> None:
-    """Refuse a document of another version: scales and VERSAO differ."""
+    """Refuse a real V3 document (the 739 parent type): scales and VERSAO differ."""
+    cls_v3 = PerfilMensalV3Document.model_construct(header=_doc().header, rows=_doc().rows)
     with pytest.raises(TypeError):
-        PerfilMensal739().export(PerfilMensalV3(), None)  # type: ignore[arg-type]
+        PerfilMensal739().export(cls_v3, None)  # type: ignore[arg-type]
+
+
+def test_negative_stress_value_truncates_toward_zero() -> None:
+    """Truncate a negative stress value toward zero at two places, never down."""
+    row = _row(
+        variacao_diar_perc_patrim_fdo_var_n_outros=PerfilMensal739VarOutros(
+            fator_risco_outros="x", val_percent_outros="-1.239"
+        )
+    )
+    assert "<VAL_PERCENT_OUTROS>-1,23</VAL_PERCENT_OUTROS>" in _xml(row)
 
 
 def test_export_plain_data_equals_model_export() -> None:
