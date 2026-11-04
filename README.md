@@ -33,7 +33,7 @@ Build, validate and serialise the files a fund sends to CVM, in CVM's own file l
   [writer issues](https://github.com/guilhermegor/layouts-cvm/issues?q=is%3Aissue+is%3Aopen+writer),
   so they are planned, not forgotten.
 - **Decimals are truncated, never rounded** (`ROUND_DOWN`): a value with more digits than the
-  layout's scale loses the excess, so a reported figure is never inflated.
+  layout's scale loses the excess, so a reported figure never grows in magnitude.
 - **CNPJ and CPF check digits are validated** before anything is serialised.
 
 <!-- optional section: delete it when the project has no feature list -->
@@ -61,8 +61,10 @@ Build, validate and serialise the files a fund sends to CVM, in CVM's own file l
 | Informe Diário V4 | `InformeDiario` | `InformeDiarioDocument` | [PadraoXMLInfoDiarioNetV4](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNetV4.asp) |
 | Informe Diário V3 | `InformeDiarioV3` | `InformeDiarioV3Document` | [PadraoXMLInfoDiarioNetV3](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNetV3.asp) |
 | Informe Diário V2 | `InformeDiarioV2` | `InformeDiarioV2Document` | [PadraoXMLInfoDiarioNet739](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNet739.asp) |
+| Informe Diário V1 | `InformeDiarioV1` | `InformeDiarioV1Document` | [PadraoXMLInfoDiarioNet](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNet.asp) |
 | Informe de Portabilidade | `InformePortabilidade` | `InformePortabilidadeDocument` | [PadraoXMLInfoPortabilidade](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoPortabilidade.asp) |
 | Informe Quadrimestral V2 | `InformeQuadrimestral` | `InformeQuadrimestralDocument` | [PadraoXMLInfoTrimV2](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoTrimV2.asp) |
+| Informe Semestral de Investidor Não Residente — Parte II | `InformeSemestralInrParte2` | `InformeSemestralInrParte2Document` | [PadraoXMLInfoSemestralINRParte2](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoSemestralINRParte2.aspx) |
 | Informe Trimestral V1 | `InformeTrimestralV1` | `InformeTrimestralV1Document` | [PadraoXMLInfoTrim](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoTrim.asp) |
 | Informe Mensal de Investidor Não Residente | `InrMensal` | `InrMensalDocument` | [PadraoXMLInfoMensalINR](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoMensalINR.asp) |
 | Lâmina de Fundos V3 | `Lamina` | `LaminaDocument` | [PadraoXMLLaminaV3](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLLaminaV3.asp) |
