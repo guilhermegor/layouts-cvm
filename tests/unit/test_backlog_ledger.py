@@ -1016,11 +1016,16 @@ def test_main_with_no_resolvable_base_fails_loudly(
 def test_github_base_ref_wins_over_the_default_branch(
     path_ci_checkout: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """A PR into ``develop`` is diffed against ``develop``, not against ``main``."""
-    _git_in(path_ci_checkout, "update-ref", "refs/remotes/origin/develop", "HEAD")
+    """A PR into ``develop`` is diffed against ``develop``, not against ``main``.
+
+    ``develop`` sits strictly between ``origin/main`` (the seed) and HEAD, so the expected
+    base differs from both: ignoring ``GITHUB_BASE_REF`` yields the seed instead.
+    """
+    _git_in(path_ci_checkout, "commit", "-q", "--allow-empty", "-m", "more feature work")
+    _git_in(path_ci_checkout, "update-ref", "refs/remotes/origin/develop", "HEAD~1")
     monkeypatch.setenv("GITHUB_BASE_REF", "develop")
     assert ledger.resolve_base(ledger.base_candidates()) == _git_in(
-        path_ci_checkout, "rev-parse", "HEAD"
+        path_ci_checkout, "rev-parse", "HEAD~1"
     )
 
 
@@ -1071,8 +1076,8 @@ def test_existing_ref_without_a_merge_base_does_not_fall_through(
 def test_main_fails_closed_when_the_existing_base_shares_no_history(
     path_orphan_checkout: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    """The gate reports it could not look instead of diffing against ``master``."""
-    assert (ledger.main(), "could not resolve a base" in capsys.readouterr().err) == (1, True)
+    """The gate says the base shares no history, not that ``fetch-depth`` is missing."""
+    assert (ledger.main(), "shares no history with HEAD" in capsys.readouterr().err) == (1, True)
 
 
 def test_newer_local_branch_beats_a_stale_remote_tracking_ref(path_ci_checkout: Path) -> None:
@@ -1084,3 +1089,29 @@ def test_newer_local_branch_beats_a_stale_remote_tracking_ref(path_ci_checkout: 
     assert ledger.resolve_base(["origin/main", "main"]) == _git_in(
         path_ci_checkout, "rev-parse", "main"
     )
+
+
+def test_pr_base_known_remote_ref_beats_a_local_branch_ahead_of_it(
+    path_ci_checkout: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """With ``GITHUB_BASE_REF`` set, unpushed local ``main`` commits must not shrink the diff."""
+    _git_in(path_ci_checkout, "checkout", "-q", "-b", "main", "origin/main")
+    _git_in(path_ci_checkout, "commit", "-q", "--allow-empty", "-m", "unpushed main")
+    _git_in(path_ci_checkout, "checkout", "-q", "feature")
+    _git_in(path_ci_checkout, "merge", "-q", "--no-edit", "main")
+    monkeypatch.setenv("GITHUB_BASE_REF", "main")
+    assert ledger.resolve_base(ledger.base_candidates()) == _git_in(
+        path_ci_checkout, "rev-parse", "origin/main"
+    )
+
+
+def test_default_branch_keeps_the_slashes_of_a_namespaced_trunk(path_ci_checkout: Path) -> None:
+    """``origin/HEAD`` -> ``origin/release/1.x`` is ``release/1.x``, not ``1.x``."""
+    _git_in(path_ci_checkout, "update-ref", "refs/remotes/origin/release/1.x", "HEAD")
+    _git_in(
+        path_ci_checkout,
+        "symbolic-ref",
+        "refs/remotes/origin/HEAD",
+        "refs/remotes/origin/release/1.x",
+    )
+    assert ledger.default_branch() == "release/1.x"
