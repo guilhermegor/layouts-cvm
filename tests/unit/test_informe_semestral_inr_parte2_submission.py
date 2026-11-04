@@ -293,7 +293,7 @@ def xml() -> str:
     return InformeSemestralInrParte2().export(_doc(_full_lista_ativ()))
 
 
-@pytest.fixture(scope="module")  # fixture-scope-ok: immutable text, rebuilt per test otherwise
+@pytest.fixture
 def root(xml: str) -> ET.Element:
     """Parse the shared document once."""
     return ET.fromstring(xml.split("\n", 1)[1])
@@ -408,6 +408,13 @@ REJECTED = {
     "notional_without_swap": lambda d: _lista(d).update(swap=[]),
     "swap_type": lambda d: _block(d, "swap")["aplic"].update(cod_tp_aplic=75),
     "swap_code": lambda d: _block(d, "swap").update(cod_swap="SAB"),
+    "swap_code_non_ascii": lambda d: _block(d, "swap").update(cod_swap="SWPÁÉÍ"),
+    "market_integer_digits": lambda d: _block(d, "tit_pub")["aplic"]["pos_fim"].update(
+        merc_pos_fim="1" * 16
+    ),
+    "quantity_integer_digits": lambda d: _block(d, "tit_pub")["aplic"]["pos_fim"].update(
+        qtde_pos_fim="1" * 16
+    ),
     "bad_cnpj": lambda d: _block(d, "cotas").update(cnpj_fdo="11222333000182"),
     "bad_cpf": lambda d: _block(d, "tit_agro_cred_priv")["emis"].update(
         nr_pf_pj_emis="11111111111"

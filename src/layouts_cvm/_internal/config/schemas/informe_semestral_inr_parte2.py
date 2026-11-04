@@ -552,10 +552,14 @@ class InrParte2Swap(BaseModel):
         Raises
         ------
         ValueError
-            If it is not ``SWP`` plus three letters or digits.
+            If it is not ``SWP`` plus three ASCII letters or digits.
         """
         body = v[len(_SWAP_PREFIX) :]
-        if len(v) != _SWAP_CODE_LEN or not v.startswith(_SWAP_PREFIX) or not body.isalnum():
+        if (
+            len(v) != _SWAP_CODE_LEN
+            or not v.startswith(_SWAP_PREFIX)
+            or not (body.isascii() and body.isalnum())
+        ):
             raise ValueError("cod_swap must be 'SWP' followed by a 3-character Table E code")
         return v
 

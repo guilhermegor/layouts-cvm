@@ -9,7 +9,7 @@ cada participante (`COD_DOC=70`,
 
 ## Descrição
 
-Monte um `InformeSemestralInrParte2Document` (cabeçalho `CAB_INFORM` + `LISTA_INFORM` com de **1
+Monte um `InformeSemestralInrParte2Document` (cabeçalho `CAB_INFORM` + `LISTA_INFORM` com **1
 a 1000** `INFORM`, um por participante) e serialize com
 `InformeSemestralInrParte2().export(doc, output_path=None)`. Namespace `urn:cda`, `COD_DOC=70`,
 `VERSAO=1.0`, `windows-1252`. O `export` aceita o modelo ou um `Mapping` cujas chaves são os nomes
@@ -43,8 +43,8 @@ Cada bloco pode se repetir, mas a ordem é a da página:
 
 ## Escalas
 
-`MERC_POS_FIM`, `NOCION_POS_FIM` e `NOCION_SWAP` têm 15 inteiros + 2 decimais; `QTDE_POS_FIM`, 15
-+ 6; `TIT_POS_FIX_PR_INDEX`, `TIT_POS_FIX_CUPOM` e `TIT_PRE_FIX_TAXA_CONTR`, 3 + 6. Excesso de
+`MERC_POS_FIM`, `NOCION_POS_FIM` e `NOCION_SWAP` têm 15 inteiros + 2 decimais; `QTDE_POS_FIM`,
+15 + 6; `TIT_POS_FIX_PR_INDEX`, `TIT_POS_FIX_CUPOM` e `TIT_PRE_FIX_TAXA_CONTR`, 3 + 6. Excesso de
 casas é truncado, nunca arredondado; passe `str`/`Decimal`, nunca `float`. A vírgula é o
 separador decimal e CPF/CNPJ são escritos sem pontuação e sem zeros à esquerda, como a página exige.
 `VALOR_AT_EXT` é "numérico (float)" na página, sem escala: o valor é mantido como `Decimal`, sem
@@ -69,6 +69,7 @@ truncar.
 - `COD_SWAP`: só o formato `SWP` + 3 caracteres; a *Tabela E* não é conferida.
 - O dígito verificador do `COD_PARTIC` (a página não publica o algoritmo).
 - O tamanho máximo de 10 MB do arquivo.
+- Que um participante tenha ao menos um ativo: a página não fixa a cardinalidade de `LISTA_ATIV`, que pode vir vazia.
 - Que a mesma competência valha para todo o arquivo (há uma só, no cabeçalho).
 - Chaves desconhecidas em um `Mapping` (por exemplo `cod_tp_aplic` dentro de `COTAS`, onde a
   página não tem essa tag) são ignoradas, como nos demais writers; a tag nunca é emitida.
