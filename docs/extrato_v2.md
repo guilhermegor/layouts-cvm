@@ -94,9 +94,10 @@ no V2: `PUBLICO_ALVO`, `COD_DISTR_FDO`, `APLICACAO_MINIMA_FUNDO`, `TIPO_VALOR_CO
 ```python
 from layouts_cvm import ExtratoV2
 
+row = {...}  # substitua pelos campos da linha (ver acima)
 doc = dict(
     header=dict(dt_gerac_arq="31/10/2026"),
-    rows=[dict(...)],  # uma linha por fundo: ver os campos acima
+    rows=[row],  # row: um dict com os campos acima, uma linha por fundo
 )
 xml = ExtratoV2().export(doc)                       # retorna str
 ExtratoV2().export(doc, output_path="extrato.xml")  # grava windows-1252, retorna None

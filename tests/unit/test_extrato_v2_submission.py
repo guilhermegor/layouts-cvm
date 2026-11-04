@@ -306,10 +306,8 @@ def _oversize_doc() -> ExtratoV2Document:
 
 
 def _unencodable_doc() -> ExtratoV2Document:
-    bad = ExtratoV2Row.model_construct(**{**_row(), "cnpj_fdo": "日本"})
-    return ExtratoV2Document.model_construct(
-        header=ExtratoV2Header(dt_gerac_arq="01/01/2026"), rows=[bad]
-    )
+    header = ExtratoV2Header.model_construct(cod_doc=41, versao="2.0", dt_gerac_arq="日本")
+    return ExtratoV2Document.model_construct(header=header, rows=[])
 
 
 def test_oversize_file_is_refused(tmp_path: Path) -> None:
@@ -338,6 +336,6 @@ def test_unencodable_text_leaves_the_target_alone(tmp_path: Path) -> None:
     """A failed export does not truncate an existing file."""
     target = tmp_path / "e.xml"
     target.write_bytes(b"keep")
-    with pytest.raises((ValueError, AttributeError, TypeError)):
+    with pytest.raises(ValueError, match="windows-1252"):
         ExtratoV2().export(_unencodable_doc(), str(target))
     assert target.read_bytes() == b"keep"  # one-assert-ok: pytest.raises is the failure path
