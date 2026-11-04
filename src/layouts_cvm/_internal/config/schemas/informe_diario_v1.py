@@ -32,7 +32,7 @@ from layouts_cvm._internal.config.schemas.informe_diario import (
 )
 
 
-class InformeDiarioV1Header(InformeDiarioHeader, BaseModel):
+class InformeDiarioV1Header(InformeDiarioHeader):
     """CAB_INFORM — V1 header; ``COD_DOC`` is pinned to ``1`` and ``VERSAO`` is never emitted."""
 
     cod_doc: Literal[1] = 1

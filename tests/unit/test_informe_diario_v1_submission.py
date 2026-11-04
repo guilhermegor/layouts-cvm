@@ -71,6 +71,13 @@ def test_header_tags_in_page_order() -> None:
     assert re.findall(r"<([A-Z_]+)>", header) == ["COD_DOC", "DT_COMPT", "DT_GERAC_ARQ"]
 
 
+def test_header_model_pins_the_full_field_set() -> None:
+    """Pin the V1 header fields so a field added to the V4 header cannot leak into V1."""
+    list_fields = list(InformeDiarioV1Header.model_fields)
+
+    assert list_fields == ["cod_doc", "dt_compt", "dt_gerac_arq", "versao"]
+
+
 @pytest.mark.parametrize("tag", ["<COD_DOC>1</COD_DOC>"])
 def test_header_stamps_doc_code(tag: str) -> None:
     """Stamp COD_DOC 1 in the header."""

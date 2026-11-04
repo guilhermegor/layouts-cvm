@@ -64,25 +64,26 @@ class InformeDiarioV1(SubmissionWriter[InformeDiarioV1Document]):
         append_field(root, "cab_inform", document.header)
         informs = ET.SubElement(root, "LISTA_INFORM")
         for inform in document.informs:
-            self._append_inform(informs, inform)
+            _append_inform(informs, inform)
         xml_str, payload = render_xml(root)
         return deliver(xml_str, payload, output_path)
 
-    @staticmethod
-    def _append_inform(parent: ET.Element, inform: InformeDiarioV1Inform) -> None:
-        """Append one INFORM block, wrapping the shareholders in LISTA_COTST_SIGNIF.
 
-        Parameters
-        ----------
-        parent : ET.Element
-                The LISTA_INFORM element.
-        inform : InformeDiarioV1Inform
-                Validated fund-informe model.
-        """
-        node = ET.SubElement(parent, "INFORM")
-        for field in _LIST_SCALAR_FIELDS:
-            append_field(node, field, getattr(inform, field))
-        _append_shareholders(node, inform.lista_cotst_signif)
+@type_checker
+def _append_inform(parent: ET.Element, inform: InformeDiarioV1Inform) -> None:
+    """Append one INFORM block, wrapping the shareholders in LISTA_COTST_SIGNIF.
+
+    Parameters
+    ----------
+    parent : ET.Element
+            The LISTA_INFORM element.
+    inform : InformeDiarioV1Inform
+            Validated fund-informe model.
+    """
+    node = ET.SubElement(parent, "INFORM")
+    for field in _LIST_SCALAR_FIELDS:
+        append_field(node, field, getattr(inform, field))
+    _append_shareholders(node, inform.lista_cotst_signif)
 
 
 @type_checker
