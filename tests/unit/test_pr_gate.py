@@ -318,8 +318,9 @@ _DICT_MAIN_API_RESPONSES = {
         "deletions": 0,
         "labels": [],
         "node_id": "PR_NODE",
+        "changed_files": 1,
     },
-    "https://api.github.com/repos/o/r/pulls/7/files?per_page=100": [
+    "https://api.github.com/repos/o/r/pulls/7/files?per_page=100&page=1": [
         {"filename": "docs/readme.md"}
     ],
     "https://api.github.com/repos/o/r/issues/7/comments": [],
@@ -444,3 +445,79 @@ def test_main_returns_zero_when_every_axis_is_green(
     monkeypatch.setattr(gate, "_enable_auto_merge", lambda *a, **k: None)
 
     assert gate.main() == 0
+
+
+@pytest.mark.parametrize("str_dropped", list(_DICT_MAIN_API_RESPONSES)[:2])
+def test_main_fails_closed_when_a_pr_read_returns_nothing(
+    monkeypatch: pytest.MonkeyPatch, str_dropped: str
+) -> None:
+    """A failed PR or files read must not classify as an empty docs PR and arm auto-merge."""
+    monkeypatch.setenv("GITHUB_TOKEN", "tkn")
+    monkeypatch.setenv("GITHUB_REPOSITORY", "o/r")
+    monkeypatch.setenv("PR_NUMBER", "7")
+    list_calls: list = []
+    dict_responses = {k: v for k, v in _DICT_MAIN_API_RESPONSES.items() if k != str_dropped}
+
+    monkeypatch.setattr(gate, "_api", lambda m, u, p=None: dict_responses.get(u))
+    monkeypatch.setattr(gate, "poll_axes_until_terminal", lambda *a, **k: ({}, {}))
+    monkeypatch.setattr(gate, "_enable_auto_merge", _CallRecorder(list_calls, "enable"))
+
+    assert (gate.main(), list_calls) == (1, [])
+
+
+_STR_FILES_URL = "https://api.github.com/repos/o/r/pulls/7/files?per_page=100&page="
+
+
+def _run_main_with(monkeypatch: pytest.MonkeyPatch, dict_overrides: dict) -> tuple[int, list]:
+    """Run ``main()`` against the canned API plus overrides, with polling stubbed.
+
+    Parameters
+    ----------
+    monkeypatch : pytest.MonkeyPatch
+        The fixture used to patch the network seams.
+    dict_overrides : dict
+        URL -> response entries replacing or adding to the canned responses.
+
+    Returns
+    -------
+    tuple of (int, list)
+        ``main()``'s exit code and the log of auto-merge arming calls.
+    """
+    monkeypatch.setenv("GITHUB_TOKEN", "tkn")
+    monkeypatch.setenv("GITHUB_REPOSITORY", "o/r")
+    monkeypatch.setenv("PR_NUMBER", "7")
+    list_calls: list = []
+    dict_responses = {**_DICT_MAIN_API_RESPONSES, **dict_overrides}
+
+    monkeypatch.setattr(gate, "_api", lambda m, u, p=None: dict_responses.get(u))
+    monkeypatch.setattr(gate, "poll_axes_until_terminal", lambda *a, **k: ({}, {}))
+    monkeypatch.setattr(gate, "_enable_auto_merge", _CallRecorder(list_calls, "enable"))
+    return gate.main(), list_calls
+
+
+def test_main_classifies_the_second_page_of_files_so_a_risky_path_blocks_auto_merge(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A risky file on page 2 must be seen: page 1 alone is all docs and would auto-merge."""
+    dict_pr = {**_DICT_MAIN_API_RESPONSES["https://api.github.com/repos/o/r/pulls/7"]}
+    dict_pr["changed_files"] = 101
+    list_page_1 = [{"filename": f"docs/p{i}.md"} for i in range(100)]
+    dict_overrides = {
+        "https://api.github.com/repos/o/r/pulls/7": dict_pr,
+        f"{_STR_FILES_URL}1": list_page_1,
+        f"{_STR_FILES_URL}2": [{"filename": "src/risky.py"}],
+    }
+
+    assert _run_main_with(monkeypatch, dict_overrides) == (0, [])
+
+
+@pytest.mark.parametrize("int_changed_files", [5, 3000])
+def test_main_fails_closed_when_the_file_count_disagrees_or_hits_the_api_cap(
+    monkeypatch: pytest.MonkeyPatch, int_changed_files: int
+) -> None:
+    """A truncated list is never classified: a count mismatch or the 3000 cap exits 1."""
+    dict_pr = {**_DICT_MAIN_API_RESPONSES["https://api.github.com/repos/o/r/pulls/7"]}
+    dict_pr["changed_files"] = int_changed_files
+    dict_overrides = {"https://api.github.com/repos/o/r/pulls/7": dict_pr}
+
+    assert _run_main_with(monkeypatch, dict_overrides) == (1, [])
