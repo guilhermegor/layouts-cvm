@@ -25,6 +25,9 @@ from layouts_cvm._internal.config.schemas.extrato import (
     Percent4,
     Percent6,
     PrazoPagamResg,
+    PublicoAlvo,
+    TipoValorCota,
+    ValorCotaBasePl,
 )
 
 
@@ -42,20 +45,11 @@ class ExtratoV2Header(ExtratoBlock):
 class ExtratoV2Row(ExtratoRow):
     """ROW_EXTRATO — the extract of one fund (V2: no "Tag opcional" row tags)."""
 
-    publico_alvo: Literal[
-        "PÚBLICO EM GERAL",
-        "INVESTIDORES QUALIFICADOS",
-        "INVESTIDORES PROFISSIONAIS",
-        "PREVIDENCIÁRIO",
-    ]
+    publico_alvo: PublicoAlvo
     cod_distr_fdo: DistributionCode
     aplicacao_minima_fundo: Money2
-    tipo_valor_cota: Literal["DO DIA DA APLICACAO", "DO DIA SEGUINTE AO DA APLICACAO"]
-    valor_cota_base_pl: Literal[
-        "DO PRÓPRIO DIA (COTA DE FECHAMENTO)",
-        "DO DIA ANTERIOR",
-        "ATUALIZADO POR 1 DIA (COTA DE ABERTURA)",
-    ]
+    tipo_valor_cota: TipoValorCota
+    valor_cota_base_pl: ValorCotaBasePl
     qt_dia_conv_cota: DaysField
     qt_dia_pagam_cota: DaysField
     prazo_pagam_resg: PrazoPagamResg

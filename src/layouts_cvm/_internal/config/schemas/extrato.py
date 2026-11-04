@@ -84,6 +84,18 @@ DistributionCode = Annotated[int, Field(strict=True, ge=1, le=3)]
 PolicyCode = Annotated[int, Field(strict=True, ge=1, le=4)]
 _INDEX_CODES = frozenset({*range(1, 36), 99})
 Yn = Literal["S", "N"]
+PublicoAlvo = Literal[
+    "PÚBLICO EM GERAL",
+    "INVESTIDORES QUALIFICADOS",
+    "INVESTIDORES PROFISSIONAIS",
+    "PREVIDENCIÁRIO",
+]
+TipoValorCota = Literal["DO DIA DA APLICACAO", "DO DIA SEGUINTE AO DA APLICACAO"]
+ValorCotaBasePl = Literal[
+    "DO PRÓPRIO DIA (COTA DE FECHAMENTO)",
+    "DO DIA ANTERIOR",
+    "ATUALIZADO POR 1 DIA (COTA DE ABERTURA)",
+]
 
 Text200 = Annotated[str, StringConstraints(min_length=1, max_length=200), _XML_TEXT]
 InfoText = Annotated[str, StringConstraints(min_length=5, max_length=400), _XML_TEXT]
@@ -680,15 +692,7 @@ class ExtratoRow(ExtratoBlock):
     cnpj_fdo: CnpjField
     forma_condominio: FormaCondominio
     prazo: Prazo
-    publico_alvo: (
-        Literal[
-            "PÚBLICO EM GERAL",
-            "INVESTIDORES QUALIFICADOS",
-            "INVESTIDORES PROFISSIONAIS",
-            "PREVIDENCIÁRIO",
-        ]
-        | None
-    ) = None
+    publico_alvo: PublicoAlvo | None = None
     fundo_anbima: FundoAnbima
     cod_distr_fdo: DistributionCode | None = None
     cod_polit_invest: PolicyCode
@@ -697,17 +701,8 @@ class ExtratoRow(ExtratoBlock):
     fundo_invert_cotas: FundoInvertCotas
     aplicacao_minima_fundo: Money2 | None = None
     valor_cota: ValorCota
-    tipo_valor_cota: Literal["DO DIA DA APLICACAO", "DO DIA SEGUINTE AO DA APLICACAO"] | None = (
-        None
-    )
-    valor_cota_base_pl: (
-        Literal[
-            "DO PRÓPRIO DIA (COTA DE FECHAMENTO)",
-            "DO DIA ANTERIOR",
-            "ATUALIZADO POR 1 DIA (COTA DE ABERTURA)",
-        ]
-        | None
-    ) = None
+    tipo_valor_cota: TipoValorCota | None = None
+    valor_cota_base_pl: ValorCotaBasePl | None = None
     qt_dia_conv_cota: DaysField | None = None
     qt_dia_pagam_cota: DaysField | None = None
     resg_cotas: ResgCotas

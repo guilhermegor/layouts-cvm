@@ -87,7 +87,7 @@ no V2: `PUBLICO_ALVO`, `COD_DISTR_FDO`, `APLICACAO_MINIMA_FUNDO`, `TIPO_VALOR_CO
 - Coerência entre os limites mínimo/máximo e o regulamento do fundo (só `MIN <= MAX` é checado).
 - Escala dos percentuais que a página não numera (4 casas, política do repositório).
 - Existência do CNPJ na CVM (só o dígito verificador) e do fundo no cadastro.
-- Nenhuma validação da CVM foi executado contra a saída.
+- Nenhuma validação da CVM foi executada contra a saída.
 
 ## Exemplos
 
@@ -96,7 +96,7 @@ from layouts_cvm import ExtratoV2
 
 doc = dict(
     header=dict(dt_gerac_arq="31/10/2026"),
-    rows=[dict(...)],  # uma linha por classe: ver os campos acima
+    rows=[dict(...)],  # uma linha por fundo: ver os campos acima
 )
 xml = ExtratoV2().export(doc)                       # retorna str
 ExtratoV2().export(doc, output_path="extrato.xml")  # grava windows-1252, retorna None

@@ -296,3 +296,48 @@ def test_export_writes_windows_1252_and_returns_none(tmp_path: Path) -> None:
     path = tmp_path / "extrato.xml"
     returned = ExtratoV2().export(_doc(publico_alvo="PREVIDENCIÁRIO"), str(path))
     assert (returned, "PREVIDENCIÁRIO".encode("windows-1252") in path.read_bytes()) == (None, True)
+
+
+def _oversize_doc() -> ExtratoV2Document:
+    row = ExtratoV2Row(**_row())
+    return ExtratoV2Document.model_construct(
+        header=ExtratoV2Header(dt_gerac_arq="01/01/2026"), rows=[row] * 1000
+    )
+
+
+def _unencodable_doc() -> ExtratoV2Document:
+    bad = ExtratoV2Row.model_construct(**{**_row(), "cnpj_fdo": "日本"})
+    return ExtratoV2Document.model_construct(
+        header=ExtratoV2Header(dt_gerac_arq="01/01/2026"), rows=[bad]
+    )
+
+
+def test_oversize_file_is_refused(tmp_path: Path) -> None:
+    """A file past 1 MB raises."""
+    with pytest.raises(ValueError, match="1 MB"):
+        ExtratoV2().export(_oversize_doc(), str(tmp_path / "e.xml"))
+
+
+def test_oversize_file_leaves_the_target_alone(tmp_path: Path) -> None:
+    """A refused oversize file does not truncate an existing one."""
+    target = tmp_path / "e.xml"
+    target.write_bytes(b"keep")
+    with pytest.raises(ValueError, match="1 MB"):
+        ExtratoV2().export(_oversize_doc(), str(target))
+    assert target.read_bytes() == b"keep"  # one-assert-ok: pytest.raises is the failure path
+
+
+def test_document_rejects_more_than_1000_rows() -> None:
+    """The page caps a file at 1000 rows."""
+    row = ExtratoV2Row(**_row())
+    with pytest.raises(ValidationError):
+        ExtratoV2Document(header=ExtratoV2Header(dt_gerac_arq="01/01/2026"), rows=[row] * 1001)
+
+
+def test_unencodable_text_leaves_the_target_alone(tmp_path: Path) -> None:
+    """A failed export does not truncate an existing file."""
+    target = tmp_path / "e.xml"
+    target.write_bytes(b"keep")
+    with pytest.raises((ValueError, AttributeError, TypeError)):
+        ExtratoV2().export(_unencodable_doc(), str(target))
+    assert target.read_bytes() == b"keep"  # one-assert-ok: pytest.raises is the failure path
