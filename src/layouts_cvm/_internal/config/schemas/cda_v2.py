@@ -259,6 +259,26 @@ class CdaV2SwapAplic(BaseModel):
 
 
 @type_checker
+def _require_related(code: int, tp_ativ: int) -> None:
+    """Require the asset type to relate to the application type (Table A, last column).
+
+    Parameters
+    ----------
+    code : int
+        Application type.
+    tp_ativ : int
+        Asset type of the enclosing block.
+
+    Raises
+    ------
+    ValueError
+        If the application type is unknown or does not relate to the asset type.
+    """
+    if tp_ativ not in _RELATED_ASSETS.get(code, frozenset()):
+        raise ValueError(f"COD_TP_ATIV {tp_ativ} is not valid for COD_TP_APLIC {code}")
+
+
+@type_checker
 def _check_aplic(aplic: CdaV2Aplic, tp_ativ: int) -> None:
     """Validate an APLIC against Table A and the application x asset type relation.
 
@@ -268,18 +288,9 @@ def _check_aplic(aplic: CdaV2Aplic, tp_ativ: int) -> None:
         The application.
     tp_ativ : int
         Asset type of the enclosing block.
-
-    Raises
-    ------
-    ValueError
-        If the application type is unknown, does not relate to the asset type, or a column
-        breaks its Table A flag.
     """
     code = aplic.cod_tp_aplic
-    if code not in _TABLE_A:
-        raise ValueError(f"COD_TP_APLIC {code} is not in Table A")
-    if tp_ativ not in _RELATED_ASSETS[code]:
-        raise ValueError(f"COD_TP_ATIV {tp_ativ} is not valid for COD_TP_APLIC {code}")
+    _require_related(code, tp_ativ)
     for flag, name, value in zip(
         _TABLE_A[code], _TABLE_A_COLUMNS, aplic.column_values(), strict=True
     ):
