@@ -63,8 +63,10 @@ def readme_badge_url(path_readme: pathlib.Path) -> str | None:
     Returns
     -------
     str or None
-        The badge URL, or ``None`` when the README has no coverage badge.
+        The badge URL, or ``None`` when the README is missing or has no coverage badge.
     """
+    if not path_readme.is_file():
+        return None
     cls_match = _RE_README_BADGE.search(path_readme.read_text(encoding="utf-8"))
     return cls_match.group(1) if cls_match else None
 
@@ -87,7 +89,11 @@ def structural_findings(path_root: pathlib.Path) -> list[str]:
         "(it is gitignored)."
         for str_path in tracked_badge_files(path_root)
     ]
-    str_url = readme_badge_url(path_root / "README.md")
+    path_readme = path_root / "README.md"
+    if not path_readme.is_file():
+        list_findings.append("README.md is missing or not a regular file: cannot check its badge.")
+        return list_findings
+    str_url = readme_badge_url(path_readme)
     if str_url != URL_BADGE:
         list_findings.append(
             f"README coverage badge is {str_url!r}, expected the Pages URL {URL_BADGE!r}."
