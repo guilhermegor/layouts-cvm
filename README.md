@@ -38,6 +38,7 @@ Build, validate and serialise the files a fund sends to CVM, in CVM's own file l
 | CDA V4 | `Cda` | `CdaDocument` |
 | CDA V3 | `CdaV3` | `CdaV3Document` |
 | Extrato das Informações sobre o Fundo V3 | `Extrato` | `ExtratoDocument` |
+| Extrato das Informações sobre o Fundo V2 | `ExtratoV2` | `ExtratoV2Document` |
 | Informe de Fundo 157 | `InfFundo157` | `InfFundo157Document` |
 | Informe Mensal FIDC (ICVM 576) | `InfMensalFidc` | `InfMensalFidcDocument` |
 | Informe Diário V4 | `InformeDiario` | `InformeDiarioDocument` |

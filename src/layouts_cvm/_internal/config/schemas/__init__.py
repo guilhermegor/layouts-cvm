@@ -101,6 +101,11 @@ from layouts_cvm._internal.config.schemas.extrato import (
     ValorCota,
     Yn,
 )
+from layouts_cvm._internal.config.schemas.extrato_v2 import (
+    ExtratoV2Document,
+    ExtratoV2Header,
+    ExtratoV2Row,
+)
 from layouts_cvm._internal.config.schemas.inf_fundo_157 import (
     CompetenceField,
     CpfField,
@@ -408,6 +413,9 @@ __all__ = [
     "ExtratoDocument",
     "ExtratoHeader",
     "ExtratoRow",
+    "ExtratoV2Document",
+    "ExtratoV2Header",
+    "ExtratoV2Row",
     "FiveDecimalField",
     "ForeignValue",
     "FormaCondominio",
