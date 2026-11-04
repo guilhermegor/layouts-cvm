@@ -2,6 +2,7 @@
 
 from pathlib import Path
 import runpy
+import subprocess
 
 import pytest
 
@@ -78,3 +79,25 @@ def test_unreadable_file_fails_closed(path_sub: Path) -> None:
     (path_sub / "CLAUDE.md").write_bytes(b"\xff\xfe\x00bad")
 
     assert any("unreadable" in str_p for str_p in _check(path_sub.parent))
+
+
+def test_non_ascii_path_is_listed_unquoted(tmp_path: Path) -> None:
+    """``git ls-files -z`` returns accented directories verbatim, not C-quoted."""
+    path_dir = tmp_path / "relações"
+    path_dir.mkdir()
+    (path_dir / "CLAUDE.md").write_text(_STUB)
+    subprocess.run(["git", "-C", str(tmp_path), "init", "-q"], check=True)  # noqa: S603, S607
+    subprocess.run(["git", "-C", str(tmp_path), "add", "-A"], check=True)  # noqa: S603, S607
+
+    assert _DICT_GATE["list_tracked_claude_files"](tmp_path) == [Path("relações/CLAUDE.md")]
+
+
+def test_home_relative_import_above_marker_resolves(
+    path_sub: Path, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """``@~/x.md`` resolves against the home directory, not the file's directory."""
+    (tmp_path / "x.md").write_text("x")
+    monkeypatch.setenv("HOME", str(tmp_path))
+    (path_sub / "CLAUDE.md").write_text("@AGENTS.md\n@~/x.md\n" + _STUB.split("\n", 1)[1])
+
+    assert _check(path_sub.parent) == []

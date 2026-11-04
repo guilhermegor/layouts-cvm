@@ -41,7 +41,7 @@ def list_tracked_claude_files(path_root: Path) -> list[Path]:
         When ``git ls-files`` fails, so the gate never passes over a listing it could not make.
     """
     cls_proc = subprocess.run(  # noqa: S603
-        ["git", "-C", str(path_root), "ls-files", "--", "CLAUDE.md", "**/CLAUDE.md"],  # noqa: S607
+        ["git", "-C", str(path_root), "ls-files", "-z", "--", "CLAUDE.md", "**/CLAUDE.md"],  # noqa: S607
         capture_output=True,
         text=True,
         check=False,
@@ -50,7 +50,7 @@ def list_tracked_claude_files(path_root: Path) -> list[Path]:
         raise RuntimeError(f"git ls-files failed: {cls_proc.stderr.strip()}")
     return sorted(
         Path(str_line)
-        for str_line in cls_proc.stdout.splitlines()
+        for str_line in cls_proc.stdout.split("\0")
         if str_line and Path(str_line).parts[0] != ".claude"
     )
 
@@ -81,7 +81,7 @@ def check_imports_above_marker(
             continue
         if not str_stripped.startswith("@"):
             list_problems.append(f"{path_rel}: content above the marker: '{str_stripped}'")
-        elif not (path_file.parent / str_stripped[1:]).is_file():
+        elif not (path_file.parent / Path(str_stripped[1:]).expanduser()).is_file():
             list_problems.append(f"{path_rel}: import {str_stripped} names a missing file")
     return list_problems
 
