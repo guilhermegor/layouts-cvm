@@ -547,3 +547,9 @@ def test_invalid_input_names_the_rule_that_fired(
     """The error message names the page rule, not just any validation failure."""
     with pytest.raises(ValidationError, match=match):
         _doc(mutate)
+
+
+def test_cpf_placeholder_is_accepted() -> None:
+    """The page's CPF placeholder is a valid debtor document."""
+    mutate = _set(*_SACADOS, value=_sacado("999.999.999-99"))
+    assert _doc(mutate).lista_inform.inform.lista_dev_sacados.dev_sacados[0].vl_sacado_deved_1 == 0

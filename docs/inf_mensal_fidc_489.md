@@ -13,7 +13,7 @@ O layout vigente (ICVM 576) está em [Informe Mensal FIDC — ICVM 576](inf_mens
 Monte um `InfMensalFidc489Document` (`cab_inform` + `lista_inform`) e serialize com
 `InfMensalFidc489().export(...)`. O arquivo contém **um** informe: um fundo e uma competência
 (`DOC_ARQ`, namespace `urn:fidc`, `windows-1252`). Os blocos idênticos aos da ICVM 576 são
-reaproveitados do schema dela; só diferem `CAB_INFORM`, `APLIC_ATIVO` e `OUTRAS_INFORM`.
+reaproveitados do schema dela; só diferem `CAB_INFORM`, `LISTA_INFORM` (totais cruzados), `APLIC_ATIVO` e `OUTRAS_INFORM`.
 
 ## Regras aplicadas (todas da página)
 
@@ -23,7 +23,7 @@ reaproveitados do schema dela; só diferem `CAB_INFORM`, `APLIC_ATIVO` e `OUTRAS
 - **Cabeçalho:** sem prazos de resgate (`PR_ENTRE_*`/`TP_DIAS_*` não existem nesta versão).
 - **Somatórios (itens 1 a 31):** os itens 1, 2, 30 e 31 e os totais cruzados são verificados
   aqui; os demais vêm dos blocos reaproveitados do layout ICVM 576. Cada total deve ser igual à soma prescrita; a provisão
-  (`VL_PROVIS_REDUC_RECUP`) deve ser positiva e menor ou igual aos créditos que cobre;
+  (`VL_PROVIS_REDUC_RECUP`) deve ser não negativa e menor ou igual aos créditos que cobre;
   `VL_SOM_PRAZO_VENC` e `VL_SOM_INAD_VENC` fecham com os créditos existentes; item 31 é a soma
   das `QT_COTISTAS_SUBORD`.
 - **Sacados:** de 1 a 25, com CPF/CNPJ válido ou o marcador `99.999.999/9999-99` /
