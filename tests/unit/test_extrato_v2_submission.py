@@ -288,7 +288,7 @@ def test_document_requires_at_least_one_row() -> None:
 def test_export_accepts_a_plain_mapping() -> None:
     """A mapping is validated into a document."""
     xml = ExtratoV2().export({"header": {"dt_gerac_arq": "31/10/2026"}, "rows": [_row()]})
-    assert "<VERSAO>2.0</VERSAO>" in str(xml)
+    assert (xml or "").count("<VERSAO>2.0</VERSAO>") == 1
 
 
 def test_export_writes_windows_1252_and_returns_none(tmp_path: Path) -> None:
