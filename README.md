@@ -40,6 +40,7 @@ Build, validate and serialise the files a fund sends to CVM, in CVM's own file l
 | Extrato das Informações sobre o Fundo V3 | `Extrato` | `ExtratoDocument` |
 | Informe de Fundo 157 | `InfFundo157` | `InfFundo157Document` |
 | Informe Mensal FIDC (ICVM 576) | `InfMensalFidc` | `InfMensalFidcDocument` |
+| Informe Anual de Auditor | `InformeAnualAuditor` | `InformeAnualAuditorDocument` |
 | Informe Diário V4 | `InformeDiario` | `InformeDiarioDocument` |
 | Informe Diário V3 | `InformeDiarioV3` | `InformeDiarioV3Document` |
 | Informe Diário V2 | `InformeDiarioV2` | `InformeDiarioV2Document` |
