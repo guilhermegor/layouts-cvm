@@ -42,7 +42,14 @@ def _pad(str_text: str) -> str:
     -------
     str
         The 71-character record.
+
+    Raises
+    ------
+    ValueError
+        If the content is already wider than the record.
     """
+    if len(str_text) > _RECORD_WIDTH:
+        raise ValueError(f"a COFI record holds at most {_RECORD_WIDTH} columns")
     return str_text.ljust(_RECORD_WIDTH)
 
 

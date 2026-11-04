@@ -92,13 +92,50 @@ def test_export_writes_file(tmp_path: Path) -> None:
     "dict_patch",
     [
         {"dt_compt": "13/2026"},
+        {"dt_compt": "3/2026"},
         {"fundos": []},
         {"fundos": [{"cnpj_fundo": "11111111111111", "contas": [{"conta": "0010000007"}]}]},
         {"fundos": [{"cnpj_fundo": CNPJ, "contas": [{"conta": "10000007"}]}]},
         {"fundos": [{"cnpj_fundo": CNPJ, "contas": [{"conta": "0010000007", "total": 1.5}]}]},
+        {"fundos": [{"cnpj_fundo": CNPJ, "contas": [{"conta": "0010000007", "total": "NaN"}]}]},
+        {
+            "fundos": [
+                {"cnpj_fundo": CNPJ, "contas": [{"conta": "0010000007", "total": "Infinity"}]}
+            ]
+        },
     ],
 )
 def test_export_invalid_document_is_rejected(dict_patch: dict) -> None:
     """Each invalid document fails validation."""
     with pytest.raises(ValidationError):
         Cofi4016().export({**_doc(), **dict_patch})
+
+
+def test_export_negative_value_truncating_to_zero_is_positive() -> None:
+    """A magnitude below one cent renders as zero with a plus sign."""
+    str_line = _lines(
+        _doc([{"cnpj_fundo": CNPJ, "contas": [{"conta": "0010000007", "total": "-0.001"}]}])
+    )[1]
+    assert str_line[14:33] == "0" * 18 + "+"
+
+
+def test_export_alphanumeric_cnpj_in_header() -> None:
+    """A 2026 alphanumeric CNPJ keeps its 14 columns in the header."""
+    str_cnpj = "12ABC34501DE35"
+    str_header = _lines(_doc([{"cnpj_fundo": str_cnpj, "contas": [{"conta": "0010000007"}]}]))[0]
+    assert str_header == "#C14016" + str_cnpj + " " * 8 + "032026" + " " * 36
+
+
+def test_export_over_record_limit_is_rejected(monkeypatch: pytest.MonkeyPatch) -> None:
+    """More records than the 6-digit footer holds raises."""
+    monkeypatch.setattr("layouts_cvm.cofi_4016._MAX_RECORDS", 2)
+    with pytest.raises(ValueError, match="at most"):
+        Cofi4016().export(_doc())
+
+
+def test_pad_rejects_overflow() -> None:
+    """Content wider than 71 columns is never silently emitted."""
+    from layouts_cvm.cofi_4016 import _pad
+
+    with pytest.raises(ValueError, match="at most"):
+        _pad("x" * 72)
