@@ -10,10 +10,10 @@ from collections.abc import Mapping
 from xml.etree import ElementTree as ET  # noqa: S405  # builds XML, never parses untrusted input
 
 from layouts_cvm._internal.config.ports.submission_writer import SubmissionWriter
-from layouts_cvm._internal.config.schemas.informe_diario import SignificantShareholder
 from layouts_cvm._internal.config.schemas.informe_diario_v1 import (
     InformeDiarioV1Document,
     InformeDiarioV1Inform,
+    InformeDiarioV1Shareholder,
 )
 from layouts_cvm._internal.utils.typing import type_checker
 from layouts_cvm._internal.utils.xml_writer import (
@@ -88,7 +88,7 @@ def _append_inform(parent: ET.Element, inform: InformeDiarioV1Inform) -> None:
 
 @type_checker
 def _append_shareholders(
-    node: ET.Element, list_cotst: list[SignificantShareholder] | None
+    node: ET.Element, list_cotst: list[InformeDiarioV1Shareholder] | None
 ) -> None:
     """Append LISTA_COTST_SIGNIF with one COTST_SIGNIF per shareholder, if there are any.
 
@@ -96,7 +96,7 @@ def _append_shareholders(
     ----------
     node : ET.Element
             The INFORM element.
-    list_cotst : Optional[list[SignificantShareholder]]
+    list_cotst : Optional[list[InformeDiarioV1Shareholder]]
             Shareholders holding 20% or more of the net worth; None or empty omits the block.
     """
     if not list_cotst:

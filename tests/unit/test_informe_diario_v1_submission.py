@@ -7,6 +7,7 @@ no DATA_PROX_PL).
 
 from pathlib import Path
 import re
+from xml.etree import ElementTree as ET  # noqa: S405  # parses this suite's own output
 
 from pydantic import ValidationError
 import pytest
@@ -60,10 +61,14 @@ def _doc(inform: InformeDiarioV1Inform | None = None) -> InformeDiarioV1Document
     return InformeDiarioV1Document(header=_header(), informs=[inform or _inform()])
 
 
-def _xml(inform: InformeDiarioV1Inform | None = None) -> str:
-    xml = InformeDiarioV1().export(_doc(inform))
+def _export(doc: InformeDiarioV1Document) -> str:
+    xml = InformeDiarioV1().export(doc)
     assert xml is not None
     return xml
+
+
+def _xml(inform: InformeDiarioV1Inform | None = None) -> str:
+    return _export(_doc(inform))
 
 
 def test_header_tags_in_page_order() -> None:
@@ -80,10 +85,9 @@ def test_header_model_pins_the_full_field_set() -> None:
     assert list_fields == ["cod_doc", "dt_compt", "dt_gerac_arq", "versao"]
 
 
-@pytest.mark.parametrize("tag", ["<COD_DOC>1</COD_DOC>"])
-def test_header_stamps_doc_code(tag: str) -> None:
+def test_header_stamps_doc_code() -> None:
     """Stamp COD_DOC 1 in the header."""
-    assert tag in _xml()
+    assert "<COD_DOC>1</COD_DOC>" in _xml()
 
 
 @pytest.mark.parametrize(
@@ -97,10 +101,11 @@ def test_root_declares_namespace_and_wraps_informs_in_lista_inform(fragment: str
 
 def test_inform_tag_order_matches_page() -> None:
     """Emit the INFORM children in the order the page template lists them."""
-    body = _xml().split("<INFORM>")[1].split("</INFORM>")[0]
-    top_level = re.findall(r"^ {12}<([A-Z_]+)>", body, flags=re.M)
+    str_ns = "{urn:infdiario}"
+    root = ET.fromstring(_xml().encode("windows-1252"))  # noqa: S314
+    node = root.find(f"{str_ns}LISTA_INFORM/{str_ns}INFORM")
 
-    assert top_level == PAGE_ORDER
+    assert [child.tag.removeprefix(str_ns) for child in node] == PAGE_ORDER
 
 
 @pytest.mark.parametrize(
@@ -131,6 +136,13 @@ def test_cotst_signif_block_nests_under_lista() -> None:
     block = _xml().split("<COTST_SIGNIF>")[1].split("</COTST_SIGNIF>")[0]
 
     assert re.findall(r"<([A-Z_]+)>", block) == ["TP_PESSOA", "CPF_CNPJ_COTST", "PR_COTST"]
+
+
+def test_shareholder_model_pins_the_full_field_set() -> None:
+    """Pin the V1 shareholder fields so a field added to the V4 one cannot leak into V1."""
+    list_fields = list(InformeDiarioV1Shareholder.model_fields)
+
+    assert list_fields == ["tp_pessoa", "cpf_cnpj_cotst", "pr_cotst"]
 
 
 @pytest.mark.parametrize("list_cotst", [None, []])
@@ -258,9 +270,11 @@ def test_several_informs_stay_inside_one_lista_inform() -> None:
     doc = InformeDiarioV1Document(
         header=_header(), informs=[_inform(), _inform(cnpj_fdo="11444777000161")]
     )
-    xml = InformeDiarioV1().export(doc)
 
-    assert re.findall(r"<CNPJ_FDO>(\d+)</CNPJ_FDO>", xml) == [VALID_CNPJ, "11444777000161"]
+    assert re.findall(r"<CNPJ_FDO>(\d+)</CNPJ_FDO>", _export(doc)) == [
+        VALID_CNPJ,
+        "11444777000161",
+    ]
 
 
 def test_exactly_100_funds_are_accepted() -> None:
@@ -282,4 +296,4 @@ def test_several_informs_share_one_lista_inform_wrapper() -> None:
     """Open LISTA_INFORM exactly once however many funds follow."""
     doc = InformeDiarioV1Document(header=_header(), informs=[_inform(), _inform()])
 
-    assert InformeDiarioV1().export(doc).count("<LISTA_INFORM>") == 1
+    assert _export(doc).count("<LISTA_INFORM>") == 1
