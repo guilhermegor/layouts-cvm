@@ -2,6 +2,11 @@
 
 Build, validate and serialise the files a fund sends to CVM, in CVM's own file layouts.
 
+!!! note "Source of truth"
+    Field names, decimal scales and cardinalities come from the official
+    [CVM catalog of XML standards](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadroesXML.asp), not from this documentation. Submission only:
+    building files to send to CVM.
+
 ---
 
 ## Contents
