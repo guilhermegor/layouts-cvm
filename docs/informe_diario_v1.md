@@ -10,7 +10,8 @@ Envio (→ CVM) do padrão **Informe Diário V1**, vigente até 01/07/2012
 Monte um `InformeDiarioV1Document` (`InformeDiarioV1Header` + até 100 `InformeDiarioV1Inform`)
 e serialize com `InformeDiarioV1().export(doc, output_path=None)`. Também aceita um `Mapping`
 simples, validado para o modelo. Namespace `urn:infdiario`, `COD_DOC=1`, `windows-1252`. Todos
-os informes de um arquivo têm a mesma competência.
+os informes de um arquivo têm a mesma competência, porque a competência existe só no cabeçalho
+(o escritor não precisa conferi-la).
 
 ## Diferenças medidas contra o V2
 
@@ -26,8 +27,10 @@ Escalas (2 casas; `VL_QUOTA` até 12; `PR_COTST` até 4), `LISTA_INFORM` e o blo
 ## Decisões
 
 - A página não traz número de versão nem período de vigência; o início da vigência (05/04/2004,
-  obrigatoriedade do formato) e o fim (01/07/2012) vêm do catálogo da CVM.
+  obrigatoriedade do formato) e o fim (01/07/2012) vêm do catálogo da CVM. O escritor **não**
+  confere `DT_COMPT` contra essa janela, de propósito: escolher a versão certa para a
+  competência é do chamador, e refazer um arquivo histórico continua possível.
 - `LISTA_COTST_SIGNIF` é opcional e omitida quando vazia.
-- O cabeçalho, o documento, o `INFORM` e o `COTST_SIGNIF` rejeitam campos desconhecidos (`VL_TOTAL_SAI`, `DATA_PROX_PL`, `COD_SUBCLASSE`).
+- O cabeçalho, o documento, o `INFORM` e o `COTST_SIGNIF` rejeitam campos desconhecidos. Exemplos no `INFORM`: `VL_TOTAL_SAI`, `DATA_PROX_PL`, `COD_SUBCLASSE`; no cabeçalho: `VERSAO`.
 - Excesso de casas decimais é truncado, nunca arredondado; o separador decimal é a vírgula.
 - A escrita em arquivo é atômica.

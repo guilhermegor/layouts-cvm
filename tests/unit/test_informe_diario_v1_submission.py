@@ -71,6 +71,14 @@ def _xml(inform: InformeDiarioV1Inform | None = None) -> str:
     return _export(_doc(inform))
 
 
+def _root(doc: InformeDiarioV1Document) -> ET.Element:
+    return ET.fromstring(_export(doc).encode("windows-1252"))  # noqa: S314
+
+
+def _local(element: ET.Element) -> str:
+    return element.tag.removeprefix("{urn:infdiario}")
+
+
 def test_header_tags_in_page_order() -> None:
     """Emit COD_DOC, DT_COMPT, DT_GERAC_ARQ (no VERSAO) in the order of the page template."""
     header = _xml().split("<CAB_INFORM>")[1].split("</CAB_INFORM>")[0]
@@ -90,22 +98,16 @@ def test_header_stamps_doc_code() -> None:
     assert "<COD_DOC>1</COD_DOC>" in _xml()
 
 
-@pytest.mark.parametrize(
-    "fragment",
-    ['<DOC_ARQ xmlns="urn:infdiario">', "<LISTA_INFORM>\n        <INFORM>"],
-)
-def test_root_declares_namespace_and_wraps_informs_in_lista_inform(fragment: str) -> None:
-    """Open with DOC_ARQ in urn:infdiario and nest each INFORM in LISTA_INFORM."""
-    assert fragment in _xml()
+def test_root_declares_namespace() -> None:
+    """Open with DOC_ARQ in urn:infdiario."""
+    assert '<DOC_ARQ xmlns="urn:infdiario">' in _xml()
 
 
 def test_inform_tag_order_matches_page() -> None:
     """Emit the INFORM children in the order the page template lists them."""
-    str_ns = "{urn:infdiario}"
-    root = ET.fromstring(_xml().encode("windows-1252"))  # noqa: S314
-    node = root.find(f"{str_ns}LISTA_INFORM/{str_ns}INFORM")
+    node = _root(_doc()).find("{urn:infdiario}LISTA_INFORM/{urn:infdiario}INFORM")
 
-    assert [child.tag.removeprefix(str_ns) for child in node] == PAGE_ORDER
+    assert [_local(child) for child in node] == PAGE_ORDER
 
 
 @pytest.mark.parametrize(
@@ -128,7 +130,7 @@ def test_decimal_scales_follow_page(tag: str) -> None:
 )
 def test_tags_absent_from_v1_are_not_emitted(tag: str) -> None:
     """Never emit tags the V1 sample file lacks."""
-    assert tag not in _xml()
+    assert tag not in {_local(element) for element in _root(_doc()).iter()}
 
 
 def test_cotst_signif_block_nests_under_lista() -> None:
@@ -292,8 +294,12 @@ def test_shareholder_rejects_unknown_field() -> None:
         InformeDiarioV1Inform(**dict_inform)
 
 
-def test_several_informs_share_one_lista_inform_wrapper() -> None:
-    """Open LISTA_INFORM exactly once however many funds follow."""
+def test_informs_sit_inside_one_lista_inform_wrapper() -> None:
+    """Nest every INFORM in a single LISTA_INFORM, however many funds follow."""
     doc = InformeDiarioV1Document(header=_header(), informs=[_inform(), _inform()])
+    wrapper = _root(doc).find("{urn:infdiario}LISTA_INFORM")
 
-    assert _export(doc).count("<LISTA_INFORM>") == 1
+    assert ([_local(child) for child in _root(doc)], [_local(child) for child in wrapper]) == (
+        ["CAB_INFORM", "LISTA_INFORM"],
+        ["INFORM", "INFORM"],
+    )
