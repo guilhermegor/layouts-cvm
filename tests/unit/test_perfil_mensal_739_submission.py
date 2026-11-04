@@ -248,6 +248,9 @@ def test_header_stamps_739_version_doc_code_and_namespace(tag: str) -> None:
         "<TOT_ATIVOS_P_RELAC>3,9</TOT_ATIVOS_P_RELAC>",
         "<PR_PF_VARJ>6,2</PR_PF_VARJ>",
         "<VAL_COTA_FUNDO>1,12345</VAL_COTA_FUNDO>",
+        "<TOTAL_RECURS_BR>2,00</TOTAL_RECURS_BR>",
+        "<TOT_ATIVOS_CRED_PRIV>4,0</TOT_ATIVOS_CRED_PRIV>",
+        "<VALOR_PARTE>2,9</VALOR_PARTE>",
     ],
 )
 def test_decimal_scales_follow_page_and_truncate(tag: str) -> None:
@@ -301,14 +304,10 @@ def test_export_to_file_returns_none(tmp_path: Path) -> None:
 
 
 def test_export_writes_windows_1252_file(tmp_path: Path) -> None:
-    """Write the file as windows-1252."""
+    """Write the file as windows-1252: an accented value is one byte, not UTF-8's two."""
     out = tmp_path / "perfil.xml"
-    PerfilMensal739().export(_doc(), output_path=str(out))
-    assert (
-        out.read_bytes()
-        .decode("windows-1252")
-        .startswith('<?xml version="1.0" encoding="windows-1252"?>')
-    )
+    PerfilMensal739().export(_doc(_row(res_delib="ação")), output_path=str(out))
+    assert b"<RES_DELIB>a\xe7\xe3o</RES_DELIB>" in out.read_bytes()
 
 
 def test_739_writer_rejects_a_v3_document() -> None:
@@ -349,3 +348,40 @@ def test_739_models_do_not_subclass_live_models(cls_model: type) -> None:
     set_live = set(_own_classes(v4)) | set(_own_classes(v3))
 
     assert not set_live & set(cls_model.__mro__)
+
+
+def test_issuer_list_over_three_is_rejected() -> None:
+    """Reject a fourth EMISSORES_TIT_CRED_PRIV: the page repeats the block up to 3 times."""
+    item = PerfilMensal739PrivateCreditIssuer(
+        tp_pessoa_emissor="PJ", nr_pf_pj_emissor=VALID_CNPJ, parte_relacionada="N", valor_parte="1"
+    )
+    with pytest.raises(ValidationError):
+        _row(lista_emissores_tit_cred_priv=[item] * 4)
+
+
+def test_primitive_risk_factor_list_over_five_is_rejected() -> None:
+    """Reject a sixth FATOR_PRIMIT_RISCO: the page repeats the block up to 5 times."""
+    item = PerfilMensal739PrimitiveRiskFactor(nome_fator_primit_risco="DOLAR", cen_util="s")
+    with pytest.raises(ValidationError):
+        PerfilMensal739VarPercValCota(val_percent="1", lista_fator_primit_risco=[item] * 6)
+
+
+def test_nominal_risk_factor_list_over_five_is_rejected() -> None:
+    """Reject a sixth FATOR_RISCO_NOC: the page repeats the block up to 5 times."""
+    item = PerfilMensal739NominalRiskFactor(
+        nome_fator_noc="DOLAR", val_fator_risco_noc_long=1, val_fator_risco_noc_short=2
+    )
+    with pytest.raises(ValidationError):
+        PerfilMensal739NominalRiskBlock(val_colateral="1", lista_fator_risco_noc=[item] * 6)
+
+
+def test_739_writer_rejects_a_v3_document_given_as_plain_data() -> None:
+    """Reject the ``model_dump`` of a real V3 document: its VERSAO 3.0 is not a 739 one."""
+    doc_v3 = PerfilMensalV3Document(
+        header={"dt_compt": "01/2025", "dt_gerac_arq": "15/01/2025"},
+        rows=[
+            _row().model_dump(exclude={"montante_distrib", "inf_compl_perfil"}),
+        ],
+    )
+    with pytest.raises(ValidationError):
+        PerfilMensal739().export(doc_v3.model_dump())
