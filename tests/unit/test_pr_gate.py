@@ -458,6 +458,7 @@ def test_main_fails_closed_when_a_pr_read_returns_nothing(
     dict_responses = {k: v for k, v in _DICT_MAIN_API_RESPONSES.items() if k != str_dropped}
 
     monkeypatch.setattr(gate, "_api", lambda m, u, p=None: dict_responses.get(u))
+    monkeypatch.setattr(gate, "poll_axes_until_terminal", lambda *a, **k: ({}, {}))
     monkeypatch.setattr(gate, "_enable_auto_merge", _CallRecorder(list_calls, "enable"))
 
     assert (gate.main(), list_calls) == (1, [])
