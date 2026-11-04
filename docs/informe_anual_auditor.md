@@ -24,8 +24,8 @@ Os blocos repetidos ficam dentro de um bloco `LISTA_*`, como no exemplo da pági
   ou barras.
 - Textos respeitam os máximos da página: nome do auditor 100, e-mail 50, filial 100, logradouro
   30, complemento 18, bairro 30, critérios de honorários 500, coligada 100 e ramo 30.
-- Endereços: de 1 a 1.000; `NM_FILIAL` é omitido na sede (`TP_ENDER` 1); `NR_CEP` mantém zeros à
-  esquerda, os demais campos numéricos não.
+- Endereços: de 1 a 1.000; `NM_FILIAL` é omitido na sede (`TP_ENDER` 1); `NR_CEP`, `NR_DDD_TEL`, `NR_TEL`,
+  `NR_DDD_FAX` e `NR_FAX` são textos de dígitos e mantêm zeros à esquerda.
 - Auditor PF: um único endereço, sem `NM_FILIAL`, sem `LISTA_RESP` e sem `QT_SOCIOS`.
 - Entidades auditadas: até 8.000; `TP_ENTID` deve constar da Tabela B; `NR_PJ` é CNPJ válido.
 - Coligadas: até 1.000; `NR_PJ` é obrigatório, exceto para estrangeira (`ST_ESTR` = `S`), quando

@@ -206,8 +206,8 @@ def test_export_cod_doc_is_23_without_padding() -> None:
     assert _root(_pj_data()).find(f"{NS}COD_DOC").text == "23"
 
 
-def test_export_decimals_use_comma_and_truncate() -> None:
-    """Export decimals use comma and truncate."""
+def test_export_decimals_use_comma_separator() -> None:
+    """Export decimals use comma separator."""
     root = _root(_pj_data())
     assert root.find(f"{NS}INFORM_AUDIT/{NS}FATURA_ANUAL/{NS}VL_AUDIT").text == "1000,50"
 
@@ -237,8 +237,8 @@ def test_export_foreign_affiliate_omits_cnpj() -> None:
     assert _tags(colig[1]) == ["ST_ESTR", "DS_NOME", "DS_SETOR_ATIVD"]
 
 
-def test_export_pf_omits_responsible_block_and_partner_count() -> None:
-    """Export pf omits responsible block and partner count."""
+def test_export_pf_omits_responsible_block() -> None:
+    """Export pf omits responsible block."""
     inform = _root(_pf_data()).find(f"{NS}INFORM_AUDIT")
     assert "LISTA_RESP" not in _tags(inform)
 
