@@ -103,6 +103,7 @@ def test_export_writes_ascii_file_to_disk(tmp_path: Path) -> None:
     [
         _fund(cnpj="11222333000182"),
         _fund(competencia="132026"),
+        _fund(competencia="060000"),
         _fund(contas=[]),
         _fund(cod_doc="4016"),
         _fund(contas=[{**ACCOUNT, "conta": "123"}]),
@@ -110,5 +111,13 @@ def test_export_writes_ascii_file_to_disk(tmp_path: Path) -> None:
 )
 def test_export_rejects_invalid_input(dict_bad: dict[str, object]) -> None:
     """Invalid input is rejected by validation."""
+    with pytest.raises(ValidationError):
+        Cofi4010().export({"fundos": [dict_bad]})
+
+
+@pytest.mark.parametrize("value", ["Infinity", "-Infinity", "NaN", "sNaN", float("inf")])
+def test_export_rejects_non_finite_values(value: object) -> None:
+    """A non-finite value is a ValidationError, not a bare decimal InvalidOperation."""
+    dict_bad = _fund(contas=[{**ACCOUNT, "total": value}])
     with pytest.raises(ValidationError):
         Cofi4010().export({"fundos": [dict_bad]})

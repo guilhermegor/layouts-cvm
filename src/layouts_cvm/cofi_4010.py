@@ -40,8 +40,8 @@ class Cofi4010(SubmissionWriter[Cofi4010Document]):
         Optional[str]
                 File text when output_path is None, else None.
         """
-        document = coerce_document(Cofi4010Document, doc)
-        str_text = "".join(f"{str_rec}{LINE_END}" for str_rec in build_records(document))
+        cls_document = coerce_document(Cofi4010Document, doc)
+        str_text = "".join(f"{str_rec}{LINE_END}" for str_rec in build_records(cls_document))
         if output_path is None:
             return str_text
         atomic_write_bytes(output_path, str_text.encode(ENCODING))
