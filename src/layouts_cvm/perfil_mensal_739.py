@@ -5,8 +5,8 @@ The layout has the V4 tag order and differs only in the scale of four tags and i
 absence of two. The V4 builder reads none of the V3-only tags, so this writer subclasses
 ``PerfilMensal`` and sets the stress scale to 2 instead of duplicating the builder. The 739
 models are standalone, but the writer validates the document into the V4 shape the builder
-reads, so a stricter V4 rule or new V4 field reaches 739 output; a test pins the field sets
-to catch that drift (the shared builder base is #83).
+reads, so a stricter V4 constraint reaches 739 output; a test pins each model's field names
+against V4 (not its constraints) to catch added or removed fields (shared builder base: #83).
 """
 
 from collections.abc import Mapping

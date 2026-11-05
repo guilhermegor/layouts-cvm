@@ -389,17 +389,31 @@ def test_739_writer_rejects_a_v3_versao_given_as_plain_data() -> None:
         PerfilMensal739().export(doc_v3.model_dump())
 
 
-def test_739_row_and_header_fields_match_v4_so_the_writer_mapping_cannot_drift() -> None:
-    """Fail when V4 gains or loses a row/header field the 739 models do not mirror.
+_V4_TO_739 = {
+    "PerfilMensalRow": "PerfilMensal739Row",
+    "DocumentHeader": "PerfilMensal739Header",
+    "ClientCount": "PerfilMensal739ClientCount",
+    "PatrimonyDistribution": "PerfilMensal739PatrimonyDistribution",
+    "PrimitiveRiskFactor": "PerfilMensal739PrimitiveRiskFactor",
+    "VarPercValCota": "PerfilMensal739VarPercValCota",
+    "VarOutros": "PerfilMensal739VarOutros",
+    "NominalRiskFactor": "PerfilMensal739NominalRiskFactor",
+    "NominalRiskBlock": "PerfilMensal739NominalRiskBlock",
+    "OtcOperation": "PerfilMensal739OtcOperation",
+    "PrivateCreditIssuer": "PerfilMensal739PrivateCreditIssuer",
+    "PerformanceFeeDetails": "PerfilMensal739PerformanceFeeDetails",
+}
+
+
+@pytest.mark.parametrize("name_v4", _V4_TO_739)
+def test_739_model_fields_match_v4_so_the_writer_mapping_cannot_drift(name_v4: str) -> None:
+    """Fail when a V4 model gains or loses a field its 739 counterpart does not mirror.
 
     The writer validates the 739 document into the V4 shape before building, so a new V4
-    field would be emitted into 739 files unless the models are revisited.
+    field would be emitted into 739 files unless the models are revisited. This pins field
+    names only, not constraints.
     """
-    list_pairs = [
-        (v4.PerfilMensalRow, m739.PerfilMensal739Row),
-        (v4.DocumentHeader, m739.PerfilMensal739Header),
-    ]
+    cls_v4 = getattr(v4, name_v4)
+    cls_739 = getattr(m739, _V4_TO_739[name_v4])
 
-    assert [set(a.model_fields) for a, _ in list_pairs] == [
-        set(b.model_fields) for _, b in list_pairs
-    ]
+    assert set(cls_v4.model_fields) == set(cls_739.model_fields)

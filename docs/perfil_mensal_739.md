@@ -23,7 +23,8 @@ A página foi comparada à página e ao schema V3 (tag a tag, e linha a linha do
 - `VAR_DIAR_PERC_PATRIM_FDO_VAR_N_TAXA_ANUAL`, `VAR_DIAR_PERC_PATRIM_FDO_VAR_N_TAXA_CAMBIO`,
   `VAR_PATRIM_FDO_N_PRECO_ACOES` e `VAL_PERCENT_OUTROS` têm **2 casas decimais** (4 no V3/V4).
 
-Os demais blocos são idênticos, mas os modelos são **independentes** (o 739 é um padrão
+A saída ainda passa pela validação do V4 antes da montagem: um teste fixa os nomes dos campos
+de cada modelo contra o V4, mas não suas restrições. Os demais blocos são idênticos, mas os modelos são **independentes** (o 739 é um padrão
 encerrado e não herda dos modelos vivos do V3/V4); o writer reutiliza a rotina de montagem do V4, trocando só a escala das tags de estresse.
 
 | Tag | Regra |
@@ -43,9 +44,6 @@ valores como `str`/`Decimal`, nunca `float`. Na saída, vírgula como separador 
 validado por dígito verificador e gravado sem máscara.
 
 ## Não são verificados
-
-A saída ainda passa pela validação do V4 antes da montagem (os modelos 739 são independentes,
-mas o writer reutiliza a rotina do V4); um teste falha se o V4 ganhar ou perder um campo.
 
 O writer segue o exemplo XML da página; o que a página descreve só em prosa e não está
 modelado fica sem validação:
