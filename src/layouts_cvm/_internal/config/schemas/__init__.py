@@ -100,6 +100,14 @@ from layouts_cvm._internal.config.schemas.cofi_4016 import (
     Cofi4016Fund,
     SignedValueField,
 )
+from layouts_cvm._internal.config.schemas.demonstrativo_far import (
+    DemonstrativoFarDescAdm,
+    DemonstrativoFarDocMovMes,
+    DemonstrativoFarDocument,
+    DemonstrativoFarFar,
+    DemonstrativoFarMovimento,
+    DemonstrativoFarRegistro,
+)
 from layouts_cvm._internal.config.schemas.extrato import (
     AnbimaCode,
     AtivExter,
@@ -596,6 +604,12 @@ __all__ = [
     "DateField",
     "DaysField",
     "DecimalInput",
+    "DemonstrativoFarDescAdm",
+    "DemonstrativoFarDocMovMes",
+    "DemonstrativoFarDocument",
+    "DemonstrativoFarFar",
+    "DemonstrativoFarMovimento",
+    "DemonstrativoFarRegistro",
     "DescSerieClasse",
     "Desemp",
     "DesempClasse",
