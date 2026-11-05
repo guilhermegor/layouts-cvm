@@ -9,8 +9,8 @@ own — the ``submission``/``ingestion`` packages re-export the names consumers 
 Per-field decimal scales mirror the CVM XML standard ``PadrãoXMLPerfil`` (V4,
 https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLPerfilV4.asp).
 Values carrying more decimal places than the standard permits are truncated toward
-zero (``ROUND_DOWN``) instead of rounded, so a reported value is never inflated
-past what the standard allows.
+zero (``ROUND_DOWN``) instead of rounded, so a reported value never grows
+in magnitude past what the standard allows.
 
 CNPJ/CPF fields are validated with this library's own check-digit validators
 (``_internal.utils.br_identifiers``) and stored in bare, unmasked form — the shape
