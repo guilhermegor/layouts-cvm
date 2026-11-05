@@ -2659,6 +2659,10 @@ def _run_readme_layouts_gate(
         path_root / "README.md",
         f"| Layout | Writer | Document | Spec |\n|---|---|---|---|\n{str_rows}\n{str_extra}",
     )
+    path_mkdocs = _write(
+        path_root / "mkdocs.yml",
+        '- Layouts:\n      - "Alpha": alpha.md\n      - "Beta": beta.md\n',
+    )
     return subprocess.run(  # noqa: S603
         [
             sys.executable,
@@ -2669,6 +2673,8 @@ def _run_readme_layouts_gate(
             "pkg",
             "--readme",
             str(path_readme),
+            "--mkdocs",
+            str(path_mkdocs),
         ],
         capture_output=True,
         encoding="utf-8",
