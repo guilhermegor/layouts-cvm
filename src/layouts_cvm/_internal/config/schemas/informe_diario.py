@@ -11,7 +11,7 @@ https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNetV4.a
 The standard states monetary fields as "decimal com N casas"; ``VL_QUOTA`` allows up
 to 12 and ``PR_COTST`` up to 4. Values carrying more decimal places than the standard
 permits are truncated toward zero (``ROUND_DOWN``), never rounded, so a reported value
-is never inflated past what the standard allows.
+never grows in magnitude past what the standard allows.
 
 Each ``INFORM`` block identifies its fund by **exactly one** of ``CNPJ_FDO`` (fund
 class) or ``COD_SUBCLASSE`` (subclass), as the standard requires. CNPJ/CPF fields are
@@ -20,6 +20,7 @@ validated with this library's own check-digit validators and stored bare/unmaske
 
 from __future__ import annotations
 
+from datetime import datetime
 from decimal import Decimal
 import re
 from typing import Annotated, Literal
@@ -38,9 +39,41 @@ from layouts_cvm._internal.config.schemas._fields import (
     validate_person_doc,
     validated_cnpj,
 )
+from layouts_cvm._internal.utils.typing import type_checker
 
 
-_DATE_BR_RE = re.compile(r"^\d{2}/\d{2}/\d{4}$")
+_DATE_BR_RE = re.compile(r"[0-9]{2}/[0-9]{2}/[0-9]{4}")
+
+
+@type_checker
+def _validate_date_br(v: str, str_label: str) -> str:
+    """Check ``v`` is a real calendar date written ``DD/MM/AAAA``.
+
+    ``fullmatch`` with ``[0-9]`` rejects a trailing newline and non-ASCII digits;
+    ``strptime`` rejects dates that do not exist (e.g. ``31/02/2011``).
+
+    Parameters
+    ----------
+    v : str
+            Value to validate.
+    str_label : str
+            Field name used in the error message.
+
+    Returns
+    -------
+    str
+            ``v`` unchanged.
+
+    Raises
+    ------
+    ValueError
+            If ``v`` does not follow DD/MM/AAAA or is not a real date.
+    """
+    if not _DATE_BR_RE.fullmatch(v):
+        raise ValueError(f"{str_label} must follow DD/MM/AAAA format.")
+    datetime.strptime(v, "%d/%m/%Y")  # noqa: DTZ007  # calendar check only, no timezone
+    return v
+
 
 TwoDecimalField = Annotated[
     Decimal, BeforeValidator(truncate_to_scale(2)), Field(decimal_places=2)
@@ -83,9 +116,7 @@ class InformeDiarioHeader(BaseModel):
         ValueError
                 If value does not follow DD/MM/AAAA format.
         """
-        if not _DATE_BR_RE.match(v):
-            raise ValueError("date must follow DD/MM/AAAA format.")
-        return v
+        return _validate_date_br(v, "date")
 
 
 class SignificantShareholder(BaseModel):
@@ -156,9 +187,7 @@ class InformeDiarioInform(BaseModel):
         ValueError
                 If value does not follow DD/MM/AAAA format.
         """
-        if not _DATE_BR_RE.match(v):
-            raise ValueError("data_prox_pl must follow DD/MM/AAAA format.")
-        return v
+        return _validate_date_br(v, "data_prox_pl")
 
     @field_validator("cnpj_fdo")
     @classmethod
