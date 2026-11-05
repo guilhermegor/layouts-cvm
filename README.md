@@ -73,6 +73,7 @@ Build, validate and serialise the files a fund sends to CVM, in CVM's own file l
 | Lâmina de Fundos V2 | `LaminaV2` | `LaminaV2Document` | [PadraoXMLLaminaV2](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLLaminaV2.asp) |
 | Perfil Mensal V4 | `PerfilMensal` | `PerfilMensalDocument` | [PadraoXMLPerfilV4](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLPerfilV4.asp) |
 | Perfil Mensal (original) | `PerfilMensalOriginal` | `PerfilMensalOriginalDocument` | [PadraoXMLPerfil](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLPerfil.asp) |
+| Perfil Mensal ICVM 739 | `PerfilMensal739` | `PerfilMensal739Document` | [PadraoXMLPerfil739](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLPerfil739.asp) |
 | Perfil Mensal V3 | `PerfilMensalV3` | `PerfilMensalV3Document` | [PadraoXMLPerfilV3](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLPerfilV3.asp) |
 
 <!-- slug: documentation -->

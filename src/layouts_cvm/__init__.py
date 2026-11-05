@@ -38,6 +38,7 @@ from layouts_cvm.lamina_v1 import LaminaV1
 from layouts_cvm.lamina_v2 import LaminaV2
 from layouts_cvm.main import main
 from layouts_cvm.perfil_mensal import PerfilMensal
+from layouts_cvm.perfil_mensal_739 import PerfilMensal739
 from layouts_cvm.perfil_mensal_original import PerfilMensalOriginal
 from layouts_cvm.perfil_mensal_v3 import PerfilMensalV3
 
@@ -76,6 +77,7 @@ __all__ = [
     "LaminaV1",
     "LaminaV2",
     "PerfilMensal",
+    "PerfilMensal739",
     "PerfilMensalOriginal",
     "PerfilMensalV3",
 ]
