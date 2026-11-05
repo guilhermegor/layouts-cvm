@@ -2,15 +2,17 @@
 
 The writers are derived from ``src/layouts_cvm/__init__.py``, never listed twice: a name is a
 writer when it is in ``__all__`` AND imported from a top-level submodule of the package
-(``from layouts_cvm.cda import Cda``, absolute, never relative). That excludes
-``__version__``, ``main`` and every schema/model name, so the gate neither depends on nor
-breaks when the schemas move.
+(``from layouts_cvm.cda import Cda`` or ``from .cda import Cda``, aliases and
+``try``/``if`` nesting included; ``TYPE_CHECKING`` blocks, function bodies and ``_private``
+modules are not). That excludes ``__version__``, ``main`` and every schema/model name, so the
+gate neither depends on nor breaks when the schemas move.
 
 The README side is the backticked name in the second column of each row of the layout table.
 """
 
 import argparse
 import ast
+from collections.abc import Iterator
 from pathlib import Path
 import re
 import sys
@@ -19,11 +21,66 @@ import sys
 _SET_NOT_WRITERS = frozenset({"__version__", "main"})
 _STR_TABLE_HEADER = "| Layout | Writer |"
 _RE_ROW = re.compile(r"^\|[^|]*\|\s*`(\w+)`\s*\|")
+_RE_SEPARATOR = re.compile(r"^\|[\s:|-]+$")
 _RE_NAV = re.compile(r"^\s{6}- .*:\s*(\w+)\.md\s*$")
 
 
+def _runtime_branches(cls_node: ast.stmt) -> list[ast.stmt]:
+    """Return the nested statements of ``cls_node`` that can run at import time."""
+    if isinstance(cls_node, (ast.Try, ast.TryStar)):
+        list_nested = [*cls_node.body]
+        for cls_handler in cls_node.handlers:
+            list_nested.extend(cls_handler.body)
+        return [*list_nested, *cls_node.orelse, *cls_node.finalbody]
+    if isinstance(cls_node, ast.With):
+        return cls_node.body
+    if not isinstance(cls_node, ast.If):
+        return []
+    str_test = ast.unparse(cls_node.test)
+    if str_test.endswith("TYPE_CHECKING"):
+        return cls_node.orelse if not str_test.startswith("not ") else cls_node.body
+    return [*cls_node.body, *cls_node.orelse]
+
+
+def _iter_statements(
+    list_body: list[ast.stmt], bool_nested: bool = False
+) -> Iterator[tuple[ast.stmt, bool]]:
+    """Yield ``(statement, is_nested)`` for what runs at import time.
+
+    Descends into ``try``, ``with`` and ``if`` only. The branch a ``TYPE_CHECKING`` test
+    never takes at runtime is skipped, and function and class bodies are never entered.
+    """
+    for cls_node in list_body:
+        yield cls_node, bool_nested
+        yield from _iter_statements(_runtime_branches(cls_node), True)
+
+
+def _read_literal_names(cls_value: ast.expr) -> set[str]:
+    """Return the string literals of a list/tuple node, or raise ``ValueError``."""
+    if isinstance(cls_value, (ast.List, ast.Tuple)) and all(
+        isinstance(cls_e, ast.Constant) and isinstance(cls_e.value, str)
+        for cls_e in cls_value.elts
+    ):
+        return {cls_e.value for cls_e in cls_value.elts}
+    raise ValueError("__all__ must be a list or tuple of string literals")
+
+
+def _is_all_name(cls_target: ast.expr) -> bool:
+    """Return whether an assignment target is the bare name ``__all__``."""
+    return isinstance(cls_target, ast.Name) and cls_target.id == "__all__"
+
+
+def _replacement_value(cls_node: ast.stmt) -> ast.expr | None:
+    """Return the value a statement binds to ``__all__`` with ``=``, or ``None``."""
+    if isinstance(cls_node, ast.Assign) and any(_is_all_name(cls_t) for cls_t in cls_node.targets):
+        return cls_node.value
+    if isinstance(cls_node, ast.AnnAssign) and _is_all_name(cls_node.target):
+        return cls_node.value
+    return None
+
+
 def read_all_names(cls_tree: ast.Module) -> set[str]:
-    """Return the names in the top-level ``__all__``.
+    """Return the names in ``__all__``, replayed in source order.
 
     Parameters
     ----------
@@ -33,35 +90,46 @@ def read_all_names(cls_tree: ast.Module) -> set[str]:
     Returns
     -------
     set of str
-        The literal names of a top-level ``__all__`` list or tuple.
+        What ``__all__`` holds once the module has run: ``=`` replaces, ``+=`` extends.
 
     Raises
     ------
     ValueError
-        When ``__all__`` is absent or is anything but a list/tuple of string literals.
+        When ``__all__`` is absent, an assignment is not a list/tuple of string literals, or
+        it is mutated by ``.extend``/``.append``, which the gate cannot read.
     """
-    for cls_node in cls_tree.body:
-        if isinstance(cls_node, ast.Assign):
-            list_targets, cls_value = cls_node.targets, cls_node.value
-        elif isinstance(cls_node, ast.AnnAssign) and cls_node.value is not None:
-            list_targets, cls_value = [cls_node.target], cls_node.value
-        else:
-            continue
-        if not any(
-            isinstance(cls_t, ast.Name) and cls_t.id == "__all__" for cls_t in list_targets
-        ):
-            continue
-        if isinstance(cls_value, (ast.List, ast.Tuple)) and all(
-            isinstance(cls_e, ast.Constant) and isinstance(cls_e.value, str)
-            for cls_e in cls_value.elts
-        ):
-            return {cls_e.value for cls_e in cls_value.elts}
-        raise ValueError("__all__ must be a list or tuple of string literals")
-    raise ValueError("no top-level __all__ found")
+    set_names: set[str] = set()
+    bool_found = False
+    for cls_node, bool_nested in _iter_statements(cls_tree.body):
+        cls_replaced = _replacement_value(cls_node)
+        if cls_replaced is not None and bool_nested:
+            raise ValueError("__all__ may only be assigned with = at the top level")
+        if cls_replaced is not None:
+            set_names, bool_found = _read_literal_names(cls_replaced), True
+        elif isinstance(cls_node, ast.AugAssign) and _is_all_name(cls_node.target):
+            if not isinstance(cls_node.op, ast.Add):
+                raise ValueError("__all__ may only be extended with +=")
+            set_names, bool_found = set_names | _read_literal_names(cls_node.value), True
+        elif isinstance(cls_node, ast.Expr) and ast.unparse(cls_node).startswith("__all__"):
+            raise ValueError("__all__ is mutated by a method call; use = or += with literals")
+    if not bool_found:
+        raise ValueError("no __all__ assignment found at import time")
+    return set_names
+
+
+def _is_writer_module(cls_node: ast.ImportFrom, str_package: str) -> bool:
+    """Return whether an import is from a public top-level submodule of the package."""
+    if not cls_node.module:
+        return False
+    list_parts = cls_node.module.split(".")
+    if list_parts[-1].startswith("_"):
+        return False
+    bool_absolute = cls_node.level == 0 and len(list_parts) == 2 and list_parts[0] == str_package  # noqa: PLR2004
+    return bool_absolute or (cls_node.level == 1 and len(list_parts) == 1)
 
 
 def read_top_level_imports(cls_tree: ast.Module, str_package: str) -> set[str]:
-    """Return the names imported from a top-level submodule of the package.
+    """Return the names imported from a public top-level submodule of the package.
 
     Parameters
     ----------
@@ -73,15 +141,17 @@ def read_top_level_imports(cls_tree: ast.Module, str_package: str) -> set[str]:
     Returns
     -------
     set of str
-        Names from absolute ``from <package>.<module> import ...`` statements.
+        The bound name (the ``as`` alias when present) of every ``from <package>.<module>
+        import ...`` or ``from .<module> import ...`` at import time (``try``/``if`` bodies
+        included, ``TYPE_CHECKING`` and function bodies not). A module whose name starts
+        with ``_`` is private and never a writer source.
     """
     set_top: set[str] = set()
-    for cls_node in cls_tree.body:
-        if not isinstance(cls_node, ast.ImportFrom) or cls_node.level != 0 or not cls_node.module:
-            continue
-        list_parts = cls_node.module.split(".")
-        if len(list_parts) == 2 and list_parts[0] == str_package:  # noqa: PLR2004
-            set_top.update(cls_alias.name for cls_alias in cls_node.names)
+    for cls_node, _ in _iter_statements(cls_tree.body):
+        if isinstance(cls_node, ast.ImportFrom) and _is_writer_module(cls_node, str_package):
+            if any(cls_alias.name == "*" for cls_alias in cls_node.names):
+                raise ValueError(f"star import from {cls_node.module}: list the names explicitly")
+            set_top.update(cls_alias.asname or cls_alias.name for cls_alias in cls_node.names)
     return set_top
 
 
@@ -119,6 +189,12 @@ def read_readme_writers(path_readme: Path) -> list[str]:
     list of str
         The backticked name in the second column of each row of the layout table (the one
         headed ``| Layout | Writer |``), in order and repeats kept; other tables are ignored.
+        Only the Writer column is checked: the Document and Spec columns are hand-copied.
+
+    Raises
+    ------
+    ValueError
+        When a body row has no backticked name in its second column.
     """
     list_names: list[str] = []
     bool_in_table = False
@@ -128,14 +204,17 @@ def read_readme_writers(path_readme: Path) -> list[str]:
             continue
         if bool_in_table and not str_line.startswith("|"):
             break
-        cls_match = _RE_ROW.match(str_line) if bool_in_table else None
-        if cls_match:
-            list_names.append(cls_match.group(1))
+        if not bool_in_table or _RE_SEPARATOR.match(str_line):
+            continue
+        cls_match = _RE_ROW.match(str_line)
+        if not cls_match:
+            raise ValueError(f"{path_readme}: table row has no backticked writer: {str_line!r}")
+        list_names.append(cls_match.group(1))
     return list_names
 
 
 def read_module_by_name(cls_tree: ast.Module, str_package: str) -> dict[str, str]:
-    """Map each name imported from a top-level submodule to that submodule, in import order.
+    """Map each name imported from a writer submodule to that submodule, in import order.
 
     Parameters
     ----------
@@ -150,17 +229,17 @@ def read_module_by_name(cls_tree: ast.Module, str_package: str) -> dict[str, str
         ``{"CdaV3": "cda_v3", ...}``; the submodule name is the one shared sort key.
     """
     dict_modules: dict[str, str] = {}
-    for cls_node in cls_tree.body:
-        if not isinstance(cls_node, ast.ImportFrom) or cls_node.level != 0 or not cls_node.module:
-            continue
-        list_parts = cls_node.module.split(".")
-        if len(list_parts) == 2 and list_parts[0] == str_package:  # noqa: PLR2004
-            dict_modules.update({cls_alias.name: list_parts[1] for cls_alias in cls_node.names})
+    for cls_node, _ in _iter_statements(cls_tree.body):
+        if isinstance(cls_node, ast.ImportFrom) and _is_writer_module(cls_node, str_package):
+            str_module = cls_node.module.split(".")[-1]  # type: ignore[union-attr]
+            dict_modules.update(
+                {cls_alias.asname or cls_alias.name: str_module for cls_alias in cls_node.names}
+            )
     return dict_modules
 
 
 def read_all_order(cls_tree: ast.Module) -> list[str]:
-    """Return the literal ``__all__`` entries in file order.
+    """Return the literal ``__all__`` entries in file order, ``+=`` appended.
 
     Parameters
     ----------
@@ -172,16 +251,17 @@ def read_all_order(cls_tree: ast.Module) -> list[str]:
     list of str
         The entries; empty when ``__all__`` is not a literal (``read_all_names`` reports that).
     """
-    for cls_node in cls_tree.body:
-        if isinstance(cls_node, ast.Assign) and any(
-            isinstance(cls_t, ast.Name) and cls_t.id == "__all__" for cls_t in cls_node.targets
-        ):
-            return [
-                cls_e.value
-                for cls_e in getattr(cls_node.value, "elts", [])
-                if isinstance(cls_e, ast.Constant)
-            ]
-    return []
+    list_order: list[str] = []
+    for cls_node, _ in _iter_statements(cls_tree.body):
+        cls_replaced = _replacement_value(cls_node)
+        cls_value = cls_replaced
+        if isinstance(cls_node, ast.AugAssign) and _is_all_name(cls_node.target):
+            cls_value = cls_node.value
+        if not isinstance(cls_value, (ast.List, ast.Tuple)):
+            continue
+        list_names = [cls_e.value for cls_e in cls_value.elts if isinstance(cls_e, ast.Constant)]
+        list_order = list_names if cls_replaced is not None else [*list_order, *list_names]
+    return list_order
 
 
 def read_nav_modules(path_mkdocs: Path) -> list[str]:
@@ -295,13 +375,16 @@ def main() -> int:
     cls_args = cls_parser.parse_args()
     try:
         set_writers = read_writers(cls_args.init, cls_args.package)
-    except ValueError as cls_err:
+        list_rows = read_readme_writers(cls_args.readme)
+    except (OSError, SyntaxError, ValueError) as cls_err:
         print(f"check_readme_layouts: {cls_err}", file=sys.stderr)
         return 1
-    list_rows = read_readme_writers(cls_args.readme)
     set_rows = set(list_rows)
     if not set_writers:
-        print("check_readme_layouts: found ZERO writers in __all__; refusing to pass.")
+        print(
+            "check_readme_layouts: found ZERO writers in __all__; refusing to pass.",
+            file=sys.stderr,
+        )
         return 1
     list_problems = (
         [
