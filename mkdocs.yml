@@ -34,6 +34,7 @@ nav:
       - "Perfil Mensal — V4": perfil_mensal.md
       - "Perfil Mensal — original": perfil_mensal_original.md
       - "Perfil Mensal — V3": perfil_mensal_v3.md
+      - "Perfil Mensal — ICVM 739": perfil_mensal_739.md
   - API Reference:
       - Overview: api/index.md
       - Reference: api/reference.md
