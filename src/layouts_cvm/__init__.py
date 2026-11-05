@@ -32,6 +32,7 @@ from layouts_cvm.informe_diario_v3 import InformeDiarioV3
 from layouts_cvm.informe_portabilidade import InformePortabilidade
 from layouts_cvm.informe_quadrimestral import InformeQuadrimestral
 from layouts_cvm.informe_semestral_inr_parte2 import InformeSemestralInrParte2
+from layouts_cvm.informe_sintetico import InformeSintetico
 from layouts_cvm.informe_trimestral_v1 import InformeTrimestralV1
 from layouts_cvm.inr_mensal import InrMensal
 from layouts_cvm.lamina import Lamina
@@ -72,6 +73,7 @@ __all__ = [
     "InformeDiarioV3",
     "InformePortabilidade",
     "InformeQuadrimestral",
+    "InformeSintetico",
     "InformeSemestralInrParte2",
     "InformeTrimestralV1",
     "InrMensal",
