@@ -22,5 +22,9 @@ help = "Update locked dependencies (poetry update)"
 cmd = "bash bin/precommit.sh"
 help = "Install the pre-commit, commit-msg and pre-push hooks"
 
+[tool.poe.tasks.check_agents_md_pairs]
+cmd = "python bin/check_agents_md_pairs.py"
+help = "Every CLAUDE.md must be a stub beside an AGENTS.md"
+
 [tool.poe]
 include = ["poe_tasks.library.toml", "poe_tasks.test.toml", "poe_tasks.lint.toml", "poe_tasks.repo.toml", "poe_tasks.docs.toml"]

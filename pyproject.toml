@@ -10,7 +10,7 @@ documentation = "https://guilhermegor.github.io/layouts-cvm/"
 repository = "https://github.com/guilhermegor/layouts-cvm"
 keywords = ["layouts-cvm", "python", "library"]
 packages = [{ include = "layouts_cvm", from = "src" }]
-exclude = ["src/**/CLAUDE.md"]
+exclude = ["src/**/CLAUDE.md", "src/**/AGENTS.md"]
 package-mode = true
 classifiers = [
     "Programming Language :: Python :: 3",
