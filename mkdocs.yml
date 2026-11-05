@@ -14,6 +14,7 @@ nav:
       - "COFI 4010 — Balancete": cofi_4010.md
       - "COFI 4016 — Balanço": cofi_4016.md
       - "Extrato das Informações sobre o Fundo — V3": extrato.md
+      - "Extrato das Informações sobre o Fundo — V2": extrato_v2.md
       - "Informe de Fundo 157": inf_fundo_157.md
       - "Informe Mensal FIDC — ICVM 576": inf_mensal_fidc.md
       - "Informe Anual de Auditor": informe_anual_auditor.md
@@ -34,6 +35,7 @@ nav:
       - "Perfil Mensal — V4": perfil_mensal.md
       - "Perfil Mensal — original": perfil_mensal_original.md
       - "Perfil Mensal — V3": perfil_mensal_v3.md
+      - "Perfil Mensal — ICVM 739": perfil_mensal_739.md
   - API Reference:
       - Overview: api/index.md
       - Reference: api/reference.md

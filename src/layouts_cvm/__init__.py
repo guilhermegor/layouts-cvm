@@ -19,6 +19,7 @@ from layouts_cvm.cda_v3 import CdaV3
 from layouts_cvm.cofi_4010 import Cofi4010
 from layouts_cvm.cofi_4016 import Cofi4016
 from layouts_cvm.extrato import Extrato
+from layouts_cvm.extrato_v2 import ExtratoV2
 from layouts_cvm.inf_fundo_157 import InfFundo157
 from layouts_cvm.inf_mensal_fidc import InfMensalFidc
 from layouts_cvm.inf_mensal_fidc_489 import InfMensalFidc489
@@ -38,6 +39,7 @@ from layouts_cvm.lamina_v1 import LaminaV1
 from layouts_cvm.lamina_v2 import LaminaV2
 from layouts_cvm.main import main
 from layouts_cvm.perfil_mensal import PerfilMensal
+from layouts_cvm.perfil_mensal_739 import PerfilMensal739
 from layouts_cvm.perfil_mensal_original import PerfilMensalOriginal
 from layouts_cvm.perfil_mensal_v3 import PerfilMensalV3
 
@@ -58,6 +60,7 @@ __all__ = [
     "Cofi4010",
     "Cofi4016",
     "Extrato",
+    "ExtratoV2",
     "InfFundo157",
     "InfMensalFidc",
     "InformeAnualAuditor",
@@ -76,6 +79,7 @@ __all__ = [
     "LaminaV1",
     "LaminaV2",
     "PerfilMensal",
+    "PerfilMensal739",
     "PerfilMensalOriginal",
     "PerfilMensalV3",
 ]
