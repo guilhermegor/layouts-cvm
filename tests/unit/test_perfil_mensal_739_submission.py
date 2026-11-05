@@ -266,9 +266,11 @@ def test_row_rejects_tags_the_739_page_does_not_have(field: str) -> None:
 
 
 def test_distr_patrim_rejects_a_missing_percentage() -> None:
-    """Reject a DISTR_PATRIM that leaves a percentage out (the page marks it mandatory)."""
+    """Reject a DISTR_PATRIM that omits a percentage (the page marks it mandatory)."""
     with pytest.raises(ValidationError):
-        PerfilMensal739PatrimonyDistribution(**_patrimony(pr_pf_varj=None))
+        PerfilMensal739PatrimonyDistribution(
+            **{k: v for k, v in _patrimony().items() if k != "pr_pf_varj"}
+        )
 
 
 def test_header_rejects_other_versao() -> None:
@@ -311,7 +313,7 @@ def test_export_writes_windows_1252_file(tmp_path: Path) -> None:
 
 
 def test_739_writer_rejects_a_v3_document() -> None:
-    """Refuse a real V3 document (the 739 parent type): scales and VERSAO differ."""
+    """Refuse a V3 document model: its scales and VERSAO differ from 739."""
     cls_v3 = PerfilMensalV3Document.model_construct(header=_doc().header, rows=_doc().rows)
     with pytest.raises(TypeError):
         PerfilMensal739().export(cls_v3, None)  # type: ignore[arg-type]
@@ -375,7 +377,7 @@ def test_nominal_risk_factor_list_over_five_is_rejected() -> None:
         PerfilMensal739NominalRiskBlock(val_colateral="1", lista_fator_risco_noc=[item] * 6)
 
 
-def test_739_writer_rejects_a_v3_document_given_as_plain_data() -> None:
+def test_739_writer_rejects_a_v3_versao_given_as_plain_data() -> None:
     """Reject the ``model_dump`` of a real V3 document: its VERSAO 3.0 is not a 739 one."""
     doc_v3 = PerfilMensalV3Document(
         header={"dt_compt": "01/2025", "dt_gerac_arq": "15/01/2025"},
@@ -385,3 +387,19 @@ def test_739_writer_rejects_a_v3_document_given_as_plain_data() -> None:
     )
     with pytest.raises(ValidationError):
         PerfilMensal739().export(doc_v3.model_dump())
+
+
+def test_739_row_and_header_fields_match_v4_so_the_writer_mapping_cannot_drift() -> None:
+    """Fail when V4 gains or loses a row/header field the 739 models do not mirror.
+
+    The writer validates the 739 document into the V4 shape before building, so a new V4
+    field would be emitted into 739 files unless the models are revisited.
+    """
+    list_pairs = [
+        (v4.PerfilMensalRow, m739.PerfilMensal739Row),
+        (v4.DocumentHeader, m739.PerfilMensal739Header),
+    ]
+
+    assert [set(a.model_fields) for a, _ in list_pairs] == [
+        set(b.model_fields) for _, b in list_pairs
+    ]

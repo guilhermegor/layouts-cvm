@@ -4,7 +4,9 @@ Produces CVM-compliant Monthly Profile XML (``VERSAO`` 1.0) from validated schem
 The layout has the V4 tag order and differs only in the scale of four tags and in the
 absence of two. The V4 builder reads none of the V3-only tags, so this writer subclasses
 ``PerfilMensal`` and sets the stress scale to 2 instead of duplicating the builder. The 739
-models are standalone; the writer maps them onto the V4 shape the builder reads.
+models are standalone, but the writer validates the document into the V4 shape the builder
+reads, so a stricter V4 rule or new V4 field reaches 739 output; a test pins the field sets
+to catch that drift (the shared builder base is #83).
 """
 
 from collections.abc import Mapping

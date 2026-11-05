@@ -44,6 +44,9 @@ validado por dígito verificador e gravado sem máscara.
 
 ## Não são verificados
 
+A saída ainda passa pela validação do V4 antes da montagem (os modelos 739 são independentes,
+mas o writer reutiliza a rotina do V4); um teste falha se o V4 ganhar ou perder um campo.
+
 O writer segue o exemplo XML da página; o que a página descreve só em prosa e não está
 modelado fica sem validação:
 
