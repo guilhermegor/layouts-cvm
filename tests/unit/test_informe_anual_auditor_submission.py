@@ -348,3 +348,125 @@ def test_document_truncates_percent_never_rounds() -> None:
     """Document truncates percent never rounds."""
     doc = InformeAnualAuditorDocument.model_validate(_pj_data())
     assert doc.inform_audit.lista_entid_audita.entid_audita[0].pr_fatura == Decimal("12.34")
+
+
+TABLE_B = frozenset(
+    {17, 23, 45, 7, 5, 1, 20, 47, 48, 25, 14, 63, 67, 93, 96, 27, 22, 95, 99, 88, 86, 75, 32, 69}
+    | {74, 87, 98, 89, 91, 92, 90, 83, 73, 70, 84, 77, 30, 80, 72, 43, 85, 60, 61, 94, 55, 57}
+    | {52, 50}
+)
+NOT_IN_TABLE_B = sorted(set(range(101)) - TABLE_B)
+LIST_LIMITS = [
+    ("lista_ender", "ENDER", 1000),
+    ("lista_entid_audita", "ENTID_AUDITA", 8000),
+    ("lista_entid_colig", "ENTID_COLIG", 1000),
+]
+EMPTY_LISTS = [
+    ("lista_resp", "LISTA_RESP", {"resp": []}),
+    ("lista_entid_audita", "LISTA_ENTID_AUDITA", {"entid_audita": []}),
+    ("lista_entid_colig", "LISTA_ENTID_COLIG", {"entid_colig": []}),
+]
+
+
+def _inform(data: dict) -> ET.Element:
+    """Export ``data`` and return its ``INFORM_AUDIT`` block.
+
+    Parameters
+    ----------
+    data : dict
+        Document payload.
+
+    Returns
+    -------
+    ET.Element
+        The ``INFORM_AUDIT`` element.
+    """
+    return _root(data).find(f"{NS}INFORM_AUDIT")
+
+
+def _with_items(str_key: str, int_count: int) -> dict:
+    """Build the PJ payload with ``int_count`` items in one repeating list.
+
+    Parameters
+    ----------
+    str_key : str
+        The ``LISTA_*`` field to fill.
+    int_count : int
+        How many blocks the list holds.
+
+    Returns
+    -------
+    dict
+        The payload; an address list keeps its head office first, then branches.
+    """
+    data = _pj_data()
+    inform = data["inform_audit"]
+    audited = _entities()["lista_entid_audita"]["entid_audita"][0]
+    affiliated = _entities()["lista_entid_colig"]["entid_colig"][0]
+    templates = {
+        "lista_ender": (_addresses()[0], _addresses()[1]),
+        "lista_entid_audita": (audited, audited),
+        "lista_entid_colig": (affiliated, affiliated),
+    }
+    first, rest = templates[str_key]
+    items = [copy.deepcopy(first)] + [copy.deepcopy(rest) for _ in range(int_count - 1)]
+    inform[str_key] = {next(iter(inform[str_key])): items}
+    return data
+
+
+@pytest.mark.parametrize(("str_key", "str_tag", "dict_empty"), EMPTY_LISTS)
+def test_export_empty_list_keeps_its_wrapper(str_key: str, str_tag: str, dict_empty: dict) -> None:
+    """Export empty list keeps its wrapper in the page's tag order."""
+    data = _mutate((_INFORM, str_key), dict_empty)
+    assert _tags(_inform(data)) == INFORM_TAGS
+
+
+@pytest.mark.parametrize(("str_key", "str_tag", "dict_empty"), EMPTY_LISTS)
+def test_export_empty_list_wrapper_holds_no_blocks(
+    str_key: str, str_tag: str, dict_empty: dict
+) -> None:
+    """Export empty list wrapper holds no repeating blocks."""
+    data = _mutate((_INFORM, str_key), dict_empty)
+    assert list(_inform(data).find(f"{NS}{str_tag}")) == []
+
+
+@pytest.mark.parametrize("str_key", ["lista_entid_audita", "lista_entid_colig"])
+def test_export_omitted_optional_list_still_emits_wrapper(str_key: str) -> None:
+    """Export omitted optional list still emits its empty wrapper."""
+    data = _pj_data()
+    del data["inform_audit"][str_key]
+    assert _tags(_inform(data)) == INFORM_TAGS
+
+
+@pytest.mark.parametrize("int_code", sorted(TABLE_B))
+def test_export_table_b_code_is_written_as_is(int_code: int) -> None:
+    """Export writes every Table B entity type unchanged."""
+    data = _mutate((_INFORM, "lista_entid_audita", "entid_audita", 0, "tp_entid"), int_code)
+    tp_entid = _inform(data).find(f"{NS}LISTA_ENTID_AUDITA/{NS}ENTID_AUDITA/{NS}TP_ENTID")
+    assert tp_entid.text == str(int_code)
+
+
+@pytest.mark.parametrize("int_code", NOT_IN_TABLE_B)
+def test_document_rejects_code_outside_table_b(int_code: int) -> None:
+    """Document rejects every entity type the page's Table B does not list."""
+    data = _mutate((_INFORM, "lista_entid_audita", "entid_audita", 0, "tp_entid"), int_code)
+    with pytest.raises(ValidationError):
+        InformeAnualAuditorDocument.model_validate(data)
+
+
+@pytest.mark.parametrize(("str_key", "str_tag", "int_limit"), LIST_LIMITS)
+def test_export_list_at_upload_limit_keeps_every_block(
+    str_key: str, str_tag: str, int_limit: int
+) -> None:
+    """Export a list at its upload limit (Table A) keeps every block."""
+    wrapper = _inform(_with_items(str_key, int_limit)).find(f"{NS}{str_key.upper()}")
+    assert len(wrapper.findall(f"{NS}{str_tag}")) == int_limit
+
+
+@pytest.mark.parametrize(("str_key", "str_tag", "int_limit"), LIST_LIMITS)
+def test_document_rejects_list_one_over_upload_limit(
+    str_key: str, str_tag: str, int_limit: int
+) -> None:
+    """Document rejects a list one block over its upload limit (Table A)."""
+    with pytest.raises(ValidationError):
+        InformeAnualAuditorDocument.model_validate(_with_items(str_key, int_limit + 1))
