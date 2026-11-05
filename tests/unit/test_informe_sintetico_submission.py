@@ -340,6 +340,8 @@ def test_cod_doc_must_match_the_variant() -> None:
         ("patrim_liq", "1"),
         ("patrim_liq", True),
         ("patrim_liq", 10**12),
+        ("patrim_liq", -(10**12)),
+        ("vl_quota_ult_dia_mes", "1" * 17),
         ("nr_tot_quotst_ult_dia_mes", -1),
         ("nr_tot_quotst_ult_dia_mes", 1.0),
         ("vl_quota_ult_dia_mes", 1.5),
@@ -370,6 +372,18 @@ def test_quota_value_truncates_beyond_twelve_places() -> None:
     """The quota value truncates, never rounds, beyond twelve places."""
     data = _data(7, _row(7, vl_quota_ult_dia_mes="1.9999999999999"))
     assert _body_text(data, 1) == "1,999999999999"
+
+
+def test_quota_value_with_sixteen_integer_digits_is_kept() -> None:
+    """The widest quota value the 12-place scale can quantize is accepted."""
+    data = _data(7, _row(7, vl_quota_ult_dia_mes="1" * 16 + ".5"))
+    assert _body_text(data, 1) == "1" * 16 + ",500000000000"
+
+
+@pytest.mark.parametrize("edge", [999_999_999_999, -999_999_999_999])
+def test_amount_at_the_bound_is_kept(edge: int) -> None:
+    """The amount bound is inclusive on both sides."""
+    assert _body_text(_data(7, _row(7, patrim_liq=edge)), 2) == str(edge)
 
 
 def test_negative_amount_allowed() -> None:

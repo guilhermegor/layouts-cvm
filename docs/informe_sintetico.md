@@ -64,7 +64,7 @@ A gravação em disco usa arquivo temporário no mesmo diretório + `os.replace`
 - Valores negativos não são mencionados; como a página não impõe sinal, são aceitos em todos
   os campos de valor inteiros (`PATRIM_LIQ`, `QUOTA_EMITIDA_MES`, `QUOTA_RESG_MES`, as posições
   de `APLICACOES` e `MERC_A_TERMO`, prêmios e margem), recusados só em `NR_TOT_QUOTST_ULT_DIA_MES`.
-- `VL_QUOTA_ULT_DIA_MES` aceita até 18 dígitos inteiros e 12 decimais, mais largo que os
+- `VL_QUOTA_ULT_DIA_MES` aceita até 16 dígitos inteiros e 12 decimais, mais largo que os
   inteiros (12 dígitos), porque a página não fixa a largura de nenhum dos dois.
 - Não há limite de fundos por arquivo na página; nenhum é imposto. CNPJ repetido no mesmo
   arquivo não é recusado.

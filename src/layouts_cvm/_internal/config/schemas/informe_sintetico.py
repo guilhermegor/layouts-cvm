@@ -39,7 +39,7 @@ from layouts_cvm._internal.utils.xml_fields import (
 
 
 _QUOTA_VALUE_PLACES = 12
-_QUOTA_INTEGER_DIGITS = 18
+_QUOTA_INTEGER_DIGITS = 16
 _INT_MAX = 999_999_999_999
 
 _Amount = Annotated[int, Field(strict=True, ge=-_INT_MAX, le=_INT_MAX)]
