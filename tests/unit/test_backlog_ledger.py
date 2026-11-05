@@ -917,6 +917,7 @@ def path_mid_merge(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     _git_in(tmp_path, "commit", "-q", "-m", "theirs")
     _git_in(tmp_path, "checkout", "-q", "feature")
     _git_in(tmp_path, "merge", "-q", "--no-commit", "--no-ff", "main")
+    monkeypatch.delenv("GITHUB_BASE_REF", raising=False)
     monkeypatch.chdir(tmp_path)
     return tmp_path
 
