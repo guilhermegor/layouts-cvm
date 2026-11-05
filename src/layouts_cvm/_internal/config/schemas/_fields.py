@@ -1,8 +1,8 @@
 """Shared field helpers for CVM XML-standard schemas.
 
 Direction-neutral building blocks reused by every ``_internal/config/schemas/<standard>.py``
-model: a decimal-scale truncation factory (ROUND_DOWN, never inflating a value past
-the scale a standard permits) and the Brazilian CPF/CNPJ check-digit validators.
+model: a decimal-scale truncation factory (ROUND_DOWN, never growing a value in
+magnitude past the scale a standard permits) and the Brazilian CPF/CNPJ check-digit validators.
 
 This is a private ``_``-prefixed module — it ships in the wheel but is not part of the
 public API. Each standard imports these to declare its own ``Annotated`` field types
@@ -66,8 +66,8 @@ def _quantize(value: DecimalInput, quantum: Decimal) -> Decimal:
 def truncate_to_scale(decimal_places: int) -> Callable[[DecimalInput], Decimal | None]:
     """Build a before-validator that truncates a value to ``decimal_places`` (ROUND_DOWN).
 
-    Truncation (never rounding) is used so a value is never inflated past the scale
-    the CVM standard permits; any excess precision is discarded toward zero.
+    Truncation (never rounding) is used so a value never grows in magnitude past
+    the scale the CVM standard permits; any excess precision is discarded toward zero.
 
     Parameters
     ----------
