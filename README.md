@@ -41,7 +41,7 @@ Build, validate and serialise the files a fund sends to CVM, in CVM's own file l
 ## Features
 
 - Pydantic models for every CVM XML layout listed below, validated before anything is serialised.
-- One writer per layout (`export(doc, output_path=None)`), producing windows-1252 XML.
+- One writer per layout (`export(doc, output_path=None)`), producing windows-1252 XML (`Cofi4016` is the exception: ASCII fixed-width `.cvm` records).
 - Byte-identical to the original `filings-cvm` writers, pinned by a golden-file test.
 - Runtime dependencies: `pydantic` and `beartype`. No network.
 
@@ -51,7 +51,9 @@ Build, validate and serialise the files a fund sends to CVM, in CVM's own file l
 | CDA V4 | `Cda` | `CdaDocument` | [PadraoXMLCDANetV4](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLCDANetV4.aspx) |
 | CDA V3 | `CdaV3` | `CdaV3Document` | [PadraoXMLCDANetV3](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLCDANetV3.aspx) |
 | CDA V2 | `CdaV2` | `CdaV2Document` | [PadraoXMLCDANet](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLCDANet.aspx) |
+| COFI 4016 (Balanço, largura fixa) | `Cofi4016` | `Cofi4016Document` | [PadraoCOFI](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoCOFI.aspx) |
 | Extrato das Informações sobre o Fundo V3 | `Extrato` | `ExtratoDocument` | [PadraoXMLInfExtratoV3](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfExtratoV3.asp) |
+| Extrato das Informações sobre o Fundo V2 | `ExtratoV2` | `ExtratoV2Document` | [PadraoXMLInfExtratoV2](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfExtratoV2.asp) |
 | Informe de Fundo 157 | `InfFundo157` | `InfFundo157Document` | [PadraoXMLInf157](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInf157.asp) |
 | Informe Mensal FIDC (ICVM 576) | `InfMensalFidc` | `InfMensalFidcDocument` | [PadraoXMLMensalFIDC576](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLMensalFIDC576.asp) |
 | Informe Anual de Auditor | `InformeAnualAuditor` | `InformeAnualAuditorDocument` | [PadraoXMLAuditorAnual](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLAuditorAnual.asp) |
@@ -60,9 +62,11 @@ Build, validate and serialise the files a fund sends to CVM, in CVM's own file l
 | Informe Diário V4 | `InformeDiario` | `InformeDiarioDocument` | [PadraoXMLInfoDiarioNetV4](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNetV4.asp) |
 | Informe Diário V3 | `InformeDiarioV3` | `InformeDiarioV3Document` | [PadraoXMLInfoDiarioNetV3](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNetV3.asp) |
 | Informe Diário V2 | `InformeDiarioV2` | `InformeDiarioV2Document` | [PadraoXMLInfoDiarioNet739](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNet739.asp) |
+| Informe Diário V1 | `InformeDiarioV1` | `InformeDiarioV1Document` | [PadraoXMLInfoDiarioNet](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNet.asp) |
 | Informe de Portabilidade | `InformePortabilidade` | `InformePortabilidadeDocument` | [PadraoXMLInfoPortabilidade](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoPortabilidade.asp) |
 | Informe Quadrimestral V2 | `InformeQuadrimestral` | `InformeQuadrimestralDocument` | [PadraoXMLInfoTrimV2](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoTrimV2.asp) |
 | Informe Sintético (FCCE, FITVM, FIC-FITVM, Outros) | `InformeSintetico` | `InformeSinteticoFcceDocument`, `InformeSinteticoFitvmDocument`, `InformeSinteticoFicDocument`, `InformeSinteticoOutrosDocument` | [FCCE](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLSintFCCE.asp), [FITVM](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLSintFITVM.asp), [FIC-FITVM](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLSintFIC.asp), [Outros](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLSintOutros.asp) |
+| Informe Semestral de Investidor Não Residente — Parte II | `InformeSemestralInrParte2` | `InformeSemestralInrParte2Document` | [PadraoXMLInfoSemestralINRParte2](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoSemestralINRParte2.aspx) |
 | Informe Trimestral V1 | `InformeTrimestralV1` | `InformeTrimestralV1Document` | [PadraoXMLInfoTrim](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoTrim.asp) |
 | Informe Mensal de Investidor Não Residente | `InrMensal` | `InrMensalDocument` | [PadraoXMLInfoMensalINR](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoMensalINR.asp) |
 | Lâmina de Fundos V3 | `Lamina` | `LaminaDocument` | [PadraoXMLLaminaV3](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLLaminaV3.asp) |
@@ -70,6 +74,7 @@ Build, validate and serialise the files a fund sends to CVM, in CVM's own file l
 | Lâmina de Fundos V2 | `LaminaV2` | `LaminaV2Document` | [PadraoXMLLaminaV2](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLLaminaV2.asp) |
 | Perfil Mensal V4 | `PerfilMensal` | `PerfilMensalDocument` | [PadraoXMLPerfilV4](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLPerfilV4.asp) |
 | Perfil Mensal (original) | `PerfilMensalOriginal` | `PerfilMensalOriginalDocument` | [PadraoXMLPerfil](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLPerfil.asp) |
+| Perfil Mensal ICVM 739 | `PerfilMensal739` | `PerfilMensal739Document` | [PadraoXMLPerfil739](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLPerfil739.asp) |
 | Perfil Mensal V3 | `PerfilMensalV3` | `PerfilMensalV3Document` | [PadraoXMLPerfilV3](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLPerfilV3.asp) |
 
 <!-- slug: documentation -->
