@@ -7,7 +7,8 @@ namespace ``urn:infmensal``, ``COD_DOC=69``, ``VERSAO=1.0``).
 Part I has the monthly INR blocks minus ``APLICACOES``, but it is a frozen layout version of its
 own: every model is declared here and none inherits from
 :mod:`layouts_cvm._internal.config.schemas.inr_mensal`, so a change to the live monthly layout
-cannot move Part I. Only the field validators (``utils/inr_mensal_fields.py``) are shared.
+cannot move Part I's models. The field validators (``utils/inr_mensal_fields.py``) are shared on
+purpose: a change there reaches both layouts, so version it before changing a rule for one.
 ``APLICACOES`` is not a field, so no input can make the writer emit it.
 
 **Field order is the XML order**, as in the monthly schema. Part II (``COD_DOC=70``, the

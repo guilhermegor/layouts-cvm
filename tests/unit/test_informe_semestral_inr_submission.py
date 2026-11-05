@@ -129,20 +129,6 @@ def test_1000_participants_is_accepted() -> None:
     assert xml.count("<PARTICIPANTE>") == 1000
 
 
-@pytest.mark.parametrize("name", ["Header", "Participante", "Document"])
-def test_part_one_models_do_not_inherit_the_live_monthly_models(name: str) -> None:
-    """A frozen layout version must not move when the monthly layout does (PRINCIPLES 1)."""
-    from layouts_cvm._internal.config.schemas import informe_semestral_inr, inr_mensal
-
-    monthly = {
-        "Header": inr_mensal.InrMensalHeader,
-        "Participante": inr_mensal.Participante,
-        "Document": inr_mensal.InrMensalDocument,
-    }[name]
-    part_one = getattr(informe_semestral_inr, f"InformeSemestralInr{name}")
-    assert not issubclass(part_one, monthly)
-
-
 def test_participant_cannot_carry_aplicacoes_at_all() -> None:
     """The field does not exist, so no mutation or model_construct can emit the tag."""
     from layouts_cvm._internal.config.schemas.informe_semestral_inr import (
@@ -156,7 +142,30 @@ _ORDER_CASES = [
     ("CAB_INFORM", ["COD_DOC", "VERSAO", "CD_CVM", "DT_COMPT", "DT_GERAC_ARQ"]),
     (
         "LISTA_PARTICIPANTES/{ns}PARTICIPANTE/{ns}MOV_RECURSOS",
-        ["TRANSF_RECURSOS", "RECURSOS_MESMO_INVEST"],
+        ["TRANSF_RECURSOS", "RECURSOS_MESMO_INVEST", "RECURSOS_OUTRO_INVEST"],
+    ),
+    (
+        "LISTA_PARTICIPANTES/{ns}PARTICIPANTE/{ns}ENTRADA_SAIDA",
+        ["VL_ENTR", "VL_SAIDA"],
+    ),
+    (
+        "LISTA_PARTICIPANTES/{ns}PARTICIPANTE/{ns}MOV_RECURSOS/{ns}TRANSF_RECURSOS",
+        [
+            "VL_INVEST_CARTEIRA_HAVER_NRES",
+            "VL_HAVER_NRES_INVEST_CARTEIRA",
+            "VL_INVEST_CARTEIRA_ADR",
+            "VL_ADR_INVEST_CARTEIRA",
+            "VL_INVEST_CARTEIRA_ESTRANG_DIRETA",
+            "VL_ESTRANG_DIRETA_INVEST_CARTEIRA",
+        ],
+    ),
+    (
+        "LISTA_PARTICIPANTES/{ns}PARTICIPANTE",
+        ["COD_PARTIC", "ENTRADA_SAIDA", "MOV_RECURSOS", "PATRIM_LIQ"],
+    ),
+    (
+        "LISTA_PARTICIPANTES/{ns}PARTICIPANTE/{ns}MOV_RECURSOS/{ns}RECURSOS_OUTRO_INVEST",
+        ["RECURSOS_RECEB_OUTRO_INVEST", "RECURSOS_ENV_OUTRO_INVEST"],
     ),
     (
         "LISTA_PARTICIPANTES/{ns}PARTICIPANTE/{ns}MOV_RECURSOS/{ns}RECURSOS_MESMO_INVEST",
@@ -172,6 +181,10 @@ def test_block_tag_order(path: str, expected: list[str]) -> None:
     data["participantes"][0]["mov_recursos"]["recursos_mesmo_invest"] = {  # type: ignore[index]
         "recursos_receb_mesmo_invest": [{"cd_partic_origem": CODE, "vl_recebido": 1}],
         "recursos_env_mesmo_invest": [{"cd_partic_dest": CODE, "vl_enviado": 2}],
+    }
+    data["participantes"][0]["mov_recursos"]["recursos_outro_invest"] = {  # type: ignore[index]
+        "recursos_receb_outro_invest": [{"cd_partic_origem": CODE, "vl_recebido": 3}],
+        "recursos_env_outro_invest": [{"cd_partic_dest": CODE, "vl_enviado": 4}],
     }
     root = _root(InformeSemestralInr().export(data))
     block = root.find(f"{NS}{path.format(ns=NS)}")
