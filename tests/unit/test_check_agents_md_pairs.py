@@ -113,3 +113,20 @@ def test_main_fails_when_no_claude_file_is_tracked(tmp_path: Path) -> None:
         [sys.executable, str(gate), "--root", str(tmp_path)], capture_output=True, check=False
     )
     assert (cls_proc.returncode, b"no tracked CLAUDE.md" in cls_proc.stderr) == (1, True)
+
+
+def test_main_fails_when_tracked_stub_is_invalid(tmp_path: Path) -> None:
+    """An invalid tracked stub fails the CLI, and the message names that file."""
+    path_dir = tmp_path / "sub"
+    path_dir.mkdir()
+    (path_dir / "AGENTS.md").write_text("# Guidance\n")
+    (path_dir / "CLAUDE.md").write_text("@README.md\n" + _STUB)
+    (path_dir / "README.md").write_text("x")
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)  # noqa: S603, S607
+    subprocess.run(["git", "-C", str(tmp_path), "add", "-A"], check=True)  # noqa: S603, S607
+    gate = Path(__file__).parents[2] / "bin" / "check_agents_md_pairs.py"
+    cls_proc = subprocess.run(  # noqa: S603
+        [sys.executable, str(gate), "--root", str(tmp_path)], capture_output=True, check=False
+    )
+
+    assert (cls_proc.returncode, b"sub/CLAUDE.md" in cls_proc.stderr) == (1, True)

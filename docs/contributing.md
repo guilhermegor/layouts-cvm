@@ -104,6 +104,13 @@ pointed at an empty branch) and tells you to re-run it. So: cut the first releas
 `poe enable_pages` once. Manual alternative: *Settings → Pages → Build and deployment →
 Source: Deploy from a branch → `gh-pages` / `/`*.
 
+## Agent guidance
+
+Guidance for AI coding agents goes in `AGENTS.md`, which every agent reads. A `CLAUDE.md` beside
+it is only a stub: it imports `@AGENTS.md`, then the line `Edit AGENTS.md, not this file.
+Claude-Code-only lines go below this one.` Put only Claude-Code-only lines (a hook, a slash
+command, a skill) below that line. `bin/check_agents_md_pairs.py` enforces the pairing.
+
 ## Pull requests
 
 1. Open an issue first, using the repository's issue template. State what you want to change
