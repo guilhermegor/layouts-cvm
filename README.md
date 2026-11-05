@@ -51,6 +51,7 @@ Build, validate and serialise the files a fund sends to CVM, in CVM's own file l
 | CDA V4 | `Cda` | `CdaDocument` | [PadraoXMLCDANetV4](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLCDANetV4.aspx) |
 | CDA V2 | `CdaV2` | `CdaV2Document` | [PadraoXMLCDANet](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLCDANet.aspx) |
 | CDA V3 | `CdaV3` | `CdaV3Document` | [PadraoXMLCDANetV3](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLCDANetV3.aspx) |
+| COFI 4010 (Balancete, largura fixa) | `Cofi4010` | `Cofi4010Document` | [PadraoCOFI](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoCOFI.aspx) |
 | COFI 4016 (Balanço, largura fixa) | `Cofi4016` | `Cofi4016Document` | [PadraoCOFI](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoCOFI.aspx) |
 | Extrato das Informações sobre o Fundo V3 | `Extrato` | `ExtratoDocument` | [PadraoXMLInfExtratoV3](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfExtratoV3.asp) |
 | Extrato das Informações sobre o Fundo V2 | `ExtratoV2` | `ExtratoV2Document` | [PadraoXMLInfExtratoV2](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfExtratoV2.asp) |
@@ -66,6 +67,7 @@ Build, validate and serialise the files a fund sends to CVM, in CVM's own file l
 | Informe de Portabilidade | `InformePortabilidade` | `InformePortabilidadeDocument` | [PadraoXMLInfoPortabilidade](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoPortabilidade.asp) |
 | Informe Quadrimestral V2 | `InformeQuadrimestral` | `InformeQuadrimestralDocument` | [PadraoXMLInfoTrimV2](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoTrimV2.asp) |
 | Informe Semestral de Investidor Não Residente — Parte II | `InformeSemestralInrParte2` | `InformeSemestralInrParte2Document` | [PadraoXMLInfoSemestralINRParte2](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoSemestralINRParte2.aspx) |
+| Informe Sintético (FCCE, FITVM, FIC-FITVM, Outros) | `InformeSintetico` | `InformeSinteticoFcceDocument`, `InformeSinteticoFitvmDocument`, `InformeSinteticoFicDocument`, `InformeSinteticoOutrosDocument` | [FCCE](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLSintFCCE.asp), [FITVM](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLSintFITVM.asp), [FIC-FITVM](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLSintFIC.asp), [Outros](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLSintOutros.asp) |
 | Informe Trimestral V1 | `InformeTrimestralV1` | `InformeTrimestralV1Document` | [PadraoXMLInfoTrim](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoTrim.asp) |
 | Informe Mensal de Investidor Não Residente | `InrMensal` | `InrMensalDocument` | [PadraoXMLInfoMensalINR](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoMensalINR.asp) |
 | Lâmina de Fundos V3 | `Lamina` | `LaminaDocument` | [PadraoXMLLaminaV3](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLLaminaV3.asp) |
