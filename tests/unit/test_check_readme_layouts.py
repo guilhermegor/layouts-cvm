@@ -146,6 +146,7 @@ def _run_gate(
     """Write a fake package and README under ``path_dir`` and run the gate on them."""
     (path_dir / "__init__.py").write_text(str_init, encoding="utf-8")
     (path_dir / "README.md").write_text(str_readme, encoding="utf-8")
+    (path_dir / "mkdocs.yml").write_text('- Layouts:\n      - "A": a.md\n', encoding="utf-8")
     list_argv = [
         "check_readme_layouts",
         "--init",
@@ -154,6 +155,8 @@ def _run_gate(
         "pkg",
         "--readme",
         str(path_dir / "README.md"),
+        "--mkdocs",
+        str(path_dir / "mkdocs.yml"),
     ]
     monkeypatch.setattr("sys.argv", list_argv)
     return _DICT_GATE["main"]()
@@ -236,3 +239,15 @@ def test_read_nav_modules_reads_stems_until_the_section_ends(tmp_path: Path) -> 
     )
 
     assert _DICT_GATE["read_nav_modules"](path_yml) == ["b", "a"]
+
+
+def test_registry_order_missing_nav_is_reported(tmp_path: Path) -> None:
+    """An absent ``mkdocs.yml`` is a problem, not a silent pass."""
+    (tmp_path / "__init__.py").write_text(_STR_INIT, encoding="utf-8")
+    (tmp_path / "README.md").write_text(_STR_README, encoding="utf-8")
+
+    list_problems = _DICT_GATE["find_registry_order_problems"](
+        tmp_path / "__init__.py", "pkg", tmp_path / "README.md", tmp_path / "mkdocs.yml"
+    )
+
+    assert any("Layouts nav: missing or empty" in str_p for str_p in list_problems)

@@ -35,15 +35,20 @@ def _git(path_repo: Path, *tuple_args: str) -> subprocess.CompletedProcess[str]:
     Returns
     -------
     subprocess.CompletedProcess of str
-        The finished process; the caller reads ``returncode``.
+        The finished process; a failing git step raises ``CalledProcessError``.
     """
-    list_cmd = [_GIT, "-c", "user.name=t", "-c", "user.email=t@t", *tuple_args]
+    list_cmd = [
+        _GIT, "-c", "user.name=t", "-c", "user.email=t@t", "-c", "core.hooksPath=/dev/null",
+        "-c", "commit.gpgsign=false", *tuple_args,
+    ]  # fmt: skip
     return subprocess.run(  # noqa: S603 - constant trusted argv
-        list_cmd, cwd=path_repo, capture_output=True, text=True, check=False
+        list_cmd, cwd=path_repo, capture_output=True, text=True, check=True
     )
 
 
-def _insert_after(path_file: Path, str_marker: str, str_new: str) -> None:
+def _insert_after(
+    path_file: Path, str_marker: str, str_new: str
+) -> None:  # complexity-ok: no-op guard
     """Insert a line right after the first line containing the marker.
 
     Parameters
@@ -55,13 +60,16 @@ def _insert_after(path_file: Path, str_marker: str, str_new: str) -> None:
     str_new : str
         The line to add below it.
     """
+    str_old = path_file.read_text(encoding="utf-8")
     str_text = re.sub(
         rf"^(.*{re.escape(str_marker)}.*)$",
         lambda cls_m: f"{cls_m.group(1)}\n{str_new}",
-        path_file.read_text(encoding="utf-8"),
+        str_old,
         count=1,
         flags=re.MULTILINE,
     )
+    if str_text == str_old:
+        raise AssertionError(f"marker {str_marker!r} not found in {path_file}")
     path_file.write_text(str_text, encoding="utf-8")
 
 
@@ -148,11 +156,14 @@ def test_two_branches_each_adding_a_writer_merge_cleanly(path_base: Path) -> Non
     _register_writer(path_base, "PerfilMensalV3", "perfil_mensal_v4", "PerfilMensalV4")
     _git(path_base, "commit", "-q", "-am", "b")
 
-    cls_merge = _git(path_base, "merge", "--no-edit", "a")
+    _git(path_base, "merge", "--no-edit", "a")
 
-    str_readme = (path_base / "README.md").read_text(encoding="utf-8")
-    assert (cls_merge.returncode, _problems(path_base), "`CdaV4`" in str_readme) == (
-        0,
+    str_all = "".join(
+        (path_base / str_f).read_text(encoding="utf-8")
+        for str_f in ("README.md", "mkdocs.yml", str(_PATH_INIT))
+    )
+    assert (_problems(path_base), "CdaV4" in str_all, "PerfilMensalV4" in str_all) == (
         [],
+        True,
         True,
     )

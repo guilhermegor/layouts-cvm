@@ -38,7 +38,8 @@ CI runs the same gates on every pull request; keep them green locally before pus
 
 A writer is listed in four lists (three files), and all four use **one sort key: the writer's submodule name**
 (`cda_v3` for `CdaV3`), plain ASCII order. Insert your entry at its sorted position, never at the
-end, so two writer PRs touch different lines and merge without a conflict:
+end, so two writer PRs usually touch different lines and merge without a conflict (two writers
+sorting into the same gap still conflict: keep both lines and re-sort):
 
 1. `src/layouts_cvm/__init__.py`: the `from layouts_cvm.<module> import <Writer>` line and the
    `"<Writer>"` entry in `__all__` (one per line; `__version__` and `main` stay first).

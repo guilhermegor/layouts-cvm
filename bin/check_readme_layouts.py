@@ -295,7 +295,7 @@ def read_nav_modules(path_mkdocs: Path) -> list[str]:
 
 
 def find_order_problems(
-    str_label: str, list_keys: list[str], list_leading: tuple[str, ...] = ()
+    str_label: str, list_keys: list[str], tuple_leading: tuple[str, ...] = ()
 ) -> list[str]:
     """Report a list that is not in the canonical (sorted) order.
 
@@ -305,7 +305,7 @@ def find_order_problems(
         Where the list lives, for the message.
     list_keys : list of str
         The sort keys in file order.
-    list_leading : tuple of str
+    tuple_leading : tuple of str
         Keys allowed to sit before the sorted run (``__version__``, ``main`` in ``__all__``).
 
     Returns
@@ -313,7 +313,7 @@ def find_order_problems(
     list of str
         One message naming the first out-of-order key and the sorted order; empty when sorted.
     """
-    list_body = [str_k for str_k in list_keys if str_k not in list_leading]
+    list_body = [str_k for str_k in list_keys if str_k not in tuple_leading]
     list_expected = sorted(list_body)
     if list_body == list_expected:
         return []
@@ -349,18 +349,29 @@ def find_registry_order_problems(
     """
     cls_tree = ast.parse(path_init.read_text(encoding="utf-8"))
     dict_module = read_module_by_name(cls_tree, str_package)
-    list_rows = [dict_module.get(str_n, str_n) for str_n in read_readme_writers(path_readme)]
+    list_rows = [
+        dict_module[str_n] for str_n in read_readme_writers(path_readme) if str_n in dict_module
+    ]
     list_all = [dict_module[str_n] for str_n in read_all_order(cls_tree) if str_n in dict_module]
-    return (
+    list_nav = read_nav_modules(path_mkdocs)
+    set_unlisted = set(dict_module.values()) - set(list_nav) - {"main"}
+    list_nav_problems = (
+        [f"{path_mkdocs} Layouts nav: missing or empty (or cut short by a non-entry line)"]
+        if not list_nav
+        else [f"{path_mkdocs} Layouts nav: no entry for {sorted(set_unlisted)}"]
+        if set_unlisted
+        else []
+    )
+    return list_nav_problems + (
         find_order_problems(f"{path_init} imports", list(dict_module.values()))
         + find_order_problems(f"{path_init} __all__", list_all, ("__version__", "main"))
         + find_order_problems(f"{path_readme} layout table", list_rows)
-        + find_order_problems(f"{path_mkdocs} Layouts nav", read_nav_modules(path_mkdocs))
+        + find_order_problems(f"{path_mkdocs} Layouts nav", list_nav)
     )
 
 
 def main() -> int:
-    """Compare the two sets and report every difference.
+    """Compare the exported writers with the README table and check the registry order.
 
     Returns
     -------
@@ -400,9 +411,13 @@ def main() -> int:
             for str_name in sorted({str_n for str_n in list_rows if list_rows.count(str_n) > 1})
         ]
     )
-    list_problems += find_registry_order_problems(
-        cls_args.init, cls_args.package, cls_args.readme, cls_args.mkdocs
-    )
+    try:
+        list_problems += find_registry_order_problems(
+            cls_args.init, cls_args.package, cls_args.readme, cls_args.mkdocs
+        )
+    except (OSError, SyntaxError, ValueError) as cls_err:
+        print(f"check_readme_layouts: {cls_err}", file=sys.stderr)
+        return 1
     for str_problem in list_problems:
         print(f"❌ {str_problem}", file=sys.stderr)
     if list_problems:
