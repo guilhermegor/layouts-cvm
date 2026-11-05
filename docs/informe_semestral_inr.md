@@ -6,13 +6,12 @@ Envio (→ CVM) da **Parte I** do Informe Semestral INR
 > **Veja também:** [Informe Mensal INR](inr_mensal.md), de que a Parte I copia a estrutura (modelos próprios, congelados) ·
 > [Referência da API](api/index.md) · [Uso](usage.md).
 
-!!! warning "A Parte II NÃO está implementada"
+!!! warning "A Parte I sozinha não é um envio completo"
     O Informe Semestral é composto por **dois arquivos enviados conjuntamente** (Parte I,
-    `COD_DOC` 69; Parte II, `COD_DOC` 70), com os mesmos investidores nos dois. Esta biblioteca
-    implementa **somente a Parte I**. A Parte II
-    ([`PadraoXMLInfoSemestralINRParte2.aspx`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoSemestralINRParte2.aspx),
-    as aplicações, no layout `urn:cda`) não tem writer. **Um arquivo da Parte I, sozinho, não
-    forma um envio completo e não deve ser tratado como aceitável pela CVM.**
+    `COD_DOC` 69; Parte II, `COD_DOC` 70), com os mesmos investidores nos dois. Esta página
+    cobre **somente a Parte I**; a Parte II (as aplicações, no layout `urn:cda`) é gerada por
+    `InformeSemestralInrParte2`, descrito em [Informe Semestral INR — Parte II](informe_semestral_inr_parte2.md).
+    **Um arquivo da Parte I, sozinho, não forma um envio completo.**
 
 ---
 
@@ -29,7 +28,7 @@ descritos em [Informe Mensal INR](inr_mensal.md). `aplicacoes` é recusado nesta
 
 ## Não são verificados
 
-- **A Parte II** (ver aviso acima) e a consistência entre as duas partes (mesmos investidores,
+- **A consistência entre as duas partes** (mesmos investidores,
   mesma competência).
 - Que a competência (`DT_COMPT`) seja de fim de semestre: não confirmado na página da Parte I, nada é imposto além do formato `MM/AAAA`.
 - O dígito verificador de `COD_PARTIC` (a página não publica o algoritmo); só se checa que é um

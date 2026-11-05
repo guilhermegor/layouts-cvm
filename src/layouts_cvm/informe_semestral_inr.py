@@ -3,8 +3,9 @@
 Part I (``COD_DOC`` 69) shares the monthly INR namespace, tag order and encoding, minus the
 applications block. It builds on the shared ``xml_writer`` helpers and its own frozen models,
 not on the live :class:`layouts_cvm.inr_mensal.InrMensal`.
-**Part II (``COD_DOC`` 70) is not implemented**: a Part I file alone is not the complete
-Informe Semestral.
+Part II (``COD_DOC`` 70) is written by
+:class:`layouts_cvm.informe_semestral_inr_parte2.InformeSemestralInrParte2`; a Part I file alone is
+not the complete Informe Semestral.
 """
 
 from collections.abc import Mapping

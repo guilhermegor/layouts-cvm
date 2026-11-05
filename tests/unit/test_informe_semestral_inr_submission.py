@@ -150,3 +150,73 @@ def test_participant_cannot_carry_aplicacoes_at_all() -> None:
     )
 
     assert "aplicacoes" not in InformeSemestralInrParticipante.model_fields
+
+
+_ORDER_CASES = [
+    ("CAB_INFORM", ["COD_DOC", "VERSAO", "CD_CVM", "DT_COMPT", "DT_GERAC_ARQ"]),
+    (
+        "LISTA_PARTICIPANTES/{ns}PARTICIPANTE/{ns}MOV_RECURSOS",
+        ["TRANSF_RECURSOS", "RECURSOS_MESMO_INVEST"],
+    ),
+    (
+        "LISTA_PARTICIPANTES/{ns}PARTICIPANTE/{ns}MOV_RECURSOS/{ns}RECURSOS_MESMO_INVEST",
+        ["RECURSOS_RECEB_MESMO_INVEST", "RECURSOS_ENV_MESMO_INVEST"],
+    ),
+]
+
+
+@pytest.mark.parametrize(("path", "expected"), _ORDER_CASES)
+def test_block_tag_order(path: str, expected: list[str]) -> None:
+    """Field order is XML order: pin the header, MOV_RECURSOS and an optional block."""
+    data = _data()
+    data["participantes"][0]["mov_recursos"]["recursos_mesmo_invest"] = {  # type: ignore[index]
+        "recursos_receb_mesmo_invest": [{"cd_partic_origem": CODE, "vl_recebido": 1}],
+        "recursos_env_mesmo_invest": [{"cd_partic_dest": CODE, "vl_enviado": 2}],
+    }
+    root = _root(InformeSemestralInr().export(data))
+    block = root.find(f"{NS}{path.format(ns=NS)}")
+    assert [c.tag.removeprefix(NS) for c in block] == expected
+
+
+def test_duplicate_participant_code_is_rejected() -> None:
+    """The same participant code may appear only once per file."""
+    data = _data()
+    data["participantes"] *= 2  # type: ignore[operator]
+    with pytest.raises(ValidationError, match="only once"):
+        InformeSemestralInr().export(data)
+
+
+def test_empty_optional_container_is_rejected() -> None:
+    """The page says to omit an empty RECURSOS_MESMO_INVEST, not send it."""
+    data = _data()
+    data["participantes"][0]["mov_recursos"]["recursos_mesmo_invest"] = {}  # type: ignore[index]
+    with pytest.raises(ValidationError, match="omit RECURSOS_MESMO_INVEST"):
+        InformeSemestralInr().export(data)
+
+
+def test_negative_entry_amount_is_rejected() -> None:
+    """Unsigned amounts refuse a negative value."""
+    data = _data()
+    data["participantes"][0]["entrada_saida"]["vl_entr"] = -1  # type: ignore[index]
+    with pytest.raises(ValidationError):
+        InformeSemestralInr().export(data)
+
+
+def _part_one_model_names() -> list[str]:
+    """Name every model class declared in the Part I schema module."""
+    from layouts_cvm._internal.config.schemas import informe_semestral_inr as part_one
+
+    return [
+        k
+        for k, v in vars(part_one).items()
+        if isinstance(v, type) and v.__module__ == part_one.__name__
+    ]
+
+
+@pytest.mark.parametrize("name", _part_one_model_names())
+def test_no_part_one_model_inherits_from_the_monthly_module(name: str) -> None:
+    """Every model in the Part I schema, nested blocks included, is self-contained."""
+    from layouts_cvm._internal.config.schemas import informe_semestral_inr as part_one, inr_mensal
+
+    bases = {b.__module__ for b in getattr(part_one, name).__mro__}
+    assert inr_mensal.__name__ not in bases
