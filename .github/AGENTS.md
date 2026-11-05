@@ -1,6 +1,6 @@
 # `.github/` — CI and recurrent automation
 
-Guidance for Claude Code and contributors working in this project's `.github/`.
+Guidance for agents and contributors working in this project's `.github/`.
 
 ## What ships by default
 

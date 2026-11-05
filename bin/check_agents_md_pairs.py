@@ -6,7 +6,7 @@ For each git-tracked ``CLAUDE.md`` outside ``.claude/`` (the shared copy synced 
 - a sibling ``AGENTS.md`` exists;
 - the first non-blank line is ``@AGENTS.md``;
 - the ``Edit AGENTS.md, not this file.`` marker line is present;
-- every line above the marker is an ``@<path>`` import or blank (content cannot drift back);
+- every line above the marker is an ``@<path>`` import or blank (text below it is free);
 - every ``@<path>`` import names an existing file (relative to the ``CLAUDE.md``).
 
 An unreadable file is a failure, never a pass.
@@ -51,7 +51,7 @@ def list_tracked_claude_files(path_root: Path) -> list[Path]:
         )
     return sorted(
         Path(str_line)
-        for str_line in cls_proc.stdout.decode("utf-8").split("\0")
+        for str_line in cls_proc.stdout.decode("utf-8", "surrogateescape").split("\0")
         if str_line and Path(str_line).parts[0] != ".claude"
     )
 
@@ -120,7 +120,11 @@ def check_claude_file(path_root: Path, path_rel: Path) -> list[str]:
             f"{path_rel.as_posix()}: first non-blank line must be {STR_IMPORT_FIRST}"
         )
     int_marker = next(
-        (int_i for int_i, str_line in enumerate(list_lines) if str_line.startswith(STR_MARKER)),
+        (
+            int_i
+            for int_i, str_line in enumerate(list_lines)
+            if str_line.strip().startswith(STR_MARKER)
+        ),
         None,
     )
     if int_marker is None:
@@ -152,8 +156,11 @@ def main() -> int:
         for path_rel in list_files
         for str_problem in check_claude_file(cls_args.root, path_rel)
     ]
+    if not list_files:
+        print("check_agents_md_pairs: no tracked CLAUDE.md found (wrong --root?)", file=sys.stderr)
+        return 1
     for str_problem in list_problems:
-        print(f"❌ {str_problem}", file=sys.stderr)
+        print(f"FAIL {str_problem}", file=sys.stderr)
     if list_problems:
         return 1
     print(f"{len(list_files)} CLAUDE.md file(s) are stubs beside an AGENTS.md.")

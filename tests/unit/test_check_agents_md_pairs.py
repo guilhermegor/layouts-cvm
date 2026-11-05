@@ -3,6 +3,7 @@
 from pathlib import Path
 import runpy
 import subprocess
+import sys
 
 import pytest
 
@@ -102,3 +103,13 @@ def test_home_relative_import_above_marker_resolves(
     (path_sub / "CLAUDE.md").write_text("@AGENTS.md\n@~/x.md\n" + _STUB.split("\n", 1)[1])
 
     assert _check(path_sub.parent) == []
+
+
+def test_main_fails_when_no_claude_file_is_tracked(tmp_path: Path) -> None:
+    """A discovery that matches nothing must fail, not pass vacuously."""
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)  # noqa: S603, S607
+    gate = Path(__file__).parents[2] / "bin" / "check_agents_md_pairs.py"
+    cls_proc = subprocess.run(  # noqa: S603
+        [sys.executable, str(gate), "--root", str(tmp_path)], capture_output=True, check=False
+    )
+    assert (cls_proc.returncode, b"no tracked CLAUDE.md" in cls_proc.stderr) == (1, True)
