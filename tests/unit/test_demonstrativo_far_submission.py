@@ -216,6 +216,12 @@ def test_negative_integer_is_rejected(field: str) -> None:
         DemonstrativoFar().export(_doc(_fund(**{field: -1})))
 
 
+@pytest.mark.parametrize("row", [{"cd_mov": 53, "vl_entr": -1}, {"cd_mov": True, "vl_entr": 1}])
+def test_negative_flow_and_bool_code_are_rejected(row: dict) -> None:
+    """A negative inflow and a bool cd_mov are both refused."""
+    assert not _accepts(row)
+
+
 def test_explicit_none_distribution_is_accepted() -> None:
     """An explicit None on an optional decimal means absent, not an error."""
     assert DemonstrativoFar().export(_doc(_fund(vl_ult_distr_quota=None)))
