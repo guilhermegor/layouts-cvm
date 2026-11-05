@@ -238,3 +238,16 @@ def test_badge_and_docs_deploy_use_separate_concurrency_groups() -> None:
     queued behind a badge publish was displaced by the next badge run (issue #63).
     """
     assert _concurrency_group("coverage-badge.yaml") != _concurrency_group("release-pypi.yaml")
+
+
+def test_docs_deploy_resyncs_gh_pages_before_each_mike_push() -> None:
+    """With separate groups, a badge push can reject mike's push as non-fast-forward.
+
+    The docs step must re-fetch ``gh-pages`` inside a retry loop, before ``mike deploy``,
+    or a release reaches PyPI with its versioned docs unpublished.
+    """
+    path_file = Path(__file__).resolve().parents[2] / ".github" / "workflows" / "release-pypi.yaml"
+    str_text = path_file.read_text("utf-8")
+    int_loop = str_text.index("for int_attempt in")
+    int_fetch = str_text.index('git fetch origin "+gh-pages:gh-pages"', int_loop)
+    assert int_fetch < str_text.index("mike deploy", int_loop)
