@@ -19,7 +19,8 @@ Os blocos repetidos ficam dentro de um bloco `LISTA_*`, como no exemplo da pági
 Uma lista sem itens **mantém o bloco `LISTA_*` vazio** (por exemplo `<LISTA_ENTID_AUDITA />`):
 a página manda omitir o bloco repetido (`ENTID_AUDITA`, `ENTID_COLIG`) quando não há o que
 reportar, e não o `LISTA_*`, do qual diz que aparece uma única vez por arquivo. Só `LISTA_RESP`
-é omitido, e apenas para auditor PF. Os testes fixam esse comportamento, os 48 códigos da
+é omitido: sempre para auditor PF (obrigatório) e, para auditor PJ, quando o payload não
+informa `lista_resp` (campo opcional, sem valor padrão de bloco vazio). Os testes fixam esse comportamento, os 48 códigos da
 Tabela B (aceitos; qualquer outro código de 0 a 100 é recusado) e os limites de upload da
 Tabela A (1.000 endereços, 8.000 entidades auditadas, 1.000 coligadas: no limite passa, um a
 mais é recusado).
