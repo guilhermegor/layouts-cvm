@@ -11,7 +11,7 @@ https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNetV4.a
 The standard states monetary fields as "decimal com N casas"; ``VL_QUOTA`` allows up
 to 12 and ``PR_COTST`` up to 4. Values carrying more decimal places than the standard
 permits are truncated toward zero (``ROUND_DOWN``), never rounded, so a reported value
-is never inflated past what the standard allows.
+never grows in magnitude past what the standard allows.
 
 Each ``INFORM`` block identifies its fund by **exactly one** of ``CNPJ_FDO`` (fund
 class) or ``COD_SUBCLASSE`` (subclass), as the standard requires. CNPJ/CPF fields are
