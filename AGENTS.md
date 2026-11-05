@@ -37,7 +37,7 @@ src/<project_name>/
     _internal/             # PRIVATE — ships in the wheel, but not a public API
         utils/             # vendored helpers (dtypes, tabular_reader, retry/, http_downloader,
                            #   text, zip_extractor, br_identifiers, typing/)
-        config/            # ALL private structural declarations (one config/CLAUDE.md maps them)
+        config/            # ALL private structural declarations (one config/AGENTS.md maps them)
             contracts/     # FileContract declarations (one per input source)
             ports/         # private behavioural ABCs (hexagonal ports; ABCTypeCheckerMeta) — opt-in
             schemas/       # Pydantic document models, one per CVM standard — private, never in __all__
@@ -92,7 +92,7 @@ of your public `__all__`. The internal imports are package-qualified
 - **Logging via dependency injection** — never hard-import a logging backend in a helper;
   inject a logger (stdlib default), as `_internal/utils/retry/log_emitter.py`'s `LogEmitter`
   shows. The
-  in-repo `logs.py` helper is **opt-in** at scaffold time; see `_internal/utils/CLAUDE.md`.
+  in-repo `logs.py` helper is **opt-in** at scaffold time; see `_internal/utils/AGENTS.md`.
 - **Every imported package is a direct dependency.** If a module `import`s a package, declare
   it in `pyproject.toml` — even when it is already installed transitively via another dep. A
   transitive presence is an accident of another package's tree and breaks silently the day that

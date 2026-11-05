@@ -78,6 +78,9 @@ $POETRY run python bin/check_docs_sections.py
 print_status info "docs code references (symbols + import paths)"
 $POETRY run python bin/check_docs_code_refs.py
 
+print_status info "CLAUDE.md / AGENTS.md pairs"
+$POETRY run python bin/check_agents_md_pairs.py
+
 print_status info "unix filename validity"
 bash bin/check_unix_filenames.sh
 
