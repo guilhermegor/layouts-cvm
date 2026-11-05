@@ -235,3 +235,37 @@ def test_export_rejects_wrong_argument_type() -> None:
     """The TypeChecker metaclass rejects a mistyped argument at call time."""
     with pytest.raises(TypeError):
         InformeDiario().export("not a document")
+
+
+@pytest.mark.parametrize(
+    "str_bad_date",
+    ["31/02/2011", "01/02/2011\n", "15/01/٢٠١١"],
+    ids=["calendar-invalid", "trailing-newline", "arabic-indic-digits"],
+)
+def test_header_rejects_invalid_date(str_bad_date: str) -> None:
+    """Reject a date that is the wrong shape or does not exist on the calendar."""
+    with pytest.raises(ValidationError):
+        InformeDiarioHeader(dt_compt=str_bad_date, dt_gerac_arq="15/01/2011")
+
+
+@pytest.mark.parametrize(
+    "str_bad_date",
+    ["31/02/2011", "01/02/2011\n", "15/01/٢٠١١"],
+    ids=["calendar-invalid", "trailing-newline", "arabic-indic-digits"],
+)
+def test_inform_rejects_invalid_data_prox_pl(str_bad_date: str) -> None:
+    """Reject an invalid next-PL date on the INFORM block."""
+    with pytest.raises(ValidationError):
+        _minimal_inform(data_prox_pl=str_bad_date)
+
+
+@pytest.mark.parametrize("str_date", ["29/02/2024", "01/03/2024"])
+def test_valid_date_serialises_unchanged(str_date: str) -> None:
+    """A real date round-trips byte-for-byte into the XML, leap day included."""
+    xml = InformeDiario().export(
+        InformeDiarioDocument(
+            header=InformeDiarioHeader(dt_compt="29/02/2024", dt_gerac_arq="01/03/2024"),
+            informs=[_minimal_inform(data_prox_pl="01/03/2024")],
+        )
+    )
+    assert str_date in xml
