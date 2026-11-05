@@ -9,7 +9,7 @@ dia 15 do mês seguinte ([`PadraoXMLFAR.asp`](https://cvmweb.cvm.gov.br/SWB/Sist
 
 ## Descrição
 
-Monte um `DemonstrativoFarDocument` e serialize com `DemonstrativoFar().export(...)`. Um arquivo
+Passe os dados como `dict` a `DemonstrativoFar().export(...)`, que os valida. Um arquivo
 traz fundos de uma mesma competência e de um mesmo administrador. O XML não tem namespace e usa
 `windows-1252`.
 
@@ -39,7 +39,7 @@ Cada campo é a tag da página em minúsculas, na ordem do XML.
 ## Limites aplicados (escolha do projeto, a página não os fixa)
 
 - Até 18 dígitos inteiros nos decimais e 999.999.999.999 nos inteiros.
-- Valores negativos são recusados em todos os campos numéricos.
+- Valores negativos são recusados em todos os campos numéricos; um decimal negativo que o truncamento reduz a zero (`-0.00000000001`) vale zero e é gravado sem sinal.
 
 ## Não são verificados
 
@@ -52,6 +52,8 @@ Cada campo é a tag da página em minúsculas, na ordem do XML.
 - Nenhum validador da CVM foi executado.
 
 ## Exemplo
+
+O exemplo traz um único movimento por fundo para ser curto; a página pede todos os tipos da Tabela A (veja acima), o que o escritor não verifica.
 
 ```python
 from layouts_cvm import DemonstrativoFar

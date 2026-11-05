@@ -209,6 +209,18 @@ def test_value_over_the_limit_is_rejected(field: str, over: object) -> None:
         DemonstrativoFar().export(_doc(_fund(**{field: over})))
 
 
+@pytest.mark.parametrize("field", ["nr_total_quotst_ult_dia_mes"])
+def test_negative_integer_is_rejected(field: str) -> None:
+    """Integer fields refuse negatives like the decimals."""
+    with pytest.raises(ValidationError):
+        DemonstrativoFar().export(_doc(_fund(**{field: -1})))
+
+
+def test_explicit_none_distribution_is_accepted() -> None:
+    """An explicit None on an optional decimal means absent, not an error."""
+    assert DemonstrativoFar().export(_doc(_fund(vl_ult_distr_quota=None)))
+
+
 def test_alphanumeric_cnpj_is_accepted() -> None:
     """The 2026 alphanumeric CNPJ passes the fund CNPJ check."""
     assert DemonstrativoFar().export(_doc(_fund(cnpj_fundo="12ABC34501DE35")))
