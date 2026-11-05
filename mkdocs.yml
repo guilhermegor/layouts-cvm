@@ -9,27 +9,33 @@ nav:
   - Layouts:
       - "Atualização do Cadastro de Ativos": cadastro_ativos.md
       - "CDA — V4": cda.md
-      - "CDA — V3": cda_v3.md
       - "CDA — V2": cda_v2.md
+      - "CDA — V3": cda_v3.md
+      - "COFI 4010 — Balancete": cofi_4010.md
+      - "COFI 4016 — Balanço": cofi_4016.md
+      - "Demonstrativo de Fontes e Aplicações de Recursos (FAR)": demonstrativo_far.md
       - "Extrato das Informações sobre o Fundo — V3": extrato.md
+      - "Extrato das Informações sobre o Fundo — V2": extrato_v2.md
       - "Informe de Fundo 157": inf_fundo_157.md
       - "Informe Mensal FIDC — ICVM 576": inf_mensal_fidc.md
-      - "Informe Anual de Auditor": informe_anual_auditor.md
       - "Informe Mensal FIDC — ICVM 489": inf_mensal_fidc_489.md
+      - "Informe Anual de Auditor": informe_anual_auditor.md
       - "Informe Art. 12 Res. CVM 33": informe_art12_res33.md
       - "Informe Diário — V4": informe_diario.md
-      - "Informe Diário — V3": informe_diario_v3.md
-      - "Informe Diário — V2": informe_diario_v2.md
       - "Informe Diário — V1": informe_diario_v1.md
+      - "Informe Diário — V2": informe_diario_v2.md
+      - "Informe Diário — V3": informe_diario_v3.md
       - "Informe de Portabilidade": informe_portabilidade.md
       - "Informe Quadrimestral — V2": informe_quadrimestral.md
       - "Informe Semestral INR — Parte II": informe_semestral_inr_parte2.md
+      - "Informe Sintético": informe_sintetico.md
       - "Informe Trimestral — V1": informe_trimestral_v1.md
       - "Informe Mensal de Investidor Não Residente": inr_mensal.md
       - "Lâmina de Fundos — V3": lamina.md
-      - "Lâmina de Fundos — V2": lamina_v2.md
       - "Lâmina de Fundos — V1": lamina_v1.md
+      - "Lâmina de Fundos — V2": lamina_v2.md
       - "Perfil Mensal — V4": perfil_mensal.md
+      - "Perfil Mensal — ICVM 739": perfil_mensal_739.md
       - "Perfil Mensal — original": perfil_mensal_original.md
       - "Perfil Mensal — V3": perfil_mensal_v3.md
   - API Reference:

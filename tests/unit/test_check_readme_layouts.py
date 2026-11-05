@@ -146,6 +146,7 @@ def _run_gate(
     """Write a fake package and README under ``path_dir`` and run the gate on them."""
     (path_dir / "__init__.py").write_text(str_init, encoding="utf-8")
     (path_dir / "README.md").write_text(str_readme, encoding="utf-8")
+    (path_dir / "mkdocs.yml").write_text('- Layouts:\n      - "A": a.md\n', encoding="utf-8")
     list_argv = [
         "check_readme_layouts",
         "--init",
@@ -154,6 +155,8 @@ def _run_gate(
         "pkg",
         "--readme",
         str(path_dir / "README.md"),
+        "--mkdocs",
+        str(path_dir / "mkdocs.yml"),
     ]
     monkeypatch.setattr("sys.argv", list_argv)
     return _DICT_GATE["main"]()
@@ -213,3 +216,38 @@ def test_main_fails_with_zero_writers_on_stderr(
     int_code = _run_gate(tmp_path, monkeypatch, "__all__ = []\n", _STR_README)
 
     assert (int_code, "ZERO writers" in capsys.readouterr().err) == (1, True)
+
+
+def test_find_order_problems_accepts_a_sorted_list_with_leading_names() -> None:
+    """Leading names are exempt; the rest must be sorted."""
+    assert _DICT_GATE["find_order_problems"]("x", ["main", "a", "b"], ("main",)) == []
+
+
+def test_find_order_problems_names_the_first_misplaced_key() -> None:
+    """An out-of-order list is reported with the key that broke the order."""
+    list_problems = _DICT_GATE["find_order_problems"]("x", ["a", "c", "b"])
+
+    assert "first misplaced: 'c'" in list_problems[0]
+
+
+def test_read_nav_modules_reads_stems_until_the_section_ends(tmp_path: Path) -> None:
+    """Only the ``Layouts`` entries are read, in file order."""
+    path_yml = tmp_path / "mkdocs.yml"
+    path_yml.write_text(
+        'nav:\n  - Layouts:\n      - "B": b.md\n      - "A": a.md\n  - API:\n      - X: x.md\n',
+        encoding="utf-8",
+    )
+
+    assert _DICT_GATE["read_nav_modules"](path_yml) == ["b", "a"]
+
+
+def test_registry_order_missing_nav_is_reported(tmp_path: Path) -> None:
+    """An absent ``mkdocs.yml`` is a problem, not a silent pass."""
+    (tmp_path / "__init__.py").write_text(_STR_INIT, encoding="utf-8")
+    (tmp_path / "README.md").write_text(_STR_README, encoding="utf-8")
+
+    list_problems = _DICT_GATE["find_registry_order_problems"](
+        tmp_path / "__init__.py", "pkg", tmp_path / "README.md", tmp_path / "mkdocs.yml"
+    )
+
+    assert any("Layouts nav: missing or empty" in str_p for str_p in list_problems)
