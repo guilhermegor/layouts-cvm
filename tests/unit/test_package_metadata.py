@@ -1,6 +1,8 @@
 """Guard the packaging metadata a consumer's type checker and PyPI page rely on."""
 
+from email.parser import Parser
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -13,7 +15,7 @@ import yaml
 
 PATH_ROOT = Path(__file__).resolve().parents[2]
 STR_PY_PREFIX = "Programming Language :: Python :: "
-STR_CLASSIFIER_LINE = "Classifier: "
+RE_PROJECT_NAME = re.compile(r"[A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?")
 
 
 pytestmark = pytest.mark.skipif(
@@ -54,8 +56,8 @@ def path_wheel(tmp_path_factory: pytest.TempPathFactory) -> Path:
 
 
 @pytest.fixture
-def list_classifiers(path_wheel: Path) -> list[str]:
-    """Read the classifiers PyPI will publish, from the wheel's METADATA.
+def str_metadata(path_wheel: Path) -> str:
+    """Read the wheel's ``*.dist-info/METADATA``, the file PyPI publishes from.
 
     Parameters
     ----------
@@ -64,19 +66,52 @@ def list_classifiers(path_wheel: Path) -> list[str]:
 
     Returns
     -------
+    str
+        The METADATA text.
+    """
+    with zipfile.ZipFile(path_wheel) as cls_zip:
+        list_members = [
+            str_name for str_name in cls_zip.namelist() if str_name.endswith(".dist-info/METADATA")
+        ]
+        assert len(list_members) == 1, (
+            f"expected one METADATA in {path_wheel}, found {list_members}"
+        )
+        return cls_zip.read(list_members[0]).decode("utf-8")
+
+
+@pytest.fixture
+def list_classifiers(str_metadata: str) -> list[str]:
+    """Read the classifiers PyPI will publish.
+
+    Parameters
+    ----------
+    str_metadata : str
+        The wheel's METADATA text.
+
+    Returns
+    -------
     list[str]
         The published trove classifiers.
     """
-    with zipfile.ZipFile(path_wheel) as cls_zip:
-        str_member = next(
-            str_name for str_name in cls_zip.namelist() if str_name.endswith(".dist-info/METADATA")
-        )
-        str_metadata = cls_zip.read(str_member).decode("utf-8")
-    return [
-        str_line.removeprefix(STR_CLASSIFIER_LINE)
-        for str_line in str_metadata.splitlines()
-        if str_line.startswith(STR_CLASSIFIER_LINE)
-    ]
+    return Parser().parsestr(str_metadata).get_all("Classifier", [])
+
+
+def _canonical_name(str_requirement: str) -> str:
+    """Return the PEP 503 normalised project name at the start of a requirement.
+
+    Parameters
+    ----------
+    str_requirement : str
+        A dependency key or a PEP 508 ``Requires-Dist`` value.
+
+    Returns
+    -------
+    str
+        The lower-cased name with runs of ``-``, ``_`` and ``.`` collapsed to ``-``.
+    """
+    re_match = RE_PROJECT_NAME.match(str_requirement)
+    assert re_match is not None, f"no project name in {str_requirement!r}"
+    return re.sub(r"[-_.]+", "-", re_match.group(0)).lower()
 
 
 def test_classifiers_python_versions_equal_tests_matrix(list_classifiers: list[str]) -> None:
@@ -124,24 +159,18 @@ def test_wheel_ships_py_typed_marker(path_wheel: Path) -> None:
     assert "layouts_cvm/py.typed" in list_names
 
 
-def test_wheel_requires_every_runtime_dependency(path_wheel: Path) -> None:
+def test_wheel_requires_every_runtime_dependency(str_metadata: str) -> None:
     """Every runtime dependency in pyproject.toml is a ``Requires-Dist`` of the wheel.
 
     Parameters
     ----------
-    path_wheel : pathlib.Path
-        The built wheel.
+    str_metadata : str
+        The wheel's METADATA text.
     """
     with (PATH_ROOT / "pyproject.toml").open("rb") as cls_file:
         dict_deps = tomllib.load(cls_file)["tool"]["poetry"]["dependencies"]
-    with zipfile.ZipFile(path_wheel) as cls_zip:
-        str_member = next(
-            str_name for str_name in cls_zip.namelist() if str_name.endswith(".dist-info/METADATA")
-        )
-        str_metadata = cls_zip.read(str_member).decode("utf-8")
     set_required = {
-        str_line.removeprefix("Requires-Dist: ").split(" ")[0].split(";")[0].lower()
-        for str_line in str_metadata.splitlines()
-        if str_line.startswith("Requires-Dist: ")
+        _canonical_name(str_req)
+        for str_req in Parser().parsestr(str_metadata).get_all("Requires-Dist", [])
     }
-    assert set(dict_deps) - {"python"} <= set_required
+    assert {_canonical_name(str_dep) for str_dep in dict_deps} - {"python"} <= set_required
