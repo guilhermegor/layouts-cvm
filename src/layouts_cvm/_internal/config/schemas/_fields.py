@@ -33,7 +33,7 @@ _PERSON_DOC_RULES = {
 
 _TRUNCATION_CONTEXT = Context(prec=28)
 
-_COMPETENCE_RE = re.compile(r"^(0[1-9]|1[0-2])/\d{4}$")
+_COMPETENCE_RE = re.compile(r"(0[1-9]|1[0-2])/[0-9]{4}")
 
 
 @type_checker
@@ -182,6 +182,6 @@ def validated_competence(value: str) -> str:
     ValueError
             If the value is not ``MM/AAAA`` (month 01-12, four-digit year).
     """
-    if not _COMPETENCE_RE.match(value):
+    if not _COMPETENCE_RE.fullmatch(value):
         raise ValueError(f"expected MM/AAAA, got {value!r}")
     return value

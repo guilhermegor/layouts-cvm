@@ -20,7 +20,19 @@ def test_validated_competence_valid_value_returns_it_unchanged(str_value: str) -
     assert validated_competence(str_value) == str_value
 
 
-@pytest.mark.parametrize("str_value", ["13/2026", "00/2026", "2026/06", "6/2026", "06-2026", ""])
+@pytest.mark.parametrize(
+    "str_value",
+    [
+        "13/2026",
+        "00/2026",
+        "2026/06",
+        "6/2026",
+        "06-2026",
+        "",
+        "06/2026\n",
+        "06/\u0662\u0660\u0662\u0666",
+    ],
+)
 def test_validated_competence_invalid_value_names_the_format(str_value: str) -> None:
     """An invalid month or wrong shape raises with the MM/AAAA message.
 

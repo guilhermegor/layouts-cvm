@@ -6,17 +6,40 @@ other. A writer names its document model once, as the base's generic argument. N
 the public API.
 """
 
-from collections.abc import Mapping
+from collections.abc import Iterator, Mapping
 from decimal import Decimal
 from typing import ClassVar, get_args
 from xml.sax.saxutils import escape
 
 from layouts_cvm._internal.config.ports.submission_writer import SubmissionWriter, TDoc
 from layouts_cvm._internal.utils.atomic_write import atomic_write_bytes
+from layouts_cvm._internal.utils.typing import type_checker
 from layouts_cvm._internal.utils.xml_writer import DocModel, FieldMeta, coerce_document
 
 
 _INDENT = "    "
+
+
+@type_checker
+def _declared_models(cls: type) -> Iterator[type[DocModel]]:
+    """Yield the document models a class names in its own generic bases.
+
+    Parameters
+    ----------
+    cls : type
+            The class whose own ``__orig_bases__`` are read; inherited ones are ignored.
+
+    Returns
+    -------
+    Iterator[type[DocModel]]
+            Every generic argument that is a ``DocModel`` subclass, in base order.
+    """
+    return (
+        arg
+        for base in cls.__dict__.get("__orig_bases__", ())
+        for arg in get_args(base)
+        if isinstance(arg, type) and issubclass(arg, DocModel)
+    )
 
 
 class _BaseFidcWriter(SubmissionWriter[TDoc]):
@@ -38,13 +61,19 @@ class _BaseFidcWriter(SubmissionWriter[TDoc]):
         **kwargs : object
                 Forwarded to ``type.__init_subclass__``.
 
+        A subclass of a concrete writer that names no generic argument of its own inherits
+        its parent's model.
+
         Raises
         ------
-        KeyError
-                If the subclass does not parametrize the base with a document model.
+        TypeError
+                If neither the subclass nor a parent names a document model.
         """
         super().__init_subclass__(**kwargs)
-        cls._document_model = get_args(cls.__dict__["__orig_bases__"][0])[0]
+        type_model = next(_declared_models(cls), getattr(cls, "_document_model", None))
+        if type_model is None:
+            raise TypeError(f"{cls.__name__} must parametrize _BaseFidcWriter with a DocModel")
+        cls._document_model = type_model
 
     def export(
         self, doc: TDoc | Mapping[str, object], output_path: str | None = None

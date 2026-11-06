@@ -572,5 +572,15 @@ def test_fidc_base_subclass_without_a_document_model_fails_at_definition() -> No
     """A writer that does not parametrize the base fails when the class is defined."""
     from layouts_cvm._base_fidc_writer import _BaseFidcWriter
 
-    with pytest.raises(KeyError, match="__orig_bases__"):
+    with pytest.raises(TypeError, match="must parametrize _BaseFidcWriter with a DocModel"):
         type("_Unparametrized", (_BaseFidcWriter,), {})
+
+
+def test_fidc_writer_subclass_without_generic_inherits_the_document_model() -> None:
+    """Subclassing a concrete writer without a generic argument keeps the parent's model."""
+    from layouts_cvm import InfMensalFidc
+    from layouts_cvm._internal.config.schemas.inf_mensal_fidc import InfMensalFidcDocument
+
+    cls_writer = type("_Custom", (InfMensalFidc,), {})
+
+    assert cls_writer._document_model is InfMensalFidcDocument
