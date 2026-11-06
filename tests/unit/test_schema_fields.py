@@ -11,6 +11,11 @@ from layouts_cvm._internal.config.schemas.cda import CdaHeader
 from layouts_cvm._internal.config.schemas.inf_mensal_fidc import InfMensalFidcHeader
 from layouts_cvm._internal.config.schemas.inf_mensal_fidc_489 import InfMensalFidc489Header
 from layouts_cvm._internal.config.schemas.informe_art12_res33 import DsInform
+from layouts_cvm._internal.config.schemas.informe_diario import (
+    InformeDiarioHeader,
+    InformeDiarioInform,
+)
+from layouts_cvm._internal.config.schemas.informe_diario_v1 import InformeDiarioV1Header
 from layouts_cvm._internal.config.schemas.informe_portabilidade import (
     PortabilidadeHeader,
     PortabilidadeInform,
@@ -166,3 +171,85 @@ def test_validated_br_date_nonexistent_day_raises(str_value: str) -> None:
     """
     with pytest.raises(ValueError, match="no such calendar day"):
         validated_br_date(str_value)
+
+
+LIST_DIARIO_DATE_FIELDS = [
+    (InformeDiarioHeader, "dt_compt"),
+    (InformeDiarioHeader, "dt_gerac_arq"),
+    (InformeDiarioInform, "data_prox_pl"),
+    (InformeDiarioV1Header, "dt_compt"),
+    (InformeDiarioV1Header, "dt_gerac_arq"),
+]
+
+
+@pytest.mark.parametrize(("cls_model", "str_field"), LIST_DIARIO_DATE_FIELDS)
+@pytest.mark.parametrize("str_value", ["1/06/2026", "15/06/2026\n", "\u0661\u0665/06/2026"])
+def test_informe_diario_date_invalid_shape_uses_the_shared_message(
+    cls_model: type, str_field: str, str_value: str
+) -> None:
+    """Each informe diario date field refuses a wrong shape with the shared message.
+
+    Parameters
+    ----------
+    cls_model : type
+        The informe diario model under test.
+    str_field : str
+        The date field name.
+    str_value : str
+        A badly shaped date.
+    """
+    with pytest.raises(ValidationError, match="expected DD/MM/AAAA"):
+        cls_model.__pydantic_validator__.validate_assignment(
+            cls_model.model_construct(), str_field, str_value
+        )
+
+
+@pytest.mark.parametrize(("cls_model", "str_field"), LIST_DIARIO_DATE_FIELDS)
+def test_informe_diario_date_nonexistent_day_uses_the_shared_message(
+    cls_model: type, str_field: str
+) -> None:
+    """Each informe diario date field refuses a day missing from the calendar.
+
+    Parameters
+    ----------
+    cls_model : type
+        The informe diario model under test.
+    str_field : str
+        The date field name.
+    """
+    with pytest.raises(ValidationError, match="no such calendar day"):
+        cls_model.__pydantic_validator__.validate_assignment(
+            cls_model.model_construct(), str_field, "31/02/2026"
+        )
+
+
+LIST_DIARIO_HEADER_DATE_FIELDS = [
+    (cls_model, str_field)
+    for cls_model, str_field in LIST_DIARIO_DATE_FIELDS
+    if cls_model is not InformeDiarioInform
+]
+
+
+def test_informe_diario_data_prox_pl_accepts_a_real_day() -> None:
+    """``data_prox_pl`` accepts an existing day on an inform that names its subclass."""
+    cls_result = InformeDiarioInform.__pydantic_validator__.validate_assignment(
+        InformeDiarioInform.model_construct(cod_subclasse="SUB1"), "data_prox_pl", "15/06/2026"
+    )
+    assert cls_result.data_prox_pl == "15/06/2026"
+
+
+@pytest.mark.parametrize(("cls_model", "str_field"), LIST_DIARIO_HEADER_DATE_FIELDS)
+def test_informe_diario_date_accepts_a_real_day(cls_model: type, str_field: str) -> None:
+    """Each informe diario date field accepts an existing DD/MM/AAAA day.
+
+    Parameters
+    ----------
+    cls_model : type
+        The informe diario model under test.
+    str_field : str
+        The date field name.
+    """
+    cls_result = cls_model.__pydantic_validator__.validate_assignment(
+        cls_model.model_construct(), str_field, "15/06/2026"
+    )
+    assert getattr(cls_result, str_field) == "15/06/2026"
