@@ -82,9 +82,9 @@ A página diz que todos os tipos da Tabela A devem ser utilizados. Por padrão o
 ```python
 DemonstrativoFar().export(doc, require_all_movements=True)
 ```
-```
 
 Com o `doc` do exemplo acima, que só usa o código 53, a saída real é:
 
 ```text
 ValueError: fund 11444777000161 does not use Table A codes [37, 48, 54, 55, 56, 57, 58, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 77, 78, 144, 145, 150]
+```
