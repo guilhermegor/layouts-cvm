@@ -1,6 +1,7 @@
 """Guard the packaging metadata a consumer's type checker and PyPI page rely on."""
 
 from pathlib import Path
+import shutil
 import subprocess
 import zipfile
 
@@ -28,8 +29,10 @@ def path_wheel(tmp_path_factory: pytest.TempPathFactory) -> Path:
         The built wheel.
     """
     path_out = tmp_path_factory.mktemp("wheel")
+    str_poetry = shutil.which("poetry")
+    assert str_poetry is not None, "poetry is not on PATH"
     cls_build = subprocess.run(  # noqa: S603
-        ["poetry", "build", "-f", "wheel", "--output", str(path_out)],  # noqa: S607
+        [str_poetry, "build", "-f", "wheel", "--output", str(path_out)],
         cwd=PATH_ROOT,
         check=False,
         capture_output=True,
