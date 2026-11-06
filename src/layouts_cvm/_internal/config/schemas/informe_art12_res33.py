@@ -21,7 +21,7 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from layouts_cvm._internal.config.schemas._fields import (
-    validated_br_date_shape,
+    validated_br_date,
     validated_cnpj,
     validated_competence,
 )
@@ -53,7 +53,7 @@ def _parse_date(value: str) -> datetime:
     ValueError
             If the shape is wrong or the date does not exist.
     """
-    return datetime.strptime(validated_br_date_shape(value), _DATE_FMT)  # noqa: DTZ007  (calendar check only)
+    return datetime.strptime(validated_br_date(value), _DATE_FMT)  # noqa: DTZ007  (calendar check only)
 
 
 class DsInform(BaseModel):

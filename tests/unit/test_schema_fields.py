@@ -4,7 +4,7 @@ from pydantic import ValidationError
 import pytest
 
 from layouts_cvm._internal.config.schemas._fields import (
-    validated_br_date_shape,
+    validated_br_date,
     validated_competence,
 )
 from layouts_cvm._internal.config.schemas.cda import CdaHeader
@@ -19,7 +19,7 @@ from layouts_cvm._internal.config.schemas.perfil_mensal import DocumentHeader
 from layouts_cvm._internal.config.schemas.perfil_mensal_739 import PerfilMensal739Header
 
 
-LIST_COMPETENCE_FIELDS = [
+LIST_COMPETENCE_FIELDS_NO_MODEL_CHECK = [
     (CdaHeader, "dt_compt"),
     (DocumentHeader, "dt_compt"),
     (PerfilMensal739Header, "dt_compt"),
@@ -28,7 +28,7 @@ LIST_COMPETENCE_FIELDS = [
     (PortabilidadeInform, "dt_event"),
 ]
 LIST_COMPETENCE_FIELDS_ALL = [
-    *LIST_COMPETENCE_FIELDS,
+    *LIST_COMPETENCE_FIELDS_NO_MODEL_CHECK,
     (InfMensalFidcHeader, "dt_compt"),
     (InfMensalFidc489Header, "dt_compt"),
 ]
@@ -106,7 +106,7 @@ def test_competence_field_rejects_invalid_value_with_the_shared_message(
         )
 
 
-@pytest.mark.parametrize(("cls_model", "str_field"), LIST_COMPETENCE_FIELDS)
+@pytest.mark.parametrize(("cls_model", "str_field"), LIST_COMPETENCE_FIELDS_NO_MODEL_CHECK)
 @pytest.mark.parametrize("str_value", ["01/2026", "12/2026"])
 def test_competence_field_accepts_valid_value(
     cls_model: type, str_field: str, str_value: str
@@ -128,22 +128,22 @@ def test_competence_field_accepts_valid_value(
     assert getattr(cls_result, str_field) == str_value
 
 
-@pytest.mark.parametrize("str_value", ["15/06/2026", "31/02/2026"])
-def test_validated_br_date_shape_valid_shape_returns_it_unchanged(str_value: str) -> None:
-    """A DD/MM/AAAA-shaped text passes; whether the day exists is not its concern.
+@pytest.mark.parametrize("str_value", ["15/06/2026", "29/02/2024"])
+def test_validated_br_date_valid_shape_returns_it_unchanged(str_value: str) -> None:
+    """A DD/MM/AAAA date that exists on the calendar is returned as given.
 
     Parameters
     ----------
     str_value : str
-        A well-shaped date.
+        A well-shaped, existing date.
     """
-    assert validated_br_date_shape(str_value) == str_value
+    assert validated_br_date(str_value) == str_value
 
 
 @pytest.mark.parametrize(
     "str_value", ["2026-06-15", "1/06/2026", "15/06/26", "15/06/2026\n", "١٥/06/2026"]
 )
-def test_validated_br_date_shape_invalid_shape_names_the_format(str_value: str) -> None:
+def test_validated_br_date_invalid_shape_names_the_format(str_value: str) -> None:
     """A wrong shape, a trailing newline or non-ASCII digits raise the shared message.
 
     Parameters
@@ -152,4 +152,17 @@ def test_validated_br_date_shape_invalid_shape_names_the_format(str_value: str) 
         A badly shaped date.
     """
     with pytest.raises(ValueError, match="expected DD/MM/AAAA"):
-        validated_br_date_shape(str_value)
+        validated_br_date(str_value)
+
+
+@pytest.mark.parametrize("str_value", ["31/02/2026", "29/02/2025", "15/13/2026"])
+def test_validated_br_date_nonexistent_day_raises(str_value: str) -> None:
+    """A well-shaped date naming a day that does not exist is refused.
+
+    Parameters
+    ----------
+    str_value : str
+        A DD/MM/AAAA text with no matching calendar day.
+    """
+    with pytest.raises(ValueError, match="does not match format|out of range"):
+        validated_br_date(str_value)

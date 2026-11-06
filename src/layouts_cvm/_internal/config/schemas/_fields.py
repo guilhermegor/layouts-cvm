@@ -10,6 +10,7 @@ and validators, so the truncation/validation logic lives in exactly one place.
 """
 
 from collections.abc import Callable
+from datetime import datetime
 from decimal import ROUND_DOWN, Context, Decimal, InvalidOperation
 import re
 
@@ -189,10 +190,11 @@ def validated_competence(value: str) -> str:
 
 
 @type_checker
-def validated_br_date_shape(value: str) -> str:
-    """Check a date is written ``DD/MM/AAAA`` (ASCII digits only) and return it unchanged.
+def validated_br_date(value: str) -> str:
+    """Check a date is written ``DD/MM/AAAA`` and exists on the calendar; return it unchanged.
 
-    Only the shape is checked; whether the day exists is each schema's own calendar check.
+    The regex pins the shape (ASCII digits, zero-padded), which ``strptime`` alone does not;
+    ``strptime`` then rejects a day that does not exist, such as ``31/02/2026``.
 
     Parameters
     ----------
@@ -207,8 +209,9 @@ def validated_br_date_shape(value: str) -> str:
     Raises
     ------
     ValueError
-            If the value does not follow ``DD/MM/AAAA``.
+            If the value does not follow ``DD/MM/AAAA`` or names a day that does not exist.
     """
     if not _DATE_BR_SHAPE_RE.fullmatch(value):
         raise ValueError(f"expected DD/MM/AAAA, got {value!r}")
+    datetime.strptime(value, "%d/%m/%Y")  # noqa: DTZ007  (calendar check only)
     return value

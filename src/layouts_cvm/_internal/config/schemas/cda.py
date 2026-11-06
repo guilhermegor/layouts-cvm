@@ -34,7 +34,7 @@ from pydantic import (
 from layouts_cvm._internal.config.schemas._fields import (
     truncate_to_scale,
     validate_person_doc,
-    validated_br_date_shape,
+    validated_br_date,
     validated_cnpj,
     validated_competence,
 )
@@ -359,7 +359,7 @@ def _require_br_format(value: str) -> None:
     ValueError
         If the format is wrong.
     """
-    validated_br_date_shape(value)
+    validated_br_date(value)
 
 
 @type_checker

@@ -20,7 +20,7 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from layouts_cvm._internal.config.schemas._fields import (
-    validated_br_date_shape,
+    validated_br_date,
     validated_cnpj,
     validated_competence,
 )
@@ -87,7 +87,7 @@ class PortabilidadeHeader(BaseModel):
         ValueError
                 If the shape is wrong, the date does not exist or the year is before 1900.
         """
-        _check_min_year(validated_br_date_shape(v), "%d/%m/%Y")
+        _check_min_year(validated_br_date(v), "%d/%m/%Y")
         return v
 
 

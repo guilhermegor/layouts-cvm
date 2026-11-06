@@ -31,7 +31,7 @@ from pydantic import BaseModel, BeforeValidator, Field, ValidationInfo, field_va
 from layouts_cvm._internal.config.schemas._fields import (
     truncate_to_scale,
     validate_person_doc,
-    validated_br_date_shape,
+    validated_br_date,
     validated_cnpj,
     validated_competence,
 )
@@ -109,7 +109,7 @@ class PerfilMensal739Header(BaseModel):
         ValueError
                 If value does not follow DD/MM/AAAA format.
         """
-        return validated_br_date_shape(v)
+        return validated_br_date(v)
 
 
 class PerfilMensal739ClientCount(BaseModel):
@@ -282,7 +282,7 @@ class PerfilMensal739PerformanceFeeDetails(BaseModel):
         ValueError
                 If value does not follow DD/MM/AAAA format.
         """
-        return validated_br_date_shape(v)
+        return validated_br_date(v)
 
 
 class PerfilMensal739Row(BaseModel):
