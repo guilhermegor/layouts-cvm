@@ -10,6 +10,7 @@ and validators, so the truncation/validation logic lives in exactly one place.
 """
 
 from collections.abc import Callable
+from datetime import datetime
 from decimal import ROUND_DOWN, Context, Decimal, InvalidOperation
 import re
 
@@ -33,7 +34,8 @@ _PERSON_DOC_RULES = {
 
 _TRUNCATION_CONTEXT = Context(prec=28)
 
-_COMPETENCE_RE = re.compile(r"(0[1-9]|1[0-2])/[0-9]{4}")
+_COMPETENCE_RE = re.compile(r"(0[1-9]|1[0-2])/(?!0000)[0-9]{4}")
+_DATE_BR_SHAPE_RE = re.compile(r"[0-9]{2}/[0-9]{2}/[0-9]{4}")
 
 
 @type_checker
@@ -180,8 +182,58 @@ def validated_competence(value: str) -> str:
     Raises
     ------
     ValueError
-            If the value is not ``MM/AAAA`` (month 01-12, four-digit year).
+            If the value is not ``MM/AAAA`` (month 01-12, four-digit year not ``0000``).
     """
     if not _COMPETENCE_RE.fullmatch(value):
         raise ValueError(f"expected MM/AAAA, got {value!r}")
     return value
+
+
+@type_checker
+def validated_br_date(value: str) -> str:
+    """Check a date is written ``DD/MM/AAAA`` and exists on the calendar; return it unchanged.
+
+    The regex pins the shape (ASCII digits, zero-padded), which ``strptime`` alone does not;
+    ``strptime`` then rejects a day that does not exist, such as ``31/02/2026``.
+
+    Parameters
+    ----------
+    value : str
+            The date text, e.g. ``"15/06/2026"``.
+
+    Returns
+    -------
+    str
+            The validated value.
+
+    Raises
+    ------
+    ValueError
+            If the value does not follow ``DD/MM/AAAA`` or names a day that does not exist.
+    """
+    if not _DATE_BR_SHAPE_RE.fullmatch(value):
+        raise ValueError(f"expected DD/MM/AAAA, got {value!r}")
+    _require_calendar_day(value)
+    return value
+
+
+@type_checker
+def _require_calendar_day(value: str) -> None:
+    """Refuse a ``DD/MM/AAAA`` text naming no calendar day, with this module's own message.
+
+    ``strptime``'s wording differs between Python versions, so it is not part of the contract.
+
+    Parameters
+    ----------
+    value : str
+            A text already known to be ``DD/MM/AAAA``-shaped.
+
+    Raises
+    ------
+    ValueError
+            If the day does not exist, such as ``31/02/2026``.
+    """
+    try:
+        datetime.strptime(value, "%d/%m/%Y")  # noqa: DTZ007  (calendar check only)
+    except ValueError as exc:
+        raise ValueError(f"no such calendar day: {value!r}") from exc

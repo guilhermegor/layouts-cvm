@@ -34,13 +34,13 @@ from pydantic import (
 from layouts_cvm._internal.config.schemas._fields import (
     truncate_to_scale,
     validate_person_doc,
+    validated_br_date,
     validated_cnpj,
+    validated_competence,
 )
 from layouts_cvm._internal.utils.typing import type_checker
 
 
-_DATE_BR_RE = re.compile(r"[0-9]{2}/[0-9]{2}/[0-9]{4}")
-_COMPT_RE = re.compile(r"(0[1-9]|1[0-2])/(?!0000)[0-9]{4}")
 _SWAP_RE = re.compile(r"SWP[A-Z0-9]{3}")
 _XML_ILLEGAL_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
 _LINE_BREAK_RE = re.compile(r"[\t\n\r]")
@@ -359,8 +359,7 @@ def _require_br_format(value: str) -> None:
     ValueError
         If the format is wrong.
     """
-    if not _DATE_BR_RE.fullmatch(value):
-        raise ValueError("date must follow DD/MM/AAAA format.")
+    validated_br_date(value)
 
 
 @type_checker
@@ -438,9 +437,7 @@ class CdaHeader(BaseModel):
         ValueError
                 If the format is not MM/AAAA.
         """
-        if not _COMPT_RE.fullmatch(v):
-            raise ValueError("dt_compt must follow MM/AAAA format.")
-        return v
+        return validated_competence(v)
 
 
 @type_checker
