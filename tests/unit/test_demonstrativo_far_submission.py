@@ -319,10 +319,13 @@ def test_pinned_table_a_has_29_codes() -> None:
     assert len(TABLE_A) == 29
 
 
-def test_required_set_equals_table_a() -> None:
-    """A fund using only code 53 misses every other code of the pinned TABLE_A."""
-    dict_fund = _fund(doc_mov_mes={"row_mov_por_fundo": [{"cd_mov": 53, "vl_entr": 1}]})
+@pytest.mark.parametrize("int_code", [53, 54])
+def test_required_set_equals_table_a(int_code: int) -> None:
+    """A fund using one code misses every other code of the pinned TABLE_A."""
+    str_pair = TABLE_A[int_code]
+    dict_row = _movement(int_code, str_pair[0] == "E", str_pair[1] == "S")
+    dict_fund = _fund(doc_mov_mes={"row_mov_por_fundo": [dict_row]})
     cls_registro = DemonstrativoFarDocument.model_validate(
         _doc(dict_fund)
     ).far.row_registro_movimento[0]
-    assert set(find_missing_codes(cls_registro)) == set(TABLE_A) - {53}
+    assert set(find_missing_codes(cls_registro)) == set(TABLE_A) - {int_code}
