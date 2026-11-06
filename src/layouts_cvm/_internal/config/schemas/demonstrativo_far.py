@@ -219,12 +219,12 @@ class DemonstrativoFarDocument(_Block):
 
 
 @type_checker
-def find_missing_codes(registro: DemonstrativoFarRegistro) -> list[int]:
+def find_missing_codes(cls_registro: DemonstrativoFarRegistro) -> list[int]:
     """List the Table A codes a fund does not use, in ascending order.
 
     Parameters
     ----------
-    registro : DemonstrativoFarRegistro
+    cls_registro : DemonstrativoFarRegistro
         The fund whose movements are checked.
 
     Returns
@@ -232,37 +232,45 @@ def find_missing_codes(registro: DemonstrativoFarRegistro) -> list[int]:
     list[int]
         Table A codes absent from ``row_mov_por_fundo``, ascending.
     """
-    set_used = {m.cd_mov for m in registro.doc_mov_mes.row_mov_por_fundo}
+    set_used = {cls_mov.cd_mov for cls_mov in cls_registro.doc_mov_mes.row_mov_por_fundo}
     return sorted(set(_TABLE_A) - set_used)
 
 
 @type_checker
-def check_fund_uses_all_codes(registro: DemonstrativoFarRegistro) -> None:
-    """Refuse a fund that leaves a Table A code unused.
+def describe_incomplete_funds(cls_document: DemonstrativoFarDocument) -> list[str]:
+    """Describe every fund that leaves a Table A code unused.
 
     Parameters
     ----------
-    registro : DemonstrativoFarRegistro
-        The fund to check.
+    cls_document : DemonstrativoFarDocument
+        The built document to check.
 
-    Raises
-    ------
-    ValueError
-        Naming the fund's CNPJ and the missing codes, ascending.
+    Returns
+    -------
+    list[str]
+        One ``fund <cnpj> does not use Table A codes [...]`` line per incomplete fund.
     """
-    list_missing = find_missing_codes(registro)
-    if list_missing:
-        raise ValueError(f"fund {registro.cnpj_fundo} does not use Table A codes {list_missing}")
+    return [
+        f"fund {cls_registro.cnpj_fundo} does not use Table A codes {list_missing}"
+        for cls_registro in cls_document.far.row_registro_movimento
+        if (list_missing := find_missing_codes(cls_registro))
+    ]
 
 
 @type_checker
-def check_all_funds_use_all_codes(document: DemonstrativoFarDocument) -> None:
+def check_all_funds_use_all_codes(cls_document: DemonstrativoFarDocument) -> None:
     """Refuse a document in which any fund leaves a Table A code unused.
 
     Parameters
     ----------
-    document : DemonstrativoFarDocument
+    cls_document : DemonstrativoFarDocument
         The built document to check.
+
+    Raises
+    ------
+    ValueError
+        Naming every incomplete fund's CNPJ and its missing codes, ascending.
     """
-    for registro in document.far.row_registro_movimento:
-        check_fund_uses_all_codes(registro)
+    list_lines = describe_incomplete_funds(cls_document)
+    if list_lines:
+        raise ValueError("; ".join(list_lines))

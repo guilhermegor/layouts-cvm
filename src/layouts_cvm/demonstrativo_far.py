@@ -23,12 +23,12 @@ from layouts_cvm._internal.utils.xml_writer import (
 
 
 @type_checker
-def _build_root(document: DemonstrativoFarDocument) -> ET.Element:
+def _build_root(cls_document: DemonstrativoFarDocument) -> ET.Element:
     """Build the DOC_ARQ element tree from a validated document.
 
     Parameters
     ----------
-    document : DemonstrativoFarDocument
+    cls_document : DemonstrativoFarDocument
             The validated document.
 
     Returns
@@ -37,8 +37,8 @@ def _build_root(document: DemonstrativoFarDocument) -> ET.Element:
             The root element with every block appended in schema order.
     """
     root = ET.Element("DOC_ARQ")
-    for field in type(document).model_fields:
-        append_field(root, field, getattr(document, field))
+    for field in type(cls_document).model_fields:
+        append_field(root, field, getattr(cls_document, field))
     return root
 
 

@@ -15,7 +15,6 @@ import pytest
 
 from layouts_cvm import DemonstrativoFar
 from layouts_cvm._internal.config.schemas.demonstrativo_far import (
-    _TABLE_A,
     DemonstrativoFarDocument,
     find_missing_codes,
 )
@@ -278,14 +277,14 @@ def test_invalid_documents_are_rejected(doc: dict) -> None:
         DemonstrativoFar().export(doc)
 
 
-def _all_codes_fund() -> dict:
-    rows = [
+def _all_codes_fund(cnpj: str = CNPJ_A) -> dict:
+    list_rows = [
         _movement(code, pair[0] == "E", pair[1] == "S") for code, pair in sorted(TABLE_A.items())
     ]
-    return _fund(doc_mov_mes={"row_mov_por_fundo": rows})
+    return _fund(cnpj, doc_mov_mes={"row_mov_por_fundo": list_rows})
 
 
-def test_flag_off_accepts_a_fund_with_one_movement() -> None:
+def test_flag_off_accepts_a_fund_with_two_movements() -> None:
     """Without the flag a fund with two movements is accepted."""
     assert DemonstrativoFar().export(_doc())
 
@@ -297,20 +296,33 @@ def test_flag_on_accepts_a_fund_using_every_code() -> None:
 
 def test_flag_on_rejects_missing_codes_naming_fund_and_codes() -> None:
     """The message names the CNPJ and the missing codes ascending."""
-    missing = sorted(set(TABLE_A) - {53, 54})
-    with pytest.raises(ValueError, match=f"{CNPJ_A}.*{re.escape(str(missing))}"):
+    list_missing = sorted(set(TABLE_A) - {53, 54})
+    with pytest.raises(ValueError, match=f"{CNPJ_A}.*{re.escape(str(list_missing))}"):
         DemonstrativoFar().export(_doc(), require_all_movements=True)
+
+
+def test_flag_on_reports_every_incomplete_fund() -> None:
+    """Two incomplete funds are both named in one error."""
+    with pytest.raises(ValueError, match=f"{CNPJ_A}.*{CNPJ_B}"):
+        DemonstrativoFar().export(_doc(_fund(CNPJ_A), _fund(CNPJ_B)), require_all_movements=True)
 
 
 def test_flag_on_rejects_a_built_model() -> None:
     """A built model is checked too, not only a mapping."""
-    model = DemonstrativoFarDocument.model_validate(_doc())
+    cls_model = DemonstrativoFarDocument.model_validate(_doc())
     with pytest.raises(ValueError, match="does not use Table A codes"):
-        DemonstrativoFar().export(model, require_all_movements=True)
+        DemonstrativoFar().export(cls_model, require_all_movements=True)
+
+
+def test_pinned_table_a_has_29_codes() -> None:
+    """The independent Table A copy has 29 codes."""
+    assert len(TABLE_A) == 29
 
 
 def test_required_set_equals_table_a() -> None:
-    """The codes a fund can miss are exactly the Table A keys."""
-    model = DemonstrativoFarDocument.model_validate(_doc())
-    registro = model.far.row_registro_movimento[0]
-    assert set(find_missing_codes(registro)) | {53, 54} == set(_TABLE_A)
+    """A fund using no Table A code misses exactly the independent TABLE_A keys."""
+    dict_fund = _fund(doc_mov_mes={"row_mov_por_fundo": [{"cd_mov": 53, "vl_entr": 1}]})
+    cls_registro = DemonstrativoFarDocument.model_validate(
+        _doc(dict_fund)
+    ).far.row_registro_movimento[0]
+    assert set(find_missing_codes(cls_registro)) == set(TABLE_A) - {53}
