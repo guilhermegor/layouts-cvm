@@ -576,6 +576,14 @@ def test_fidc_base_subclass_without_a_document_model_fails_at_definition() -> No
         type("_Unparametrized", (_BaseFidcWriter,), {})
 
 
+def test_fidc_576_writer_rejects_a_489_document() -> None:
+    """A built 489 document handed to the ICVM 576 writer fails validation, not export."""
+    from layouts_cvm import InfMensalFidc
+
+    with pytest.raises(ValidationError, match="InfMensalFidcDocument"):
+        InfMensalFidc().export(_doc())
+
+
 def test_fidc_writer_subclass_without_generic_inherits_the_document_model() -> None:
     """Subclassing a concrete writer without a generic argument keeps the parent's model."""
     from layouts_cvm import InfMensalFidc

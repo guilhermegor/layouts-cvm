@@ -8,7 +8,7 @@ the public API.
 
 from collections.abc import Iterator, Mapping
 from decimal import Decimal
-from typing import ClassVar, get_args
+from typing import ClassVar, get_args, get_origin
 from xml.sax.saxutils import escape
 
 from layouts_cvm._internal.config.ports.submission_writer import SubmissionWriter, TDoc
@@ -22,7 +22,7 @@ _INDENT = "    "
 
 @type_checker
 def _declared_models(cls: type) -> Iterator[type[DocModel]]:
-    """Yield the document models a class names in its own generic bases.
+    """Yield the document models a class names in its own ``_BaseFidcWriter`` generic bases.
 
     Parameters
     ----------
@@ -32,11 +32,12 @@ def _declared_models(cls: type) -> Iterator[type[DocModel]]:
     Returns
     -------
     Iterator[type[DocModel]]
-            Every generic argument that is a ``DocModel`` subclass, in base order.
+            Every ``DocModel`` argument of a ``_BaseFidcWriter[...]`` base, in base order.
     """
     return (
         arg
         for base in cls.__dict__.get("__orig_bases__", ())
+        if get_origin(base) is _BaseFidcWriter
         for arg in get_args(base)
         if isinstance(arg, type) and issubclass(arg, DocModel)
     )
@@ -56,13 +57,13 @@ class _BaseFidcWriter(SubmissionWriter[TDoc]):
     def __init_subclass__(cls, **kwargs: object) -> None:
         """Derive ``_document_model`` from the subclass's generic argument.
 
+        A subclass of a concrete writer that names no generic argument of its own inherits
+        its parent's model.
+
         Parameters
         ----------
         **kwargs : object
                 Forwarded to ``type.__init_subclass__``.
-
-        A subclass of a concrete writer that names no generic argument of its own inherits
-        its parent's model.
 
         Raises
         ------
