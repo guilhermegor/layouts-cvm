@@ -219,16 +219,29 @@ def test_br_date_entry_point_refuses_a_missing_day_with_the_shared_message(
         fn_entry("31/02/2026")
 
 
-@pytest.mark.parametrize("fn_entry", LIST_BR_DATE_ENTRY_POINTS)
-def test_br_date_entry_point_accepts_a_real_date(fn_entry: Callable[[str], object]) -> None:
-    """Every DD/MM/AAAA entry point accepts a well-formed existing date.
+@pytest.mark.parametrize(
+    ("fn_entry", "obj_expected"),
+    [
+        (validated_br_date, "15/06/2026"),
+        (xml_fields.check_br_date, "15/06/2026"),
+        (xml_fields.parse_br_date, date(2026, 6, 15)),
+        (inr_mensal_fields.check_br_date, "15/06/2026"),
+        (inr_mensal_fields.parse_br_date, date(2026, 6, 15)),
+    ],
+)
+def test_br_date_entry_point_accepts_a_real_date(
+    fn_entry: Callable[[str], object], obj_expected: object
+) -> None:
+    """Every DD/MM/AAAA entry point accepts an existing date and returns its own type.
 
     Parameters
     ----------
     fn_entry : Callable[[str], object]
         One of the three modules' date checks.
+    obj_expected : object
+        The string a checker returns, or the ``date`` a parser returns.
     """
-    assert fn_entry("15/06/2026") in {"15/06/2026", date(2026, 6, 15)}
+    assert fn_entry("15/06/2026") == obj_expected
 
 
 @pytest.mark.parametrize("fn_parse", [xml_fields.parse_br_date, inr_mensal_fields.parse_br_date])
