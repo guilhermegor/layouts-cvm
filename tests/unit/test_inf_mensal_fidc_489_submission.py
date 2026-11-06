@@ -553,3 +553,16 @@ def test_cpf_placeholder_is_accepted() -> None:
     """The page's CPF placeholder is a valid debtor document."""
     mutate = _set(*_SACADOS, value=_sacado("999.999.999-99"))
     assert _doc(mutate).lista_inform.inform.lista_dev_sacados.dev_sacados[0].vl_sacado_deved_1 == 0
+
+
+def test_fidc_writers_are_siblings_over_the_private_base() -> None:
+    """Neither FIDC writer subclasses the other; both subclass the shared base."""
+    from layouts_cvm import InfMensalFidc, InfMensalFidc489
+    from layouts_cvm._base_fidc_writer import _BaseFidcWriter
+
+    assert (
+        issubclass(InfMensalFidc489, InfMensalFidc),
+        issubclass(InfMensalFidc, InfMensalFidc489),
+        issubclass(InfMensalFidc, _BaseFidcWriter),
+        issubclass(InfMensalFidc489, _BaseFidcWriter),
+    ) == (False, False, True, True)
