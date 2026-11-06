@@ -296,8 +296,16 @@ jobs:
       - name: Deploy Docs with mike
         run: |
           MINOR_VERSION="$(echo "$NEW_VERSION" | cut -d. -f1-2)"
-          poetry run mike deploy --update-aliases --push "$MINOR_VERSION" latest
-          poetry run mike set-default --push latest
+          for int_attempt in 1 2 3 4 5; do
+            git fetch origin "+gh-pages:gh-pages" || true
+            if poetry run mike deploy --update-aliases --push "$MINOR_VERSION" latest \
+              && poetry run mike set-default --push latest; then
+              exit 0
+            fi
+            echo "gh-pages push rejected (attempt $int_attempt/5); re-syncing and retrying."
+            sleep $((int_attempt * 5))
+          done
+          exit 1
 
       - name: Report GitHub Pages Status
         env:

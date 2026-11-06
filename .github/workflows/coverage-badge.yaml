@@ -11,7 +11,7 @@ permissions:
   pages: write
 
 concurrency:
-  group: gh-pages-publish
+  group: gh-pages-badge
   cancel-in-progress: false
 
 jobs:
@@ -67,6 +67,17 @@ jobs:
             exit 0
           fi
           git commit -m "chore: update coverage badge" -m "Generated from ${GITHUB_SHA}."
-          git push origin HEAD:gh-pages
+          for int_attempt in 1 2 3 4 5; do
+            if git push origin HEAD:gh-pages; then
+              break
+            fi
+            if [ "$int_attempt" -eq 5 ]; then
+              echo "::error::gh-pages moved on every attempt; badge not published."
+              exit 1
+            fi
+            echo "::warning::Push rejected (attempt $int_attempt); rebasing onto gh-pages."
+            git fetch origin gh-pages
+            git rebase FETCH_HEAD
+          done
           gh api -X POST "repos/$GITHUB_REPOSITORY/pages/builds" >/dev/null \
             || echo "::warning::Could not request a Pages build; re-run it from Settings > Pages."
