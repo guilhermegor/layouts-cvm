@@ -20,9 +20,7 @@ validated with this library's own check-digit validators and stored bare/unmaske
 
 from __future__ import annotations
 
-from datetime import datetime
 from decimal import Decimal
-import re
 from typing import Annotated, Literal
 
 from pydantic import (
@@ -37,42 +35,9 @@ from pydantic import (
 from layouts_cvm._internal.config.schemas._fields import (
     truncate_to_scale,
     validate_person_doc,
+    validated_br_date,
     validated_cnpj,
 )
-from layouts_cvm._internal.utils.typing import type_checker
-
-
-_DATE_BR_RE = re.compile(r"[0-9]{2}/[0-9]{2}/[0-9]{4}")
-
-
-@type_checker
-def _validate_date_br(v: str, str_label: str) -> str:
-    """Check ``v`` is a real calendar date written ``DD/MM/AAAA``.
-
-    ``fullmatch`` with ``[0-9]`` rejects a trailing newline and non-ASCII digits;
-    ``strptime`` rejects dates that do not exist (e.g. ``31/02/2011``).
-
-    Parameters
-    ----------
-    v : str
-            Value to validate.
-    str_label : str
-            Field name used in the error message.
-
-    Returns
-    -------
-    str
-            ``v`` unchanged.
-
-    Raises
-    ------
-    ValueError
-            If ``v`` does not follow DD/MM/AAAA or is not a real date.
-    """
-    if not _DATE_BR_RE.fullmatch(v):
-        raise ValueError(f"{str_label} must follow DD/MM/AAAA format.")
-    datetime.strptime(v, "%d/%m/%Y")  # noqa: DTZ007  # calendar check only, no timezone
-    return v
 
 
 TwoDecimalField = Annotated[
@@ -114,9 +79,9 @@ class InformeDiarioHeader(BaseModel):
         Raises
         ------
         ValueError
-                If value does not follow DD/MM/AAAA format.
+                If value does not follow DD/MM/AAAA format or is not a real date.
         """
-        return _validate_date_br(v, "date")
+        return validated_br_date(v)
 
 
 class SignificantShareholder(BaseModel):
@@ -185,9 +150,9 @@ class InformeDiarioInform(BaseModel):
         Raises
         ------
         ValueError
-                If value does not follow DD/MM/AAAA format.
+                If value does not follow DD/MM/AAAA format or is not a real date.
         """
-        return _validate_date_br(v, "data_prox_pl")
+        return validated_br_date(v)
 
     @field_validator("cnpj_fdo")
     @classmethod
