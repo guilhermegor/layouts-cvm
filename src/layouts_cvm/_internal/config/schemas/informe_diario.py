@@ -79,7 +79,7 @@ class InformeDiarioHeader(BaseModel):
         Raises
         ------
         ValueError
-                If value does not follow DD/MM/AAAA format.
+                If value does not follow DD/MM/AAAA format or is not a real date.
         """
         return validated_br_date(v)
 
@@ -150,7 +150,7 @@ class InformeDiarioInform(BaseModel):
         Raises
         ------
         ValueError
-                If value does not follow DD/MM/AAAA format.
+                If value does not follow DD/MM/AAAA format or is not a real date.
         """
         return validated_br_date(v)
 

@@ -183,7 +183,7 @@ LIST_DIARIO_DATE_FIELDS = [
 
 
 @pytest.mark.parametrize(("cls_model", "str_field"), LIST_DIARIO_DATE_FIELDS)
-@pytest.mark.parametrize("str_value", ["1/06/2026", "15/06/2026\n"])
+@pytest.mark.parametrize("str_value", ["1/06/2026", "15/06/2026\n", "\u0661\u0665/06/2026"])
 def test_informe_diario_date_invalid_shape_uses_the_shared_message(
     cls_model: type, str_field: str, str_value: str
 ) -> None:
@@ -223,9 +223,22 @@ def test_informe_diario_date_nonexistent_day_uses_the_shared_message(
         )
 
 
-@pytest.mark.parametrize(
-    ("cls_model", "str_field"), LIST_DIARIO_DATE_FIELDS[:2] + LIST_DIARIO_DATE_FIELDS[3:]
-)
+LIST_DIARIO_HEADER_DATE_FIELDS = [
+    (cls_model, str_field)
+    for cls_model, str_field in LIST_DIARIO_DATE_FIELDS
+    if cls_model is not InformeDiarioInform
+]
+
+
+def test_informe_diario_data_prox_pl_accepts_a_real_day() -> None:
+    """``data_prox_pl`` accepts an existing day on an inform that names its subclass."""
+    cls_result = InformeDiarioInform.__pydantic_validator__.validate_assignment(
+        InformeDiarioInform.model_construct(cod_subclasse="SUB1"), "data_prox_pl", "15/06/2026"
+    )
+    assert cls_result.data_prox_pl == "15/06/2026"
+
+
+@pytest.mark.parametrize(("cls_model", "str_field"), LIST_DIARIO_HEADER_DATE_FIELDS)
 def test_informe_diario_date_accepts_a_real_day(cls_model: type, str_field: str) -> None:
     """Each informe diario date field accepts an existing DD/MM/AAAA day.
 
