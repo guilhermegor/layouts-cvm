@@ -164,5 +164,5 @@ def test_validated_br_date_nonexistent_day_raises(str_value: str) -> None:
     str_value : str
         A DD/MM/AAAA text with no matching calendar day.
     """
-    with pytest.raises(ValueError, match="does not match format|out of range"):
+    with pytest.raises(ValueError, match="no such calendar day"):
         validated_br_date(str_value)

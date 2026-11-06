@@ -213,5 +213,27 @@ def validated_br_date(value: str) -> str:
     """
     if not _DATE_BR_SHAPE_RE.fullmatch(value):
         raise ValueError(f"expected DD/MM/AAAA, got {value!r}")
-    datetime.strptime(value, "%d/%m/%Y")  # noqa: DTZ007  (calendar check only)
+    _require_calendar_day(value)
     return value
+
+
+@type_checker
+def _require_calendar_day(value: str) -> None:
+    """Refuse a ``DD/MM/AAAA`` text naming no calendar day, with this module's own message.
+
+    ``strptime``'s wording differs between Python versions, so it is not part of the contract.
+
+    Parameters
+    ----------
+    value : str
+            A text already known to be ``DD/MM/AAAA``-shaped.
+
+    Raises
+    ------
+    ValueError
+            If the day does not exist, such as ``31/02/2026``.
+    """
+    try:
+        datetime.strptime(value, "%d/%m/%Y")  # noqa: DTZ007  (calendar check only)
+    except ValueError as exc:
+        raise ValueError(f"no such calendar day: {value!r}") from exc
