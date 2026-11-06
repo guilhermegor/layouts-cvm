@@ -1,7 +1,26 @@
+[project]
+name = "layouts-cvm"
+description = "Build, validate and serialise the files a fund sends to CVM, in CVM's own file layouts."
+dynamic = [
+    "version", "readme", "license", "authors", "keywords", "urls", "requires-python",
+    "dependencies",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Operating System :: OS Independent",
+    "License :: OSI Approved :: MIT License",
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries",
+]
+
 [tool.poetry]
 name = "layouts-cvm"
 version = "0.0.0"  # set from the git tag, see docs/contributing.md#releasing
-description = "Build, validate and serialise the files a fund sends to CVM, in CVM's own file layouts."
 authors = ["guilhermegor"]
 readme = "README.md"
 license = "MIT"
@@ -12,14 +31,6 @@ keywords = ["layouts-cvm", "python", "library"]
 packages = [{ include = "layouts_cvm", from = "src" }]
 exclude = ["src/**/CLAUDE.md", "src/**/AGENTS.md"]
 package-mode = true
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "Operating System :: OS Independent",
-    "License :: OSI Approved :: MIT License",
-    "Development Status :: 3 - Alpha",
-    "Intended Audience :: Developers",
-    "Topic :: Software Development :: Libraries",
-]
 
 [tool.poetry.urls]
 "Bug Reports" = "https://github.com/guilhermegor/layouts-cvm/issues"
@@ -56,6 +67,7 @@ yamllint = ">=1.35.0"
 shfmt-py = ">=3.7.0"
 shellcheck-py = ">=0.10.0"
 deptry = ">=0.20"
+pyyaml = "^6.0.3"
 
 [tool.poetry.group.docs.dependencies]
 mkdocs = ">=1.6.0"
@@ -72,5 +84,5 @@ vcs = "git"
 style = "pep440"
 
 [build-system]
-requires = ["poetry-core>=1.7.0", "poetry-dynamic-versioning>=1.4.0,<2.0.0"]
+requires = ["poetry-core>=2.0.0", "poetry-dynamic-versioning>=1.7.1,<2.0.0"]
 build-backend = "poetry_dynamic_versioning.backend"
