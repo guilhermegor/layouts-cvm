@@ -43,8 +43,6 @@ Cada campo é a tag da página em minúsculas, na ordem do XML.
 
 ## Não são verificados
 
-- Que **todos** os tipos da Tabela A apareçam em cada fundo (a página diz que devem ser
-  utilizados); só se recusa código fora da tabela e repetido.
 - Que `dt_distr` caia no mês da competência.
 - Que os fundos pertençam ao administrador `cnpj_adm`.
 - Que `dt_gerac_arq` não seja anterior à competência.
@@ -53,7 +51,7 @@ Cada campo é a tag da página em minúsculas, na ordem do XML.
 
 ## Exemplo
 
-O exemplo traz um único movimento por fundo para ser curto; a página pede todos os tipos da Tabela A (veja acima), o que o escritor não verifica.
+O exemplo traz um único movimento por fundo para ser curto; a página pede todos os tipos da Tabela A, o que o escritor só verifica com `require_all_movements=True` (veja abaixo).
 
 ```python
 from layouts_cvm import DemonstrativoFar
@@ -74,4 +72,13 @@ doc = {
 }
 
 print(DemonstrativoFar().export(doc))
+```
+
+## Exigir todos os tipos da Tabela A
+
+A página diz que todos os tipos da Tabela A devem ser utilizados. Por padrão o escritor não exige isso. Com `require_all_movements=True` (só por nome), `export` recusa o fundo cujo `row_mov_por_fundo` não use todos os códigos, com `ValueError` que traz o CNPJ do fundo e os códigos ausentes em ordem crescente. A verificação roda no documento já construído; sem a opção a saída não muda.
+
+```python
+DemonstrativoFar().export(doc, require_all_movements=True)
+# ValueError: fund 11444777000161 does not use Table A codes [37, 48, 54, ...]
 ```

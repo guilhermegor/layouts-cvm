@@ -9,13 +9,37 @@ from collections.abc import Mapping
 from xml.etree import ElementTree as ET  # noqa: S405  # builds XML, never parses untrusted input
 
 from layouts_cvm._internal.config.ports.submission_writer import SubmissionWriter
-from layouts_cvm._internal.config.schemas.demonstrativo_far import DemonstrativoFarDocument
+from layouts_cvm._internal.config.schemas.demonstrativo_far import (
+    DemonstrativoFarDocument,
+    check_all_funds_use_all_codes,
+)
+from layouts_cvm._internal.utils.typing import type_checker
 from layouts_cvm._internal.utils.xml_writer import (
     append_field,
     coerce_document,
     deliver,
     render_xml,
 )
+
+
+@type_checker
+def _build_root(document: DemonstrativoFarDocument) -> ET.Element:
+    """Build the DOC_ARQ element tree from a validated document.
+
+    Parameters
+    ----------
+    document : DemonstrativoFarDocument
+            The validated document.
+
+    Returns
+    -------
+    ET.Element
+            The root element with every block appended in schema order.
+    """
+    root = ET.Element("DOC_ARQ")
+    for field in type(document).model_fields:
+        append_field(root, field, getattr(document, field))
+    return root
 
 
 class DemonstrativoFar(SubmissionWriter[DemonstrativoFarDocument]):
@@ -31,6 +55,8 @@ class DemonstrativoFar(SubmissionWriter[DemonstrativoFarDocument]):
         self,
         doc: DemonstrativoFarDocument | Mapping[str, object],
         output_path: str | None = None,
+        *,
+        require_all_movements: bool = False,
     ) -> str | None:
         """Serialize a validated document to a CVM-compliant XML string or file.
 
@@ -41,15 +67,21 @@ class DemonstrativoFar(SubmissionWriter[DemonstrativoFarDocument]):
         output_path : Optional[str]
                 Destination file, written atomically as windows-1252. If given, None is
                 returned; otherwise the XML string is returned, by default None.
+        require_all_movements : bool
+                Refuse a fund that leaves a Table A movement code unused, by default False.
 
         Returns
         -------
         Optional[str]
                 XML string when output_path is None, else None.
+
+        Raises
+        ------
+        ValueError
+                If ``require_all_movements`` is set and a fund misses a Table A code.
         """
         document = coerce_document(DemonstrativoFarDocument, doc)
-        root = ET.Element("DOC_ARQ")
-        for field in type(document).model_fields:
-            append_field(root, field, getattr(document, field))
-        xml_str, payload = render_xml(root)
+        if require_all_movements:
+            check_all_funds_use_all_codes(document)
+        xml_str, payload = render_xml(_build_root(document))
         return deliver(xml_str, payload, output_path)

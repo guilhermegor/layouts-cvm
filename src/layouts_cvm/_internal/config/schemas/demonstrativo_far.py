@@ -24,6 +24,7 @@ from typing import Annotated, Literal
 from pydantic import AfterValidator, BaseModel, BeforeValidator, ConfigDict, Field, model_validator
 
 from layouts_cvm._internal.config.schemas._fields import validated_cnpj
+from layouts_cvm._internal.utils.typing import type_checker
 from layouts_cvm._internal.utils.xml_fields import (
     check_br_date,
     check_cnpj_shape,
@@ -215,3 +216,53 @@ class DemonstrativoFarDocument(_Block):
 
     desc_adm: DemonstrativoFarDescAdm
     far: DemonstrativoFarFar
+
+
+@type_checker
+def find_missing_codes(registro: DemonstrativoFarRegistro) -> list[int]:
+    """List the Table A codes a fund does not use, in ascending order.
+
+    Parameters
+    ----------
+    registro : DemonstrativoFarRegistro
+        The fund whose movements are checked.
+
+    Returns
+    -------
+    list[int]
+        Table A codes absent from ``row_mov_por_fundo``, ascending.
+    """
+    set_used = {m.cd_mov for m in registro.doc_mov_mes.row_mov_por_fundo}
+    return sorted(set(_TABLE_A) - set_used)
+
+
+@type_checker
+def check_fund_uses_all_codes(registro: DemonstrativoFarRegistro) -> None:
+    """Refuse a fund that leaves a Table A code unused.
+
+    Parameters
+    ----------
+    registro : DemonstrativoFarRegistro
+        The fund to check.
+
+    Raises
+    ------
+    ValueError
+        Naming the fund's CNPJ and the missing codes, ascending.
+    """
+    list_missing = find_missing_codes(registro)
+    if list_missing:
+        raise ValueError(f"fund {registro.cnpj_fundo} does not use Table A codes {list_missing}")
+
+
+@type_checker
+def check_all_funds_use_all_codes(document: DemonstrativoFarDocument) -> None:
+    """Refuse a document in which any fund leaves a Table A code unused.
+
+    Parameters
+    ----------
+    document : DemonstrativoFarDocument
+        The built document to check.
+    """
+    for registro in document.far.row_registro_movimento:
+        check_fund_uses_all_codes(registro)
