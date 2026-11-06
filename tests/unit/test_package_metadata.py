@@ -174,3 +174,20 @@ def test_wheel_requires_every_runtime_dependency(str_metadata: str) -> None:
         for str_req in Parser().parsestr(str_metadata).get_all("Requires-Dist", [])
     }
     assert {_canonical_name(str_dep) for str_dep in dict_deps} - {"python"} <= set_required
+
+
+@pytest.mark.parametrize(
+    "str_header",
+    ["Summary", "Requires-Python", "Project-URL", "Description-Content-Type", "Author"],
+)
+def test_wheel_metadata_carries_dynamic_field(str_metadata: str, str_header: str) -> None:
+    """Every field ``[project]`` leaves ``dynamic`` still reaches the published METADATA.
+
+    Parameters
+    ----------
+    str_metadata : str
+        The wheel's METADATA text.
+    str_header : str
+        A METADATA header filled from ``[tool.poetry]``.
+    """
+    assert Parser().parsestr(str_metadata).get_all(str_header), f"{str_header} missing"
