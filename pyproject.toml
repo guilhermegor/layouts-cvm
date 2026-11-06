@@ -1,7 +1,10 @@
 [project]
 name = "layouts-cvm"
 description = "Build, validate and serialise the files a fund sends to CVM, in CVM's own file layouts."
-dynamic = ["version", "readme", "license", "authors", "keywords", "urls", "requires-python"]
+dynamic = [
+    "version", "readme", "license", "authors", "keywords", "urls", "requires-python",
+    "dependencies",
+]
 classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
@@ -81,5 +84,5 @@ vcs = "git"
 style = "pep440"
 
 [build-system]
-requires = ["poetry-core>=1.7.0", "poetry-dynamic-versioning>=1.4.0,<2.0.0"]
+requires = ["poetry-core>=2.0.0", "poetry-dynamic-versioning>=1.4.0,<2.0.0"]
 build-backend = "poetry_dynamic_versioning.backend"

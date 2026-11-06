@@ -4,6 +4,7 @@ from pathlib import Path
 import shutil
 import subprocess
 import sys
+import tomllib
 import zipfile
 
 import pytest
@@ -121,3 +122,26 @@ def test_wheel_ships_py_typed_marker(path_wheel: Path) -> None:
     with zipfile.ZipFile(path_wheel) as cls_zip:
         list_names = cls_zip.namelist()
     assert "layouts_cvm/py.typed" in list_names
+
+
+def test_wheel_requires_every_runtime_dependency(path_wheel: Path) -> None:
+    """Every runtime dependency in pyproject.toml is a ``Requires-Dist`` of the wheel.
+
+    Parameters
+    ----------
+    path_wheel : pathlib.Path
+        The built wheel.
+    """
+    with (PATH_ROOT / "pyproject.toml").open("rb") as cls_file:
+        dict_deps = tomllib.load(cls_file)["tool"]["poetry"]["dependencies"]
+    with zipfile.ZipFile(path_wheel) as cls_zip:
+        str_member = next(
+            str_name for str_name in cls_zip.namelist() if str_name.endswith(".dist-info/METADATA")
+        )
+        str_metadata = cls_zip.read(str_member).decode("utf-8")
+    set_required = {
+        str_line.removeprefix("Requires-Dist: ").split(" ")[0].split(";")[0].lower()
+        for str_line in str_metadata.splitlines()
+        if str_line.startswith("Requires-Dist: ")
+    }
+    assert set(dict_deps) - {"python"} <= set_required
