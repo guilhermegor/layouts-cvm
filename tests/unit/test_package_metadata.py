@@ -3,6 +3,7 @@
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 import zipfile
 
 import pytest
@@ -12,6 +13,13 @@ import yaml
 PATH_ROOT = Path(__file__).resolve().parents[2]
 STR_PY_PREFIX = "Programming Language :: Python :: "
 STR_CLASSIFIER_LINE = "Classifier: "
+
+
+pytestmark = pytest.mark.skipif(
+    sys.platform == "win32",
+    reason="poetry is not on the test process PATH on Windows CI; wheel METADATA is "
+    "OS-independent and the Linux and macOS jobs build and check it",
+)
 
 
 @pytest.fixture(scope="module")  # fixture-scope-ok: one poetry build shared by read-only asserts
