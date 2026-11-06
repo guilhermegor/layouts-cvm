@@ -27,7 +27,6 @@ Conventions, all taken from that page:
 from __future__ import annotations
 
 from decimal import Decimal
-import re
 from typing import Annotated, Literal
 
 from pydantic import (
@@ -39,12 +38,14 @@ from pydantic import (
     model_validator,
 )
 
-from layouts_cvm._internal.config.schemas._fields import truncate_to_scale, validated_cnpj
+from layouts_cvm._internal.config.schemas._fields import (
+    truncate_to_scale,
+    validated_cnpj,
+    validated_competence,
+)
 from layouts_cvm._internal.utils.br_identifiers import is_valid_cnpj, is_valid_cpf
 from layouts_cvm._internal.utils.typing import type_checker
 
-
-_COMPETENCE_RE = re.compile(r"^(0[1-9]|1[0-2])/\d{4}$")
 
 _NO_CNPJ_PLACEHOLDER = "99.999.999/9999-99"
 _NO_CPF_PLACEHOLDER = "999.999.999-99"
@@ -218,9 +219,7 @@ class InfMensalFidcHeader(_FidcBlock):
         ValueError
                 If the value is not ``MM/AAAA``.
         """
-        if not _COMPETENCE_RE.match(v):
-            raise ValueError(f"expected MM/AAAA, got {v!r}")
-        return v
+        return validated_competence(v)
 
     @model_validator(mode="after")
     def _closed_fund_has_no_redemption_terms(self) -> InfMensalFidcHeader:
