@@ -577,10 +577,10 @@ def test_fidc_base_subclass_without_a_document_model_fails_at_definition() -> No
 
 
 def test_fidc_576_writer_rejects_a_489_document() -> None:
-    """A built 489 document handed to the ICVM 576 writer fails validation, not export."""
+    """A built 489 document handed to the ICVM 576 writer raises the TypeError main raised."""
     from layouts_cvm import InfMensalFidc
 
-    with pytest.raises(ValidationError, match="InfMensalFidcDocument"):
+    with pytest.raises(TypeError, match="expected InfMensalFidcDocument, got InfMensalFidc489"):
         InfMensalFidc().export(_doc())
 
 

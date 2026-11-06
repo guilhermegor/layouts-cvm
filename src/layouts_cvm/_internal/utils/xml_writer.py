@@ -49,8 +49,37 @@ def coerce_document(
     -------
     TDocument
         The validated document.
+
+    Raises
+    ------
+    TypeError
+        If ``doc`` is a model of another class.
     """
+    _reject_foreign_model(cls_document, doc)
     return doc if isinstance(doc, cls_document) else cls_document.model_validate(doc)
+
+
+@type_checker
+def _reject_foreign_model(cls_document: type[BaseModel], doc: object) -> None:
+    """Refuse a built model of the wrong class with a ``TypeError``.
+
+    A writer generic over its document type is only checked against the TypeVar's bound, so
+    this restores the error a concretely annotated ``export`` raises for the wrong document.
+
+    Parameters
+    ----------
+    cls_document : type[BaseModel]
+        The document model the writer serialises.
+    doc : object
+        The value handed to the writer.
+
+    Raises
+    ------
+    TypeError
+        If ``doc`` is a ``BaseModel`` that is not a ``cls_document``.
+    """
+    if isinstance(doc, BaseModel) and not isinstance(doc, cls_document):
+        raise TypeError(f"expected {cls_document.__name__}, got {type(doc).__name__}")
 
 
 @type_checker
