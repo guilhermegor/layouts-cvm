@@ -553,3 +553,42 @@ def test_cpf_placeholder_is_accepted() -> None:
     """The page's CPF placeholder is a valid debtor document."""
     mutate = _set(*_SACADOS, value=_sacado("999.999.999-99"))
     assert _doc(mutate).lista_inform.inform.lista_dev_sacados.dev_sacados[0].vl_sacado_deved_1 == 0
+
+
+def test_fidc_writers_are_siblings_over_the_private_base() -> None:
+    """Neither FIDC writer subclasses the other; both subclass the shared base."""
+    from layouts_cvm import InfMensalFidc, InfMensalFidc489
+    from layouts_cvm._base_fidc_writer import _BaseFidcWriter
+
+    assert (
+        issubclass(InfMensalFidc489, InfMensalFidc),
+        issubclass(InfMensalFidc, InfMensalFidc489),
+        issubclass(InfMensalFidc, _BaseFidcWriter),
+        issubclass(InfMensalFidc489, _BaseFidcWriter),
+    ) == (False, False, True, True)
+
+
+def test_fidc_base_subclass_without_a_document_model_fails_at_definition() -> None:
+    """A writer that does not parametrize the base fails when the class is defined."""
+    from layouts_cvm._base_fidc_writer import _BaseFidcWriter
+
+    with pytest.raises(TypeError, match="must parametrize _BaseFidcWriter with a DocModel"):
+        type("_Unparametrized", (_BaseFidcWriter,), {})
+
+
+def test_fidc_576_writer_rejects_a_489_document() -> None:
+    """A built 489 document handed to the ICVM 576 writer raises the TypeError main raised."""
+    from layouts_cvm import InfMensalFidc
+
+    with pytest.raises(TypeError, match="expected InfMensalFidcDocument, got InfMensalFidc489"):
+        InfMensalFidc().export(_doc())
+
+
+def test_fidc_writer_subclass_without_generic_inherits_the_document_model() -> None:
+    """Subclassing a concrete writer without a generic argument keeps the parent's model."""
+    from layouts_cvm import InfMensalFidc
+    from layouts_cvm._internal.config.schemas.inf_mensal_fidc import InfMensalFidcDocument
+
+    cls_writer = type("_Custom", (InfMensalFidc,), {})
+
+    assert cls_writer._document_model is InfMensalFidcDocument

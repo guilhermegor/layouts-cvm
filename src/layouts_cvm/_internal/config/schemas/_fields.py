@@ -11,6 +11,7 @@ and validators, so the truncation/validation logic lives in exactly one place.
 
 from collections.abc import Callable
 from decimal import ROUND_DOWN, Context, Decimal, InvalidOperation
+import re
 
 from layouts_cvm._internal.utils.br_identifiers import (
     is_valid_cnpj,
@@ -31,6 +32,8 @@ _PERSON_DOC_RULES = {
 
 
 _TRUNCATION_CONTEXT = Context(prec=28)
+
+_COMPETENCE_RE = re.compile(r"(0[1-9]|1[0-2])/[0-9]{4}")
 
 
 @type_checker
@@ -158,3 +161,27 @@ def validate_person_doc(tp_pessoa: str, value: str) -> str:
     name, is_valid, unmask = _PERSON_DOC_RULES[kind]
     require(is_valid(value), f"invalid {name} for {kind}: {value!r}")
     return unmask(value)
+
+
+@type_checker
+def validated_competence(value: str) -> str:
+    """Check a competence follows ``MM/AAAA`` and return it unchanged.
+
+    Parameters
+    ----------
+    value : str
+            The competence, e.g. ``"06/2026"``.
+
+    Returns
+    -------
+    str
+            The validated value.
+
+    Raises
+    ------
+    ValueError
+            If the value is not ``MM/AAAA`` (month 01-12, four-digit year).
+    """
+    if not _COMPETENCE_RE.fullmatch(value):
+        raise ValueError(f"expected MM/AAAA, got {value!r}")
+    return value

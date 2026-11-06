@@ -31,9 +31,8 @@ from typing import Annotated, Literal
 
 from pydantic import BeforeValidator, Field, field_validator, model_validator
 
-from layouts_cvm._internal.config.schemas._fields import validated_cnpj
+from layouts_cvm._internal.config.schemas._fields import validated_cnpj, validated_competence
 from layouts_cvm._internal.config.schemas.inf_mensal_fidc import (
-    _COMPETENCE_RE,
     Amortizacao,
     CartSegmt,
     CompmtDicred,
@@ -87,9 +86,7 @@ class InfMensalFidc489Header(_FidcBlock):
         ValueError
                 If the value is not ``MM/AAAA``.
         """
-        if not _COMPETENCE_RE.match(v):
-            raise ValueError(f"expected MM/AAAA, got {v!r}")
-        return v
+        return validated_competence(v)
 
 
 class Dicred489(_FidcBlock):
