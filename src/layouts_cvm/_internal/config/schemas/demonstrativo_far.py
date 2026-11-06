@@ -24,6 +24,7 @@ from typing import Annotated, Literal
 from pydantic import AfterValidator, BaseModel, BeforeValidator, ConfigDict, Field, model_validator
 
 from layouts_cvm._internal.config.schemas._fields import validated_cnpj
+from layouts_cvm._internal.utils.typing import type_checker
 from layouts_cvm._internal.utils.xml_fields import (
     check_br_date,
     check_cnpj_shape,
@@ -215,3 +216,61 @@ class DemonstrativoFarDocument(_Block):
 
     desc_adm: DemonstrativoFarDescAdm
     far: DemonstrativoFarFar
+
+
+@type_checker
+def find_missing_codes(cls_registro: DemonstrativoFarRegistro) -> list[int]:
+    """List the Table A codes a fund does not use, in ascending order.
+
+    Parameters
+    ----------
+    cls_registro : DemonstrativoFarRegistro
+        The fund whose movements are checked.
+
+    Returns
+    -------
+    list[int]
+        Table A codes absent from ``row_mov_por_fundo``, ascending.
+    """
+    set_used = {cls_mov.cd_mov for cls_mov in cls_registro.doc_mov_mes.row_mov_por_fundo}
+    return sorted(set(_TABLE_A) - set_used)
+
+
+@type_checker
+def describe_incomplete_funds(cls_document: DemonstrativoFarDocument) -> list[str]:
+    """Describe every fund that leaves a Table A code unused.
+
+    Parameters
+    ----------
+    cls_document : DemonstrativoFarDocument
+        The built document to check.
+
+    Returns
+    -------
+    list[str]
+        One ``fund <cnpj> does not use Table A codes [...]`` line per incomplete fund.
+    """
+    return [
+        f"fund {cls_registro.cnpj_fundo} does not use Table A codes {list_missing}"
+        for cls_registro in cls_document.far.row_registro_movimento
+        if (list_missing := find_missing_codes(cls_registro))
+    ]
+
+
+@type_checker
+def check_all_funds_use_all_codes(cls_document: DemonstrativoFarDocument) -> None:
+    """Refuse a document in which any fund leaves a Table A code unused.
+
+    Parameters
+    ----------
+    cls_document : DemonstrativoFarDocument
+        The built document to check.
+
+    Raises
+    ------
+    ValueError
+        Naming every incomplete fund's CNPJ and its missing codes, ascending.
+    """
+    list_lines = describe_incomplete_funds(cls_document)
+    if list_lines:
+        raise ValueError("; ".join(list_lines))
