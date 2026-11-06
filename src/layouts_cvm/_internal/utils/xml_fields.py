@@ -15,10 +15,10 @@ from decimal import ROUND_DOWN, Decimal, InvalidOperation
 import re
 import unicodedata
 
+from layouts_cvm._internal.utils.br_date import parse_br_date_strict
 from layouts_cvm._internal.utils.typing import type_checker
 
 
-_DATE_BR_RE = re.compile(r"[0-9]{2}/[0-9]{2}/[0-9]{4}")
 _MONTH_YEAR_RE = re.compile(r"[0-9]{2}/[0-9]{4}")
 _HHMM_RE = re.compile(r"([01][0-9]|2[0-3]):[0-5][0-9]")
 _CNPJ_SHAPE_RE = re.compile(
@@ -70,8 +70,7 @@ def parse_br_date(value: str) -> date:
     ValueError
             If the shape is wrong, the date does not exist (``31/02``) or the year is before 1900.
     """
-    require(bool(_DATE_BR_RE.fullmatch(value)), "date must follow DD/MM/AAAA")
-    parsed = datetime.strptime(value, "%d/%m/%Y").date()  # noqa: DTZ007
+    parsed = parse_br_date_strict(value)
     require(parsed.year >= _MIN_YEAR, f"year must be >= {_MIN_YEAR}")
     return parsed
 

@@ -1,5 +1,8 @@
 """Unit tests for the shared schema field helpers."""
 
+from collections.abc import Callable
+from datetime import date
+
 from pydantic import ValidationError
 import pytest
 
@@ -22,6 +25,7 @@ from layouts_cvm._internal.config.schemas.informe_portabilidade import (
 )
 from layouts_cvm._internal.config.schemas.perfil_mensal import DocumentHeader
 from layouts_cvm._internal.config.schemas.perfil_mensal_739 import PerfilMensal739Header
+from layouts_cvm._internal.utils import inr_mensal_fields, xml_fields
 
 
 LIST_COMPETENCE_FIELDS_NO_MODEL_CHECK = [
@@ -171,6 +175,86 @@ def test_validated_br_date_nonexistent_day_raises(str_value: str) -> None:
     """
     with pytest.raises(ValueError, match="no such calendar day"):
         validated_br_date(str_value)
+
+
+LIST_BR_DATE_ENTRY_POINTS = [
+    validated_br_date,
+    xml_fields.check_br_date,
+    xml_fields.parse_br_date,
+    inr_mensal_fields.check_br_date,
+    inr_mensal_fields.parse_br_date,
+]
+
+
+@pytest.mark.parametrize("fn_entry", LIST_BR_DATE_ENTRY_POINTS)
+@pytest.mark.parametrize("str_value", ["1/06/2026", "15/06/2026\n"])
+def test_br_date_entry_point_refuses_a_bad_shape_with_the_shared_message(
+    fn_entry: Callable[[str], object], str_value: str
+) -> None:
+    """Every DD/MM/AAAA entry point refuses an unpadded day or a trailing newline.
+
+    Parameters
+    ----------
+    fn_entry : Callable[[str], object]
+        One of the three modules' date checks.
+    str_value : str
+        A badly shaped date.
+    """
+    with pytest.raises(ValueError, match="expected DD/MM/AAAA"):
+        fn_entry(str_value)
+
+
+@pytest.mark.parametrize("fn_entry", LIST_BR_DATE_ENTRY_POINTS)
+def test_br_date_entry_point_refuses_a_missing_day_with_the_shared_message(
+    fn_entry: Callable[[str], object],
+) -> None:
+    """Every DD/MM/AAAA entry point refuses a day that is not on the calendar.
+
+    Parameters
+    ----------
+    fn_entry : Callable[[str], object]
+        One of the three modules' date checks.
+    """
+    with pytest.raises(ValueError, match="no such calendar day"):
+        fn_entry("31/02/2026")
+
+
+@pytest.mark.parametrize(
+    ("fn_entry", "obj_expected"),
+    [
+        (validated_br_date, "15/06/2026"),
+        (xml_fields.check_br_date, "15/06/2026"),
+        (xml_fields.parse_br_date, date(2026, 6, 15)),
+        (inr_mensal_fields.check_br_date, "15/06/2026"),
+        (inr_mensal_fields.parse_br_date, date(2026, 6, 15)),
+    ],
+)
+def test_br_date_entry_point_accepts_a_real_date(
+    fn_entry: Callable[[str], object], obj_expected: object
+) -> None:
+    """Every DD/MM/AAAA entry point accepts an existing date and returns its own type.
+
+    Parameters
+    ----------
+    fn_entry : Callable[[str], object]
+        One of the three modules' date checks.
+    obj_expected : object
+        The string a checker returns, or the ``date`` a parser returns.
+    """
+    assert fn_entry("15/06/2026") == obj_expected
+
+
+@pytest.mark.parametrize("fn_parse", [xml_fields.parse_br_date, inr_mensal_fields.parse_br_date])
+def test_parse_br_date_before_1900_is_refused(fn_parse: Callable[[str], date]) -> None:
+    """The parsers keep their 1900 minimum year on top of the shared check.
+
+    Parameters
+    ----------
+    fn_parse : Callable[[str], date]
+        A parser returning a ``date``.
+    """
+    with pytest.raises(ValueError, match="year must be >= 1900"):
+        fn_parse("31/12/1899")
 
 
 LIST_DIARIO_DATE_FIELDS = [
