@@ -18,7 +18,7 @@ verificadores de CNPJ/CPF e a escala decimal de cada campo.
 | Modelo | Tag XML | Papel |
 |--------|---------|-------|
 | `PerfilMensalDocument` | `DOC_ARQ` | Documento completo: `header` + `rows`. |
-| `DocumentHeader` | `CAB_INFORM` | Cabeçalho. `dt_compt` no formato `MM/AAAA`; `dt_gerac_arq` em `DD/MM/AAAA`. |
+| `DocumentHeader` | `CAB_INFORM` | Cabeçalho. `dt_compt` no formato `MM/AAAA` (mês 01-12, ano diferente de `0000`); `dt_gerac_arq` em `DD/MM/AAAA`. |
 | `PerfilMensalRow` | `ROW_PERFIL` | Uma entrada de perfil mensal por classe de fundo. |
 
 **Campos obrigatórios de `PerfilMensalRow`:** `cnpj_fdo` (validado por dígito verificador,

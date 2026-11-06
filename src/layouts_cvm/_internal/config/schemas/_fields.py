@@ -33,7 +33,8 @@ _PERSON_DOC_RULES = {
 
 _TRUNCATION_CONTEXT = Context(prec=28)
 
-_COMPETENCE_RE = re.compile(r"(0[1-9]|1[0-2])/[0-9]{4}")
+_COMPETENCE_RE = re.compile(r"(0[1-9]|1[0-2])/(?!0000)[0-9]{4}")
+_DATE_BR_SHAPE_RE = re.compile(r"[0-9]{2}/[0-9]{2}/[0-9]{4}")
 
 
 @type_checker
@@ -180,8 +181,34 @@ def validated_competence(value: str) -> str:
     Raises
     ------
     ValueError
-            If the value is not ``MM/AAAA`` (month 01-12, four-digit year).
+            If the value is not ``MM/AAAA`` (month 01-12, four-digit year not ``0000``).
     """
     if not _COMPETENCE_RE.fullmatch(value):
         raise ValueError(f"expected MM/AAAA, got {value!r}")
+    return value
+
+
+@type_checker
+def validated_br_date_shape(value: str) -> str:
+    """Check a date is written ``DD/MM/AAAA`` (ASCII digits only) and return it unchanged.
+
+    Only the shape is checked; whether the day exists is each schema's own calendar check.
+
+    Parameters
+    ----------
+    value : str
+            The date text, e.g. ``"15/06/2026"``.
+
+    Returns
+    -------
+    str
+            The validated value.
+
+    Raises
+    ------
+    ValueError
+            If the value does not follow ``DD/MM/AAAA``.
+    """
+    if not _DATE_BR_SHAPE_RE.fullmatch(value):
+        raise ValueError(f"expected DD/MM/AAAA, got {value!r}")
     return value

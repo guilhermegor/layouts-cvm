@@ -24,7 +24,6 @@ neutral helpers in ``_fields`` are shared.
 from __future__ import annotations
 
 from decimal import Decimal
-import re
 from typing import Annotated, Literal
 
 from pydantic import BaseModel, BeforeValidator, Field, ValidationInfo, field_validator
@@ -32,12 +31,11 @@ from pydantic import BaseModel, BeforeValidator, Field, ValidationInfo, field_va
 from layouts_cvm._internal.config.schemas._fields import (
     truncate_to_scale,
     validate_person_doc,
+    validated_br_date_shape,
     validated_cnpj,
+    validated_competence,
 )
 
-
-_MONTH_BR_RE = re.compile(r"^\d{2}/\d{4}$")
-_DATE_BR_RE = re.compile(r"^\d{2}/\d{2}/\d{4}$")
 
 OneDecimalField = Annotated[
     Decimal, BeforeValidator(truncate_to_scale(1)), Field(decimal_places=1)
@@ -89,9 +87,7 @@ class PerfilMensal739Header(BaseModel):
         ValueError
                 If value does not follow MM/AAAA format.
         """
-        if not _MONTH_BR_RE.match(v):
-            raise ValueError("dt_compt must follow MM/AAAA format.")
-        return v
+        return validated_competence(v)
 
     @field_validator("dt_gerac_arq")
     @classmethod
@@ -113,9 +109,7 @@ class PerfilMensal739Header(BaseModel):
         ValueError
                 If value does not follow DD/MM/AAAA format.
         """
-        if not _DATE_BR_RE.match(v):
-            raise ValueError("dt_gerac_arq must follow DD/MM/AAAA format.")
-        return v
+        return validated_br_date_shape(v)
 
 
 class PerfilMensal739ClientCount(BaseModel):
@@ -288,9 +282,7 @@ class PerfilMensal739PerformanceFeeDetails(BaseModel):
         ValueError
                 If value does not follow DD/MM/AAAA format.
         """
-        if not _DATE_BR_RE.match(v):
-            raise ValueError("data_cota_fundo must follow DD/MM/AAAA format.")
-        return v
+        return validated_br_date_shape(v)
 
 
 class PerfilMensal739Row(BaseModel):

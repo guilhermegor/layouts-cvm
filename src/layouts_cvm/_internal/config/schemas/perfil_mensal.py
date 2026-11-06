@@ -18,7 +18,6 @@ CVM expects in the XML — rather than a format-only regex.
 """
 
 from decimal import Decimal
-import re
 from typing import Annotated, Literal
 
 from pydantic import BaseModel, BeforeValidator, Field, ValidationInfo, field_validator
@@ -26,7 +25,9 @@ from pydantic import BaseModel, BeforeValidator, Field, ValidationInfo, field_va
 from layouts_cvm._internal.config.schemas._fields import (
     truncate_to_scale,
     validate_person_doc,
+    validated_br_date_shape,
     validated_cnpj,
+    validated_competence,
 )
 
 
@@ -84,9 +85,7 @@ class DocumentHeader(BaseModel):
         ValueError
                 If value does not follow MM/AAAA format.
         """
-        if not re.match(r"^\d{2}/\d{4}$", v):
-            raise ValueError("dt_compt must follow MM/AAAA format.")
-        return v
+        return validated_competence(v)
 
     @field_validator("dt_gerac_arq")
     @classmethod
@@ -108,9 +107,7 @@ class DocumentHeader(BaseModel):
         ValueError
                 If value does not follow DD/MM/AAAA format.
         """
-        if not re.match(r"^\d{2}/\d{2}/\d{4}$", v):
-            raise ValueError("dt_gerac_arq must follow DD/MM/AAAA format.")
-        return v
+        return validated_br_date_shape(v)
 
 
 class ClientCount(BaseModel):
@@ -283,9 +280,7 @@ class PerformanceFeeDetails(BaseModel):
         ValueError
                 If value does not follow DD/MM/AAAA format.
         """
-        if not re.match(r"^\d{2}/\d{2}/\d{4}$", v):
-            raise ValueError("data_cota_fundo must follow DD/MM/AAAA format.")
-        return v
+        return validated_br_date_shape(v)
 
 
 class PerfilMensalRow(BaseModel):

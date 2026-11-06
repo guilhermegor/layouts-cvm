@@ -19,12 +19,14 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from layouts_cvm._internal.config.schemas._fields import validated_cnpj
+from layouts_cvm._internal.config.schemas._fields import (
+    validated_br_date_shape,
+    validated_cnpj,
+    validated_competence,
+)
 from layouts_cvm._internal.utils.typing import type_checker
 
 
-_DATE_BR_RE = re.compile(r"[0-9]{2}/[0-9]{2}/[0-9]{4}")
-_MONTH_YEAR_RE = re.compile(r"[0-9]{2}/[0-9]{4}")
 _CNPJ_SHAPE_RE = re.compile(
     r"[0-9A-Z]{12}[0-9]{2}|[0-9A-Z]{2}\.[0-9A-Z]{3}\.[0-9A-Z]{3}/[0-9A-Z]{4}-[0-9]{2}"
 )
@@ -85,9 +87,7 @@ class PortabilidadeHeader(BaseModel):
         ValueError
                 If the shape is wrong, the date does not exist or the year is before 1900.
         """
-        if not _DATE_BR_RE.fullmatch(v):
-            raise ValueError("date must follow DD/MM/AAAA")
-        _check_min_year(v, "%d/%m/%Y")
+        _check_min_year(validated_br_date_shape(v), "%d/%m/%Y")
         return v
 
 
@@ -198,7 +198,5 @@ def _check_month_year(value: str) -> str:
     ValueError
             If the shape is wrong, the month is not 01-12 or the year is before 1900.
     """
-    if not _MONTH_YEAR_RE.fullmatch(value):
-        raise ValueError("month must follow MM/AAAA")
-    _check_min_year(value, "%m/%Y")
+    _check_min_year(validated_competence(value), "%m/%Y")
     return value
