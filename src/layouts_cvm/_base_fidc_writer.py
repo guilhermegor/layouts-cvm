@@ -2,7 +2,8 @@
 
 Holds the schema-driven block walk and the ``export`` template that ``InfMensalFidc`` (ICVM
 576) and ``InfMensalFidc489`` both render through, so neither public writer subclasses the
-other. A writer only names its ``_document_model``. Not part of the public API.
+other. A writer names its document model once, as the base's generic argument. Not part of
+the public API.
 """
 
 from collections.abc import Mapping
@@ -28,6 +29,22 @@ class _BaseFidcWriter(SubmissionWriter[TDoc]):
     """
 
     _document_model: ClassVar[type[DocModel]]
+
+    def __init_subclass__(cls, **kwargs: object) -> None:
+        """Derive ``_document_model`` from the subclass's generic argument.
+
+        Parameters
+        ----------
+        **kwargs : object
+                Forwarded to ``type.__init_subclass__``.
+
+        Raises
+        ------
+        KeyError
+                If the subclass does not parametrize the base with a document model.
+        """
+        super().__init_subclass__(**kwargs)
+        cls._document_model = get_args(cls.__dict__["__orig_bases__"][0])[0]
 
     def export(
         self, doc: TDoc | Mapping[str, object], output_path: str | None = None

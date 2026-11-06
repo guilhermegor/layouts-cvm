@@ -566,3 +566,11 @@ def test_fidc_writers_are_siblings_over_the_private_base() -> None:
         issubclass(InfMensalFidc, _BaseFidcWriter),
         issubclass(InfMensalFidc489, _BaseFidcWriter),
     ) == (False, False, True, True)
+
+
+def test_fidc_base_subclass_without_a_document_model_fails_at_definition() -> None:
+    """A writer that does not parametrize the base fails when the class is defined."""
+    from layouts_cvm._base_fidc_writer import _BaseFidcWriter
+
+    with pytest.raises(KeyError, match="__orig_bases__"):
+        type("_Unparametrized", (_BaseFidcWriter,), {})

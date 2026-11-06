@@ -19,5 +19,3 @@ class InfMensalFidc489(_BaseFidcWriter[InfMensalFidc489Document]):
     export(doc, output_path)
             Serialize a validated document to a CVM-compliant XML string or file.
     """
-
-    _document_model = InfMensalFidc489Document

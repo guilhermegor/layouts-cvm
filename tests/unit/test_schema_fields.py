@@ -1,5 +1,6 @@
 """Unit tests for the shared schema field helpers."""
 
+from pydantic import ValidationError
 import pytest
 
 from layouts_cvm._internal.config.schemas._fields import validated_competence
@@ -33,13 +34,13 @@ def test_validated_competence_invalid_value_names_the_format(str_value: str) -> 
 
 
 @pytest.mark.parametrize("cls_header", [InfMensalFidcHeader, InfMensalFidc489Header])
-def test_fidc_headers_share_the_competence_validator(cls_header: type) -> None:
-    """Both FIDC header schemas reject a bad competence through the shared helper.
+def test_fidc_header_model_validate_rejects_an_impossible_month(cls_header: type) -> None:
+    """Validating a FIDC header with month 13 fails on ``dt_compt`` with the MM/AAAA message.
 
     Parameters
     ----------
     cls_header : type
         A FIDC header model.
     """
-    with pytest.raises(ValueError, match="expected MM/AAAA"):
-        cls_header._check_competence("13/2026")
+    with pytest.raises(ValidationError, match=r"dt_compt\n  Value error, expected MM/AAAA"):
+        cls_header.model_validate({"dt_compt": "13/2026"})
