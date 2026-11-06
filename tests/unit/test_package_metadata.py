@@ -16,6 +16,16 @@ import yaml
 PATH_ROOT = Path(__file__).resolve().parents[2]
 STR_PY_PREFIX = "Programming Language :: Python :: "
 RE_PROJECT_NAME = re.compile(r"[A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?")
+DICT_DYNAMIC_HEADER = {
+    "version": "Version",
+    "readme": "Description-Content-Type",
+    "license": "License",
+    "authors": "Author",
+    "keywords": "Keywords",
+    "urls": "Project-URL",
+    "requires-python": "Requires-Python",
+    "dependencies": "Requires-Dist",
+}
 
 
 pytestmark = pytest.mark.skipif(
@@ -176,10 +186,7 @@ def test_wheel_requires_every_runtime_dependency(str_metadata: str) -> None:
     assert {_canonical_name(str_dep) for str_dep in dict_deps} - {"python"} <= set_required
 
 
-@pytest.mark.parametrize(
-    "str_header",
-    ["Summary", "Requires-Python", "Project-URL", "Description-Content-Type", "Author"],
-)
+@pytest.mark.parametrize("str_header", sorted(DICT_DYNAMIC_HEADER.values()))
 def test_wheel_metadata_carries_dynamic_field(str_metadata: str, str_header: str) -> None:
     """Every field ``[project]`` leaves ``dynamic`` still reaches the published METADATA.
 
@@ -191,3 +198,9 @@ def test_wheel_metadata_carries_dynamic_field(str_metadata: str, str_header: str
         A METADATA header filled from ``[tool.poetry]``.
     """
     assert Parser().parsestr(str_metadata).get_all(str_header), f"{str_header} missing"
+
+
+def test_dynamic_header_map_covers_project_dynamic() -> None:
+    """The header map names exactly the fields ``[project].dynamic`` declares."""
+    dict_project = tomllib.loads((PATH_ROOT / "pyproject.toml").read_text())["project"]
+    assert set(dict_project["dynamic"]) == set(DICT_DYNAMIC_HEADER)
