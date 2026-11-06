@@ -3,9 +3,35 @@
 from pydantic import ValidationError
 import pytest
 
-from layouts_cvm._internal.config.schemas._fields import validated_competence
+from layouts_cvm._internal.config.schemas._fields import (
+    validated_br_date,
+    validated_competence,
+)
+from layouts_cvm._internal.config.schemas.cda import CdaHeader
 from layouts_cvm._internal.config.schemas.inf_mensal_fidc import InfMensalFidcHeader
 from layouts_cvm._internal.config.schemas.inf_mensal_fidc_489 import InfMensalFidc489Header
+from layouts_cvm._internal.config.schemas.informe_art12_res33 import DsInform
+from layouts_cvm._internal.config.schemas.informe_portabilidade import (
+    PortabilidadeHeader,
+    PortabilidadeInform,
+)
+from layouts_cvm._internal.config.schemas.perfil_mensal import DocumentHeader
+from layouts_cvm._internal.config.schemas.perfil_mensal_739 import PerfilMensal739Header
+
+
+LIST_COMPETENCE_FIELDS_NO_MODEL_CHECK = [
+    (CdaHeader, "dt_compt"),
+    (DocumentHeader, "dt_compt"),
+    (PerfilMensal739Header, "dt_compt"),
+    (DsInform, "dt_compt"),
+    (PortabilidadeHeader, "dt_compt"),
+    (PortabilidadeInform, "dt_event"),
+]
+LIST_COMPETENCE_FIELDS_ALL = [
+    *LIST_COMPETENCE_FIELDS_NO_MODEL_CHECK,
+    (InfMensalFidcHeader, "dt_compt"),
+    (InfMensalFidc489Header, "dt_compt"),
+]
 
 
 @pytest.mark.parametrize("str_value", ["01/2026", "12/1999"])
@@ -56,3 +82,87 @@ def test_fidc_header_model_validate_rejects_an_impossible_month(cls_header: type
     """
     with pytest.raises(ValidationError, match=r"dt_compt\n  Value error, expected MM/AAAA"):
         cls_header.model_validate({"dt_compt": "13/2026"})
+
+
+@pytest.mark.parametrize(("cls_model", "str_field"), LIST_COMPETENCE_FIELDS_ALL)
+@pytest.mark.parametrize("str_value", ["13/2026", "00/2026", "01/0000"])
+def test_competence_field_rejects_invalid_value_with_the_shared_message(
+    cls_model: type, str_field: str, str_value: str
+) -> None:
+    """Every MM/AAAA field refuses a bad month or year ``0000`` with one message.
+
+    Parameters
+    ----------
+    cls_model : type
+        A model that owns a competence field.
+    str_field : str
+        The competence field name.
+    str_value : str
+        An invalid competence.
+    """
+    with pytest.raises(ValidationError, match=rf"{str_field}\n  Value error, expected MM/AAAA"):
+        cls_model.__pydantic_validator__.validate_assignment(
+            cls_model.model_construct(), str_field, str_value
+        )
+
+
+@pytest.mark.parametrize(("cls_model", "str_field"), LIST_COMPETENCE_FIELDS_NO_MODEL_CHECK)
+@pytest.mark.parametrize("str_value", ["01/2026", "12/2026"])
+def test_competence_field_accepts_valid_value(
+    cls_model: type, str_field: str, str_value: str
+) -> None:
+    """Every MM/AAAA field accepts the first and last month of a year.
+
+    Parameters
+    ----------
+    cls_model : type
+        A model that owns a competence field.
+    str_field : str
+        The competence field name.
+    str_value : str
+        A valid competence.
+    """
+    cls_result = cls_model.__pydantic_validator__.validate_assignment(
+        cls_model.model_construct(), str_field, str_value
+    )
+    assert getattr(cls_result, str_field) == str_value
+
+
+@pytest.mark.parametrize("str_value", ["15/06/2026", "29/02/2024"])
+def test_validated_br_date_valid_shape_returns_it_unchanged(str_value: str) -> None:
+    """A DD/MM/AAAA date that exists on the calendar is returned as given.
+
+    Parameters
+    ----------
+    str_value : str
+        A well-shaped, existing date.
+    """
+    assert validated_br_date(str_value) == str_value
+
+
+@pytest.mark.parametrize(
+    "str_value", ["2026-06-15", "1/06/2026", "15/06/26", "15/06/2026\n", "١٥/06/2026"]
+)
+def test_validated_br_date_invalid_shape_names_the_format(str_value: str) -> None:
+    """A wrong shape, a trailing newline or non-ASCII digits raise the shared message.
+
+    Parameters
+    ----------
+    str_value : str
+        A badly shaped date.
+    """
+    with pytest.raises(ValueError, match="expected DD/MM/AAAA"):
+        validated_br_date(str_value)
+
+
+@pytest.mark.parametrize("str_value", ["31/02/2026", "29/02/2025", "15/13/2026"])
+def test_validated_br_date_nonexistent_day_raises(str_value: str) -> None:
+    """A well-shaped date naming a day that does not exist is refused.
+
+    Parameters
+    ----------
+    str_value : str
+        A DD/MM/AAAA text with no matching calendar day.
+    """
+    with pytest.raises(ValueError, match="no such calendar day"):
+        validated_br_date(str_value)

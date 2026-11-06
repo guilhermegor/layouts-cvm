@@ -16,17 +16,18 @@ competência", which is structural here: there is one ``DS_INFORM`` per document
 from __future__ import annotations
 
 from datetime import datetime
-import re
 from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-from layouts_cvm._internal.config.schemas._fields import validated_cnpj
+from layouts_cvm._internal.config.schemas._fields import (
+    validated_br_date,
+    validated_cnpj,
+    validated_competence,
+)
 from layouts_cvm._internal.utils.typing import type_checker
 
 
-_DATE_RE = re.compile(r"[0-9]{2}/[0-9]{2}/[0-9]{4}")
-_MONTH_RE = re.compile(r"[0-9]{2}/[0-9]{4}")
 _DATE_FMT = "%d/%m/%Y"
 
 ProviderType = Literal[41, 42, 52, 65]
@@ -52,9 +53,7 @@ def _parse_date(value: str) -> datetime:
     ValueError
             If the shape is wrong or the date does not exist.
     """
-    if not _DATE_RE.fullmatch(value):
-        raise ValueError("date must follow DD/MM/AAAA")
-    return datetime.strptime(value, _DATE_FMT)  # noqa: DTZ007  (calendar check only)
+    return datetime.strptime(validated_br_date(value), _DATE_FMT)  # noqa: DTZ007  (calendar check only)
 
 
 class DsInform(BaseModel):
@@ -85,10 +84,7 @@ class DsInform(BaseModel):
         ValueError
                 If the shape is wrong or the month is not 01-12.
         """
-        if not _MONTH_RE.fullmatch(v):
-            raise ValueError("dt_compt must follow MM/AAAA")
-        _parse_date(f"01/{v}")
-        return v
+        return validated_competence(v)
 
     @field_validator("dt_gerac_arq")
     @classmethod
