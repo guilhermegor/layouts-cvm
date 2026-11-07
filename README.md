@@ -5,7 +5,6 @@
 
 [![Project Status: Active](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 ![Python Version](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue.svg)
-![PyPI Version](https://img.shields.io/pypi/v/layouts-cvm)
 [![Snyk Vulnerabilities](https://snyk.io/test/github/guilhermegor/layouts-cvm/badge.svg)](https://snyk.io/test/github/guilhermegor/layouts-cvm)
 ![PyPI Downloads](https://static.pepy.tech/badge/layouts-cvm)
 [![PyPI](https://img.shields.io/pypi/v/layouts-cvm.svg)](https://pypi.org/project/layouts-cvm/)
