@@ -41,6 +41,9 @@ Versions follow [semantic versioning](https://semver.org/) since 1.0.0. Within 1
 - A name in `__all__` is not removed or renamed, and a call to `export` that works keeps
   working. New optional keyword-only arguments can be added.
 - A new version of a CVM layout ships as a new writer, and the older writer stays.
+- Each writer stays bound to the layout version it writes today. A name without a version
+  suffix is not an alias for "the latest": `Lamina` stays Lâmina V3 and `PerfilMensal` stays
+  Perfil Mensal V4.
 - A document a writer accepts is not refused later, unless CVM's own rules require it. That case is
   called out in the release notes.
 - The exception types above do not change. The wording of error messages can.
