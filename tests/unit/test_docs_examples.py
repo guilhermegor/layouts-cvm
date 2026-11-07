@@ -22,7 +22,11 @@ def test_page_has_examples(str_page: str) -> None:
     assert any(str_found == str_page for str_found, _ in _LIST_BLOCKS)
 
 
-@pytest.mark.parametrize(("str_page", "str_code"), _LIST_BLOCKS)
+@pytest.mark.parametrize(
+    ("str_page", "str_code"),
+    _LIST_BLOCKS,
+    ids=[f"{str_page}#{int_i}" for int_i, (str_page, _) in enumerate(_LIST_BLOCKS)],
+)
 def test_example_runs(
     str_page: str, str_code: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

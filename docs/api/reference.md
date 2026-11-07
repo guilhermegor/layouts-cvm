@@ -30,8 +30,7 @@ are windows-1252; `Cofi4010` and `Cofi4016` write ASCII fixed-width `.cvm` recor
 also takes the keyword-only `require_all_movements`, off by default; when on, an incomplete fund
 raises `ValueError`.
 
-An invalid document raises `pydantic.ValidationError`, and a built model of the wrong class raises
-`TypeError`.
+An invalid document raises `pydantic.ValidationError`.
 
 ---
 
