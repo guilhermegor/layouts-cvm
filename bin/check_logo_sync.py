@@ -3,7 +3,9 @@
 The README points at ``.../main/<path>`` on raw.githubusercontent.com, ``docs/index.md`` at an
 ``<img src>`` relative to ``docs/``, and ``mkdocs.yml`` at ``theme.logo`` / ``theme.favicon``,
 also relative to ``docs/``. All four must resolve to existing, byte-identical files; a missing
-file fails. Reading is textual (regex) so the gate needs no YAML dependency.
+file fails. Reading is textual (regex) so the gate needs no YAML dependency; only direct
+children of the top-level ``theme:`` block count, so ``theme.icon.logo`` and ``extra.logo``
+never match.
 """
 
 import pathlib
@@ -14,7 +16,8 @@ import sys
 _ROOT = pathlib.Path(__file__).resolve().parents[1]
 _RE_README = re.compile(r"raw\.githubusercontent\.com/[^/\s\"']+/[^/\s\"']+/main/([^\s\"')]+)")
 _RE_INDEX = re.compile(r"<img[^>]*?\ssrc=[\"']([^\"']+)[\"']")
-_RE_THEME = re.compile(r"^\s+(logo|favicon):\s*[\"']?([^\s\"'#]+)", re.MULTILINE)
+_RE_THEME_BLOCK = re.compile(r"^theme:\n((?:[ \t]+.*\n?|\n)*)", re.MULTILINE)
+_RE_THEME = re.compile(r"^  (logo|favicon):\s*[\"']?([^\s\"'#]+)", re.MULTILINE)
 
 
 def _read_text(path_file: pathlib.Path) -> str:
@@ -42,7 +45,8 @@ def resolve_logos(path_root: pathlib.Path) -> dict[str, pathlib.Path | None]:
     """
     cls_readme = _RE_README.search(_read_text(path_root / "README.md"))
     cls_index = _RE_INDEX.search(_read_text(path_root / "docs" / "index.md"))
-    dict_theme = dict(_RE_THEME.findall(_read_text(path_root / "mkdocs.yml")))
+    cls_theme = _RE_THEME_BLOCK.search(_read_text(path_root / "mkdocs.yml"))
+    dict_theme = dict(_RE_THEME.findall(cls_theme.group(1) if cls_theme else ""))
     path_docs = path_root / "docs"
     return {
         "README.md": _under(path_root, cls_readme and cls_readme.group(1)),

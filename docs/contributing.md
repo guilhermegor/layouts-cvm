@@ -182,8 +182,9 @@ against dependency confusion (`poetry`'s `priority = "explicit"`; `pip --index-u
 
 The site uses the CVM emblem at `docs/assets/cvm-logo.png`, the same file as the README's
 `assets/cvm-logo.png`. It is wired as the header logo and favicon (`theme.logo` /
-`theme.favicon` in `mkdocs.yml`) and as the landing image on `docs/index.md`. Both logos must be the same file, byte for byte: the `check-logo-sync` pre-commit hook
-(`bin/check_logo_sync.py`) fails unless the README image, the `docs/index.md` `<img>`,
+`theme.favicon` in `mkdocs.yml`) and as the landing image on `docs/index.md`. All four
+references must point to the same image, byte for byte: the `check-logo-sync` pre-commit
+hook (`bin/check_logo_sync.py`) fails unless the README image, the `docs/index.md` `<img>`,
 `theme.logo` and `theme.favicon` all exist and are identical. To change it:
 
 1. Replace `assets/cvm-logo.png` and copy it over `docs/assets/cvm-logo.png` (keep the

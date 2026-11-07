@@ -81,3 +81,12 @@ def test_gate_flags_a_missing_file(path_repo: Path) -> None:
     (path_repo / "docs" / "assets" / "cvm-logo.png").unlink()
 
     assert "docs/index.md: logo file missing" in _load_gate().check_logos(path_repo)[0]
+
+
+def test_gate_reads_only_direct_theme_keys(path_repo: Path) -> None:
+    """A nested ``theme.icon.logo`` or an ``extra.logo`` is not taken for the docs logo."""
+    (path_repo / "mkdocs.yml").write_text(
+        _MKDOCS + "  icon:\n    logo: material/library\nextra:\n  logo: nope.png\n"
+    )
+
+    assert _load_gate().check_logos(path_repo) == []
