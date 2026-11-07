@@ -55,8 +55,8 @@ theme:
     - navigation.tabs
     - navigation.sections
   language: en
-  logo: assets/logo.png
-  favicon: assets/logo.png
+  logo: assets/cvm-logo.png
+  favicon: assets/cvm-logo.png
   palette:
     - scheme: default
       primary: custom

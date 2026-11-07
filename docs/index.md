@@ -1,4 +1,4 @@
-# **layouts-cvm** <img src="assets/logo.png" align="right" width="200" style="border-radius: 15px;" alt="layouts-cvm">
+# **layouts-cvm** <img src="assets/cvm-logo.png" align="right" width="200" style="border-radius: 15px;" alt="layouts-cvm">
 
 Build, validate and serialise the files a fund sends to CVM, in CVM's own file layouts.
 
