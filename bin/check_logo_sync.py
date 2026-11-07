@@ -14,7 +14,7 @@ import sys
 
 
 _ROOT = pathlib.Path(__file__).resolve().parents[1]
-_RE_README = re.compile(r"raw\.githubusercontent\.com/[^/\s\"']+/[^/\s\"']+/main/([^\s\"')]+)")
+_RE_README = re.compile(r"raw\.githubusercontent\.com/[^/\s\"']+/[^/\s\"']+/main/([^\s\"')?#]+)")
 _RE_INDEX = re.compile(r"<img[^>]*?\ssrc=[\"']([^\"']+)[\"']")
 _RE_THEME_BLOCK = re.compile(r"^theme:\n((?:[ \t]+.*\n?|\n)*)", re.MULTILINE)
 _RE_THEME = re.compile(r"^  (logo|favicon):\s*[\"']?([^\s\"'#]+)", re.MULTILINE)

@@ -180,7 +180,7 @@ against dependency confusion (`poetry`'s `priority = "explicit"`; `pip --index-u
 
 ## Branding the docs site
 
-The site uses the CVM emblem at `docs/assets/cvm-logo.png`, the same file as the README's
+The site uses the CVM emblem at `docs/assets/cvm-logo.png`, a copy of the README's
 `assets/cvm-logo.png`. It is wired as the header logo and favicon (`theme.logo` /
 `theme.favicon` in `mkdocs.yml`) and as the landing image on `docs/index.md`. All four
 references must point to the same image, byte for byte: the `check-logo-sync` pre-commit
