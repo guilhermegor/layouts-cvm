@@ -26,7 +26,7 @@ wheel so that imports resolve, and it can change in any release.
 | `output_path` | Where to write the file. When omitted, the text is returned instead. |
 
 It returns the file's text as `str`, or `None` once it has written to `output_path`. XML layouts
-are windows-1252; `Cofi4016` writes ASCII fixed-width `.cvm` records. `DemonstrativoFar.export`
+are windows-1252; `Cofi4010` and `Cofi4016` write ASCII fixed-width `.cvm` records. `DemonstrativoFar.export`
 also takes the keyword-only `require_all_movements`, off by default; when on, an incomplete fund
 raises `ValueError`.
 
