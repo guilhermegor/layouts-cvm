@@ -1,30 +1,31 @@
-# Releasing 1.0.0
+# Lançando a 1.0.0
 
-1.0.0 is the moment this library promises its public API. Until then the 0.x rules apply: a
-breaking change is a MINOR bump, a feature or fix is a PATCH. From 1.0.0 on, full semver
-applies. Two things must be true at that moment and are easy to get wrong by hand: the
-backlog is done, and the docs describe the code that actually ships.
+A 1.0.0 é o momento em que esta biblioteca promete sua API pública. Até lá valem as regras da 0.x:
+uma mudança incompatível é um bump MINOR, e uma funcionalidade ou correção é um PATCH. A partir da
+1.0.0, vale o versionamento semântico completo. Duas coisas precisam ser verdade nesse momento e são
+fáceis de errar à mão: o backlog está concluído, e a documentação descreve o código que de fato é
+publicado.
 
-## The path
+## O caminho
 
-1. Open the **Cut 1.0.0** issue from the issue template. It is created `state:blocked`, blocked by
-   every other open issue.
-2. Implement the backlog. An issue that will not make 1.0.0 gets the `post-1.0` label, set by
-   the owner (create it once with `gh label create post-1.0`), so it is deferred on the record rather than dropped.
-3. Work the issue's checklist: the docs audit, runnable examples, the 1.x supported-versions
-   table in `SECURITY.md`, then the rehearsal and publish.
-4. After the release, switch the documented version policy to full semver.
+1. Abra a issue **Cut 1.0.0** a partir do modelo de issue. Ela é criada como `state:blocked`,
+   bloqueada por todas as outras issues abertas.
+2. Implemente o backlog. Uma issue que não entrará na 1.0.0 recebe o label `post-1.0`, definido pelo
+   dono do projeto (crie-o uma vez com `gh label create post-1.0`), para que fique adiada de forma registrada em vez de descartada.
+3. Siga o checklist da issue: a auditoria da documentação, os exemplos executáveis, a tabela de
+   versões suportadas da 1.x em `SECURITY.md` e, depois, o ensaio e a publicação.
+4. Depois da release, mude a política de versões documentada para o versionamento semântico completo.
 
-## The release gate
+## O gate de release
 
-The release workflow runs `bin/check_release_gate.py` before it publishes. It applies only
-when the requested MAJOR is at least 1 and the latest published version is 0.x. In that case
-it lists the open issues and fails while any lacks the `post-1.0` label, naming each one.
+O workflow de release executa `bin/check_release_gate.py` antes de publicar. Ele só se aplica quando
+o MAJOR pedido é pelo menos 1 e a última versão publicada é 0.x. Nesse caso, lista as issues abertas
+e falha enquanto alguma não tiver o label `post-1.0`, citando cada uma.
 
-- Pull requests are not counted, and neither is the **Cut 1.0.0** issue itself.
-- The issues are read through the GitHub REST API with the workflow token, read-only.
-- If the API cannot be read, the gate fails closed: it blocks the release rather than guess.
-- Every other bump, such as 0.4.0 to 0.5.0 or 1.0.0 to 1.0.1, is untouched.
-- A first publish counts as coming from 0.0.0, so a project whose first release is 1.0.0 is gated too.
+- Pull requests não contam, nem a própria issue **Cut 1.0.0**.
+- As issues são lidas pela API REST do GitHub com o token do workflow, somente para leitura.
+- Se a API não puder ser lida, o gate falha fechado: bloqueia a release em vez de adivinhar.
+- Qualquer outro bump, como de 0.4.0 para 0.5.0 ou de 1.0.0 para 1.0.1, não é afetado.
+- Uma primeira publicação conta como vinda de 0.0.0, então um projeto cuja primeira release é a 1.0.0 também passa pelo gate.
 
-To pass, implement each named issue or label it `post-1.0`, then re-run the workflow.
+Para passar, implemente cada issue citada ou aplique a ela o label `post-1.0`, e execute o workflow de novo.

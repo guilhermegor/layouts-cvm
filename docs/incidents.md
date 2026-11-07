@@ -1,71 +1,71 @@
-# **Incident Records**
+# **Registros de incidentes**
 
-What broke in this project, and what changed so it cannot break that way again. This page
-keeps debugging knowledge inside the codebase instead of in git history and one person's
-memory — the knowledge a team already paid for once should not have to be paid for twice.
+O que quebrou neste projeto, e o que mudou para que não possa quebrar da mesma forma de novo. Esta
+página mantém o conhecimento de depuração dentro do código, em vez de no histórico do git e na
+memória de uma pessoa: um conhecimento que a equipe já pagou uma vez não deveria ser pago duas.
 
-> **See also:** [Usage](usage.md) · [Contributing](contributing.md) · [Changelog](changelog.md).
+> **Veja também:** [Uso](usage.md) · [Contribuindo](contributing.md) · [Histórico de versões](changelog.md).
 
-## Not an ADR, and not a lessons store
+## Não é um ADR, nem um repositório de lições
 
-An **ADR** records a decision made *before* something went wrong. An incident record documents
-one made *because* something already did — different trigger, different audience. If this
-project adopts ADRs later, keep the two separate rather than merging them into one grab-bag.
+Um **ADR** registra uma decisão tomada *antes* de algo dar errado. Um registro de incidente documenta
+uma decisão tomada *porque* algo já deu errado: gatilho diferente, público diferente. Se este projeto
+adotar ADRs no futuro, mantenha os dois separados em vez de misturá-los.
 
-This is also not a copy of a scaffolding tool's own "lessons learned" store. That kind of store
-answers "what should every future generated project inherit" — this page answers "what bit
-*this* codebase, and what did we do about it." Different audience, different lifetime.
+Também não é uma cópia do repositório de "lições aprendidas" de uma ferramenta de scaffolding. Esse
+tipo de repositório responde "o que todo projeto gerado no futuro deve herdar"; esta página responde
+"o que mordeu *este* código, e o que fizemos a respeito". Público diferente, tempo de vida diferente.
 
-## Published on purpose — redact before you write
+## Publicado de propósito: oculte dados antes de escrever
 
-This page ships in the published docs site, same as [Usage](usage.md). An incident can carry
-production detail (a hostname, a query, a customer-facing symptom) that should not reach a
-public site — redact or generalize it before committing the entry, the way an external
-postmortem omits internal specifics. If this project's site is genuinely public and entries
-cannot stay redacted, exclude `incidents.md` via `exclude_docs` in `mkdocs.yml` instead of
-leaving it half-written.
+Esta página vai para o site publicado da documentação, assim como [Uso](usage.md). Um incidente pode
+trazer detalhes de produção (um hostname, uma consulta, um sintoma visto por clientes) que não devem
+chegar a um site público: oculte ou generalize esses dados antes de fazer o commit da entrada, como um
+postmortem externo omite detalhes internos. Se o site deste projeto for de fato público e as entradas
+não puderem ficar sem esses dados, exclua `incidents.md` via `exclude_docs` no `mkdocs.yml` em vez de
+deixá-lo pela metade.
 
-## Format
+## Formato
 
-Five fields, in this order. Keep each to a few sentences — the entry stops getting written the
-day it takes an hour to fill in.
+Cinco campos, nesta ordem. Mantenha cada um em poucas frases: a entrada deixa de ser escrita no dia
+em que leva uma hora para ser preenchida.
 
-- **Symptom** — what was observed, not what was wrong.
-- **How it was found** — the tool, command, or accident that surfaced it; "we were careful"
-  does not belong here.
-- **Root cause** — measured, not assumed.
-- **The change** — what now makes this class of failure impossible, or loud instead of silent.
-- **How we'd know it regressed** — the gate, test, or assertion that would catch it coming back.
+- **Sintoma** — o que foi observado, não o que estava errado.
+- **Como foi encontrado** — a ferramenta, o comando ou o acaso que o revelou; "fomos cuidadosos" não
+  cabe aqui.
+- **Causa raiz** — medida, não presumida.
+- **A mudança** — o que agora torna essa classe de falha impossível, ou ruidosa em vez de silenciosa.
+- **Como saberíamos que voltou** — o gate, teste ou asserção que a pegaria de volta.
 
 ---
 
-## TEMPLATE — replace with this project's first real incident
+## MODELO — substitua pelo primeiro incidente real deste projeto
 
-Delete this section once you have an entry of your own. It stays only so a reader can see what
-a filled-in entry looks like — an empty page teaches readers there is nothing to read here.
+Apague esta seção quando tiver uma entrada própria. Ela fica aqui só para mostrar como é uma entrada
+preenchida: uma página vazia ensina a quem lê que não há nada para ler aqui.
 
-### 2026-08-16 — Reconfiguring the logger leaked a file handle every time
+### 2026-08-16 — Reconfigurar o logger vazava um file handle a cada vez
 
-**Symptom.** `logging.FileHandler` objects accumulated across the process lifetime whenever
-the logger was reconfigured (e.g. rotating to a new dated log file). Harmless in a short-lived
-script; in a long-running service the leaked file descriptors build up.
+**Sintoma.** Objetos `logging.FileHandler` se acumulavam durante a vida do processo sempre que o
+logger era reconfigurado (por exemplo, ao passar para um novo arquivo de log datado). Inofensivo em
+um script curto; em um serviço de longa duração, os descritores de arquivo vazados vão se acumulando.
 
-**How it was found.** Not by the test suite — `ResourceWarning` is not shown by default in
-Python. It surfaced only when the suite ran with `-W always`, while measuring something
-unrelated. The defect was invisible by construction, not by anyone's oversight.
+**Como foi encontrado.** Não pela suíte de testes: o `ResourceWarning` não aparece por padrão no
+Python. Só surgiu quando a suíte rodou com `-W always`, durante a medição de outra coisa. O defeito
+era invisível por construção, não por descuido de alguém.
 
-**Root cause.** The reconfiguration path called `logger.handlers.clear()` to detach the old
-handler before attaching a new one. Clearing the list drops the Python *reference*; it does not
-close the OS file descriptor, which stays open until garbage collection runs.
+**Causa raiz.** O caminho de reconfiguração chamava `logger.handlers.clear()` para desligar o handler
+antigo antes de ligar um novo. Limpar a lista descarta a *referência* do Python, mas não fecha o
+descritor de arquivo do sistema operacional, que continua aberto até a coleta de lixo.
 
-**The change.** Close every existing handler explicitly before detaching it, so the descriptor
-is released immediately instead of at GC time. One call site — `handlers.clear()` appeared
-exactly once in the whole codebase, so no sibling caller was left unfixed.
+**A mudança.** Fechar explicitamente cada handler existente antes de desligá-lo, para que o descritor
+seja liberado na hora, e não na coleta de lixo. Um só ponto de chamada: `handlers.clear()` aparecia
+exatamente uma vez em todo o código, então nenhum chamador irmão ficou sem correção.
 
-**How we'd know it regressed.** A test reconfigures the logger twice and asserts the first
-handler's `.stream is None` after the second call — `close()` sets that attribute the moment the
-descriptor is released, so the assertion does not depend on garbage-collection timing.
-⚠️ Measured separately: promoting bare `ResourceWarning` to `error:` in `pytest.ini` does **not**
-catch this alone — it is raised from `__del__`, an *unraisable* context pytest downgrades to
-`PytestUnraisableExceptionWarning`, so both warning classes must be promoted together or the
-suite still passes over a real leak.
+**Como saberíamos que voltou.** Um teste reconfigura o logger duas vezes e verifica que `.stream is
+None` no primeiro handler após a segunda chamada: `close()` define esse atributo no momento em que o
+descritor é liberado, então a asserção não depende do momento da coleta de lixo.
+⚠️ Medido à parte: promover apenas `ResourceWarning` a `error:` no `pytest.ini` **não** pega isso
+sozinho. O aviso é levantado em `__del__`, um contexto *unraisable* que o pytest rebaixa para
+`PytestUnraisableExceptionWarning`, então as duas classes de aviso precisam ser promovidas juntas, ou
+a suíte continua passando por cima de um vazamento real.

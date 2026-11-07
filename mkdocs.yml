@@ -2,10 +2,10 @@ site_name: layouts-cvm
 site_description: "Build, validate and serialise the files a fund sends to CVM, in CVM's own file layouts."
 repo_url: https://github.com/guilhermegor/layouts-cvm
 nav:
-  - Home: index.md
-  - Guide:
-      - Usage: usage.md
-      - Examples: examples.md
+  - Início: index.md
+  - Guia:
+      - Uso: usage.md
+      - Exemplos: examples.md
   - Layouts:
       - "Atualização do Cadastro de Ativos": cadastro_ativos.md
       - "CDA — V4": cda.md
@@ -39,22 +39,22 @@ nav:
       - "Perfil Mensal — ICVM 739": perfil_mensal_739.md
       - "Perfil Mensal — original": perfil_mensal_original.md
       - "Perfil Mensal — V3": perfil_mensal_v3.md
-  - API Reference:
-      - Overview: api/index.md
-      - Reference: api/reference.md
-  - Project:
-      - FAQ: faq.md
-      - Contributing: contributing.md
-      - Releasing 1.0.0: releasing-1-0-0.md
-      - Changelog: changelog.md
-      - Incidents: incidents.md
+  - Referência da API:
+      - Visão geral: api/index.md
+      - Referência: api/reference.md
+  - Projeto:
+      - Perguntas frequentes: faq.md
+      - Contribuindo: contributing.md
+      - Lançando a 1.0.0: releasing-1-0-0.md
+      - Histórico de versões: changelog.md
+      - Incidentes: incidents.md
 
 theme:
   name: material
   features:
     - navigation.tabs
     - navigation.sections
-  language: en
+  language: pt-BR
   logo: assets/cvm-logo.png
   favicon: assets/cvm-logo.png
   palette:
@@ -62,12 +62,12 @@ theme:
       primary: custom
       toggle:
         icon: material/weather-night
-        name: Switch to dark mode
+        name: Mudar para o modo escuro
     - scheme: slate
       primary: custom
       toggle:
         icon: material/white-balance-sunny
-        name: Switch to light mode
+        name: Mudar para o modo claro
 extra_css:
   - stylesheets/brand.css
 extra:

@@ -1,51 +1,51 @@
-# **API Reference**
+# **Referência da API**
 
-Public interface for this library.
+Interface pública desta biblioteca.
 
-> **See also:** [Usage](../usage.md) · [Examples](../examples.md)
+> **Veja também:** [Uso](../usage.md) · [Exemplos](../examples.md)
 
 ---
 
-## The public surface
+## A superfície pública
 
-The public API is what `layouts_cvm.__all__` lists: `__version__`, and one writer class per CVM
-layout. The [layout pages](../cadastro_ativos.md) document each writer's fields.
+A API pública é o que `layouts_cvm.__all__` lista: `__version__` e uma classe de writer por layout
+da CVM. As [páginas de layout](../cadastro_ativos.md) documentam os campos de cada writer.
 
 ```python
 from layouts_cvm import InformeDiario, __version__
 ```
 
-Everything under `layouts_cvm._internal` is private, the document models included. It ships in the
-wheel so that imports resolve, and it can change in any release.
+Tudo em `layouts_cvm._internal` é privado, inclusive os modelos de documento. Esse código vai no
+wheel para que os imports funcionem, e pode mudar em qualquer release.
 
 ### `Writer().export(doc, output_path=None)`
 
-| Argument | Meaning |
+| Argumento | Significado |
 |----------|---------|
-| `doc` | A mapping with the layout's fields. It is validated before anything is serialised. |
-| `output_path` | Where to write the file. When omitted, the text is returned instead. |
+| `doc` | Um mapeamento com os campos do layout. É validado antes de qualquer serialização. |
+| `output_path` | Onde gravar o arquivo. Quando omitido, o texto é retornado. |
 
-It returns the file's text as `str`, or `None` once it has written to `output_path`. XML layouts
-are windows-1252; `Cofi4010` and `Cofi4016` write ASCII fixed-width `.cvm` records. `DemonstrativoFar.export`
-also takes the keyword-only `require_all_movements`, off by default; when on, an incomplete fund
-raises `ValueError`.
+Retorna o texto do arquivo como `str`, ou `None` depois de gravar em `output_path`. Os layouts XML
+são windows-1252; `Cofi4010` e `Cofi4016` gravam registros `.cvm` em ASCII de largura fixa. `DemonstrativoFar.export`
+também aceita o argumento somente nomeado `require_all_movements`, desligado por padrão; quando ligado, um fundo
+incompleto levanta `ValueError`.
 
-An invalid document raises `pydantic.ValidationError`.
+Um documento inválido levanta `pydantic.ValidationError`.
 
 ---
 
-## The 1.x guarantee
+## A garantia da 1.x
 
-Versions follow [semantic versioning](https://semver.org/) since 1.0.0. Within 1.x:
+As versões seguem o [versionamento semântico](https://semver.org/) desde a 1.0.0. Dentro da 1.x:
 
-- A name in `__all__` is not removed or renamed, and a call to `export` that works keeps
-  working. New optional keyword-only arguments can be added.
-- A new version of a CVM layout ships as a new writer, and the older writer stays.
-- Each writer stays bound to the layout version it writes today. A name without a version
-  suffix is not an alias for "the latest": `Lamina` stays Lâmina V3 and `PerfilMensal` stays
+- Um nome em `__all__` não é removido nem renomeado, e uma chamada a `export` que funciona continua
+  funcionando. Novos argumentos opcionais somente nomeados podem ser adicionados.
+- Uma nova versão de um layout da CVM chega como um novo writer, e o writer antigo permanece.
+- Cada writer continua preso à versão de layout que grava hoje. Um nome sem sufixo de versão não é
+  um apelido para "a mais recente": `Lamina` continua sendo a Lâmina V3, e `PerfilMensal`, o
   Perfil Mensal V4.
-- A document a writer accepts is not refused later, unless CVM's own rules require it. That case is
-  called out in the release notes.
-- The exception types above do not change. The wording of error messages can.
+- Um documento que um writer aceita não é recusado depois, salvo se as regras da própria CVM o
+  exigirem. Esse caso é destacado nas notas de release.
+- Os tipos de exceção acima não mudam. O texto das mensagens de erro pode mudar.
 
-A change that breaks any of these is a 2.0.
+Uma mudança que quebre qualquer um desses pontos é uma 2.0.

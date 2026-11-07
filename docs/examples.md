@@ -1,17 +1,17 @@
-# **Examples**
+# **Exemplos**
 
-Task-oriented, self-contained snippets for common uses of this library. Each recipe stands
-alone — copy it and adjust. `tests/unit/test_docs_examples.py` runs every snippet on this page.
+Trechos autônomos, orientados a tarefas, para usos comuns desta biblioteca. Cada receita se
+basta: copie e ajuste. `tests/unit/test_docs_examples.py` executa todos os trechos desta página.
 
-> **See also:** [Usage](usage.md) for the basics · [API Reference](api/index.md) for every public
-> symbol.
+> **Veja também:** [Uso](usage.md) para o básico · [Referência da API](api/index.md) para cada
+> símbolo público.
 
 ---
 
-## Recipe: write a submission file
+## Receita: gravar um arquivo de envio
 
-Pass `output_path` to write the file. The writer returns `None`, and the file is windows-1252,
-as CVM expects.
+Passe `output_path` para gravar o arquivo. O writer retorna `None`, e o arquivo sai em
+windows-1252, como a CVM espera.
 
 ```python
 from pathlib import Path
@@ -39,10 +39,10 @@ InformeDiario().export(dict_payload, "informe_diario.xml")
 assert Path("informe_diario.xml").read_bytes().startswith(b"<?xml")
 ```
 
-## Recipe: refuse a bad document before it reaches CVM
+## Receita: recusar um documento inválido antes que chegue à CVM
 
-Validation runs before anything is serialised, so a bad value raises and no file is written.
-Here the header names a day that does not exist.
+A validação roda antes de qualquer serialização, então um valor inválido levanta uma exceção e
+nenhum arquivo é gravado. Aqui, o cabeçalho cita um dia que não existe.
 
 ```python
 from pathlib import Path
@@ -71,7 +71,7 @@ dict_payload = {
 try:
     InformeDiario().export(dict_payload, "refused.xml")
 except ValidationError as exc:
-    print(exc.error_count(), "problem(s) in the document")
+    print(exc.error_count(), "problema(s) no documento")
 
 assert not Path("refused.xml").exists()
 ```

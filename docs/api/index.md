@@ -1,31 +1,31 @@
-# **API Reference**
+# **Referência da API**
 
-The public interface, grouped by the code's own top-level split.
+A interface pública, agrupada pela própria divisão de primeiro nível do código.
 
-> **See also:** [Usage](../usage.md)
+> **Veja também:** [Uso](../usage.md)
 
-## Pages
+## Páginas
 
-| Group | Contents |
+| Grupo | Conteúdo |
 |-------|----------|
-| [Reference](reference.md) | The public surface and the 1.x API guarantee |
+| [Referência](reference.md) | A superfície pública e a garantia de API da 1.x |
 
-## Growing this section
+## Fazendo esta seção crescer
 
-This is a **directory, not a single page**, on purpose. An API reference grows once per shipped
-unit, so a single `api.md` becomes the largest page in the repo; splitting it later is trivial
-effort but **rots every published deep link** — and permanently, once versioned docs are live,
-because `/<version>/api/#anchor` exists forever. The premium for starting as a directory is one
-extra file and one nav level, paid once.
+Isto é um **diretório, não uma página única**, de propósito. Uma referência de API cresce a cada
+unidade publicada, então um único `api.md` vira a maior página do repositório; dividi-lo depois é
+fácil, mas **quebra todo deep link publicado**, e para sempre quando há documentação versionada,
+porque `/<version>/api/#anchor` continua existindo. O custo de começar como diretório é um arquivo
+a mais e um nível a mais de navegação, pagos uma única vez.
 
-When you add pages:
+Ao adicionar páginas:
 
-- **Group by the codebase's own top-level split — never invent a parallel taxonomy**
-  (e.g. one page per public module, mirroring the package's own split). A reader who knows the package can then guess the URL, and the docs cannot drift from
-  a structure they mirror.
-- **Depth follows count, not taste.** The real axis picks the sections; volume alone decides
-  whether a section needs a second level.
-- Prose shared by one group lives once on that group's page, not restated per item.
-- **Register every new page in `mkdocs.yml` `nav:` in the same commit.** MkDocs builds an
-  unregistered page anyway — it just vanishes from navigation, which is how a page silently goes
-  missing (and what the `check_docs_sections.py` gate exists to catch).
+- **Agrupe pela própria divisão de primeiro nível do código; nunca invente uma taxonomia paralela**
+  (por exemplo, uma página por módulo público, espelhando a divisão do pacote). Assim, quem conhece o pacote consegue adivinhar a URL, e a documentação não se
+  afasta de uma estrutura que ela espelha.
+- **A profundidade segue a contagem, não o gosto.** O eixo real escolhe as seções; só o volume
+  decide se uma seção precisa de um segundo nível.
+- Um texto comum a um grupo fica uma única vez na página desse grupo, sem repetição por item.
+- **Registre cada página nova no `nav:` do `mkdocs.yml` no mesmo commit.** O MkDocs gera mesmo uma
+  página não registrada, que apenas some da navegação: é assim que uma página desaparece em
+  silêncio (e é isso que o gate `check_docs_sections.py` existe para detectar).

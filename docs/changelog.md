@@ -1,15 +1,15 @@
-# **Changelog**
+# **Histórico de versões**
 
-Release history for this project. Entries are generated from
-[Conventional Commit](https://www.conventionalcommits.org/) messages via
-[commitizen](https://commitizen-tools.github.io/commitizen/), so the version headings below track
-what actually shipped.
+Histórico de releases deste projeto. As entradas são geradas a partir de mensagens
+[Conventional Commit](https://www.conventionalcommits.org/) pelo
+[commitizen](https://commitizen-tools.github.io/commitizen/), de modo que os títulos de versão
+abaixo acompanham o que de fato foi publicado. Por virem dos commits, as entradas ficam em inglês.
 
-**How it updates:** the sections below are generated from the git tags and commit history by
-`cz changelog`. The published page is regenerated **fresh on every docs build** (the docs workflow
-runs `cz changelog` before `mkdocs build`), so it always reflects the default branch — CI never
-commits `CHANGELOG.md` back to the repo. You never edit it by hand. Regenerate or preview locally
-any time with `poe changelog` (or `poe changelog`).
+**Como é atualizado:** as seções abaixo são geradas pelo `cz changelog` a partir das tags e do
+histórico de commits. A página publicada é regenerada **a cada build da documentação** (o workflow
+de docs executa `cz changelog` antes de `mkdocs build`), então sempre reflete a branch padrão: o CI
+nunca faz commit de `CHANGELOG.md` de volta no repositório, e o arquivo nunca é editado à mão. Para
+regenerar ou pré-visualizar localmente, use `poe changelog`.
 
 ---
 

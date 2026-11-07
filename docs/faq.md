@@ -1,35 +1,35 @@
-# **FAQ**
+# **Perguntas frequentes**
 
-Answers to common questions about using and developing this library. Add project-specific
-entries as they come up in issues.
+Respostas a perguntas comuns sobre o uso e o desenvolvimento desta biblioteca. Adicione entradas
+específicas do projeto à medida que surgirem em issues.
 
-> **See also:** [Usage](usage.md) · [Examples](examples.md) · [Contributing](contributing.md).
+> **Veja também:** [Uso](usage.md) · [Exemplos](examples.md) · [Contribuindo](contributing.md).
 
 ---
 
-## How do I install it?
+## Como instalo?
 
 ```bash
 pip install layouts-cvm
 ```
 
-## How do I add or update a dependency?
+## Como adiciono ou atualizo uma dependência?
 
-Use Poetry so the lock file stays authoritative:
+Use o Poetry, para que o lock file continue sendo a referência:
 
 ```bash
-poetry add <package>          # runtime dependency
-poetry add --group dev <package>   # dev-only tool
+poetry add <package>          # dependência de execução
+poetry add --group dev <package>   # ferramenta só de desenvolvimento
 ```
 
-Every package the code imports must be a **direct** dependency — never rely on it arriving
-transitively through another package.
+Todo pacote que o código importa deve ser uma dependência **direta**; nunca conte com ele chegando
+de forma transitiva por outro pacote.
 
-## Which Python versions are supported?
+## Quais versões do Python são suportadas?
 
-See the `python = "..."` constraint in `pyproject.toml`; CI runs the test matrix against each.
+Veja a restrição `python = "..."` em `pyproject.toml`; o CI executa a matriz de testes em cada uma.
 
-## How is the version determined?
+## Como a versão é determinada?
 
-The version is the **git tag** (via poetry-dynamic-versioning); `pyproject.toml` holds a `0.0.0`
-placeholder. Cut a release from the release workflow — see [Contributing](contributing.md).
+A versão é a **tag do git** (via poetry-dynamic-versioning); `pyproject.toml` guarda um placeholder
+`0.0.0`. Crie uma release pelo workflow de release; veja [Contribuindo](contributing.md).

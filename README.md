@@ -1,7 +1,7 @@
 <!-- readme-archetype: library -->
 # layouts-cvm
 
-<p align="center"><img src="https://raw.githubusercontent.com/guilhermegor/layouts-cvm/main/assets/cvm-logo.png" width="200" alt="CVM emblem"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/guilhermegor/layouts-cvm/main/assets/cvm-logo.png" width="200" alt="Emblema da CVM"></p>
 
 [![Project Status: Active](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 ![Python Version](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue.svg)
@@ -17,33 +17,33 @@
 ![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-darkgreen.svg)
 
 <!-- slug: overview -->
-## Overview
+## Visão geral
 
-Build, validate and serialise the files a fund sends to CVM, in CVM's own file layouts.
+Monte, valide e serialize os arquivos que um fundo envia à CVM, nos layouts da própria CVM.
 
-> **Source of truth.** Field names, decimal scales and cardinalities come from the official
-> [CVM catalog of XML standards](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadroesXML.asp), not from this documentation. When the two disagree,
-> the catalog wins; please open an issue.
+> **Fonte da verdade.** Nomes de campos, escalas decimais e cardinalidades vêm do
+> [catálogo oficial de padrões XML da CVM](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadroesXML.asp), não desta documentação. Se os dois divergirem,
+> vale o catálogo; por favor, abra uma issue.
 
-- **Direction: submission only** (build, then send to CVM). Reading CVM files back is out of
-  scope today.
-- **Coverage:** the layouts in the table below are implemented. The rest are tracked as open
-  [writer issues](https://github.com/guilhermegor/layouts-cvm/issues?q=is%3Aissue+is%3Aopen+writer),
-  so they are planned, not forgotten.
-- **Decimals are truncated, never rounded** (`ROUND_DOWN`): a value with more digits than the
-  layout's scale loses the excess, so a reported figure never grows in magnitude.
-- **CNPJ and CPF check digits are validated** before anything is serialised.
+- **Direção: apenas envio** (montar e depois enviar à CVM). Ler arquivos da CVM está fora do
+  escopo hoje.
+- **Cobertura:** os layouts da tabela abaixo estão implementados. Os demais são acompanhados em
+  [issues de writer](https://github.com/guilhermegor/layouts-cvm/issues?q=is%3Aissue+is%3Aopen+writer),
+  abertas: estão planejados, não esquecidos.
+- **Decimais são truncados, nunca arredondados** (`ROUND_DOWN`): um valor com mais dígitos que a
+  escala do layout perde o excesso, de modo que um número informado nunca cresce em magnitude.
+- **Os dígitos verificadores de CNPJ e CPF são validados** antes de qualquer serialização.
 
 <!-- optional section: delete it when the project has no feature list -->
 <!-- slug: features -->
-## Features
+## Funcionalidades
 
-- Pydantic models for every CVM XML layout listed below, validated before anything is serialised.
-- One writer per layout (`export(doc, output_path=None)`), producing windows-1252 XML (`Cofi4016` is the exception: ASCII fixed-width `.cvm` records).
-- Byte-identical to the original `filings-cvm` writers, pinned by a golden-file test.
-- Runtime dependencies: `pydantic` and `beartype`. No network.
+- Modelos Pydantic para cada layout XML da CVM listado abaixo, validados antes de qualquer serialização.
+- Um writer por layout (`export(doc, output_path=None)`), que produz XML em windows-1252 (a exceção é `Cofi4016`: registros `.cvm` em ASCII de largura fixa).
+- Saída idêntica byte a byte à dos writers originais do `filings-cvm`, garantida por um teste de golden file.
+- Dependências de execução: `pydantic` e `beartype`. Sem acesso à rede.
 
-| Layout | Writer | Document model (private) | Spec |
+| Layout | Writer | Modelo do documento (privado) | Especificação |
 |---|---|---|---|
 | Atualização do Cadastro de Ativos | `CadastroAtivos` | `CadastroAtivosDocument` | [PadraoXMLAtivos](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLAtivos.asp) |
 | CDA V4 | `Cda` | `CdaDocument` | [PadraoXMLCDANetV4](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLCDANetV4.aspx) |
@@ -79,23 +79,23 @@ Build, validate and serialise the files a fund sends to CVM, in CVM's own file l
 | Perfil Mensal V3 | `PerfilMensalV3` | `PerfilMensalV3Document` | [PadraoXMLPerfilV3](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLPerfilV3.asp) |
 
 <!-- slug: documentation -->
-## Documentation
+## Documentação
 
-The documentation site lives at https://guilhermegor.github.io/layouts-cvm/. Serve it locally with `bash bin/poe_exec.sh docs_serve`.
+O site da documentação fica em https://guilhermegor.github.io/layouts-cvm/. Para servi-lo localmente, use `bash bin/poe_exec.sh docs_serve`.
 
 <!-- slug: getting-started -->
-## Getting Started
+## Primeiros passos
 
-Python 3.11-3.14 is the only prerequisite; `bin/venv.sh` installs [Poetry](https://python-poetry.org/) when it is missing.
+Python 3.11-3.14 é o único pré-requisito; `bin/venv.sh` instala o [Poetry](https://python-poetry.org/) quando ele não existe.
 
 <!-- slug: install -->
-### Install
+### Instalação
 
 ```bash
 pip install layouts-cvm
 ```
 
-Or from source:
+Ou a partir do código-fonte:
 
 ```bash
 git clone https://github.com/guilhermegor/layouts-cvm.git
@@ -104,12 +104,12 @@ bash bin/venv.sh
 bash bin/poe_exec.sh init
 ```
 
-`poe` lives inside the virtualenv, so `bin/venv.sh` creates it first; `bin/poe_exec.sh` then
-runs `poe init` without activating anything. Once the virtualenv exists, `poetry run poe init`
-does the same.
+O `poe` fica dentro do virtualenv, então `bin/venv.sh` o cria primeiro; `bin/poe_exec.sh` executa
+`poe init` em seguida, sem ativar nada. Com o virtualenv criado, `poetry run poe init` faz o
+mesmo.
 
 <!-- slug: usage -->
-### Usage
+### Uso
 
 ```python
 from layouts_cvm import InformeDiario
@@ -132,96 +132,95 @@ dict_payload = {
     ],
 }
 
-xml = InformeDiario().export(dict_payload)                  # returns the XML text
-InformeDiario().export(dict_payload, "informe_diario.xml")  # or writes it, atomically
+xml = InformeDiario().export(dict_payload)                  # retorna o texto XML
+InformeDiario().export(dict_payload, "informe_diario.xml")  # ou grava o arquivo, de forma atômica
 ```
 
-The payload is plain data: the writer validates it against the layout's document model
-before serialising. The document models are private (`layouts_cvm._internal`) and not part of
-the public API; each layout's page in the documentation lists its fields.
+O payload é composto de dados simples: o writer o valida contra o modelo de documento do layout
+antes de serializar. Os modelos de documento são privados (`layouts_cvm._internal`) e não fazem
+parte da API pública; a página de cada layout na documentação lista seus campos.
 
-Each layout has its own page under the Layouts section of the documentation.
+Cada layout tem sua própria página na seção Layouts da documentação.
 
 <!-- slug: project-structure -->
-## Project Structure
+## Estrutura do projeto
 
 ```text
 layouts-cvm/
-├── .github/        workflows, CODEOWNERS, PR template
-├── .specs/         feature specs and backlog trackers
-├── bin/            gate scripts and helpers
-├── docs/           published documentation
+├── .github/        workflows, CODEOWNERS, modelo de PR
+├── .specs/         specs de funcionalidades e controles de backlog
+├── bin/            scripts de gate e utilitários
+├── docs/           documentação publicada
 ├── src/layouts_cvm/
-│   ├── <layout>.py one writer module per layout, exported in __init__.py
-│   └── _internal/  private: config/schemas/ (the document models), utils/
+│   ├── <layout>.py um módulo de writer por layout, exportado em __init__.py
+│   └── _internal/  privado: config/schemas/ (os modelos de documento), utils/
 ├── tests/
 │   ├── unit/
 │   ├── integration/
-│   └── golden/     byte-parity fixture against the original filings-cvm writers
+│   └── golden/     fixture de paridade byte a byte com os writers originais do filings-cvm
 ├── pyproject.toml
-└── poe_tasks.toml  task runner entry points
+└── poe_tasks.toml  pontos de entrada do executor de tarefas
 ```
 
 <!-- slug: development -->
-## Development
+## Desenvolvimento
 
-After the bootstrap under Install, any task can be run with the bootstrap script:
-`bash bin/poe_exec.sh <task>`, and `bash bin/poe_exec.sh` with no task lists them.
+Depois do bootstrap descrito em Instalação, qualquer tarefa pode ser executada com o script de
+bootstrap: `bash bin/poe_exec.sh <task>`; `bash bin/poe_exec.sh` sem tarefa lista todas.
 
 ```bash
 bash bin/poe_exec.sh unit_tests
 bash bin/poe_exec.sh integration_tests
 ```
 
-Once the first release's docs deploy has created the `gh-pages` branch, run
-`bash bin/poe_exec.sh enable_pages` once: until that branch exists, `init` leaves Pages untouched.
+Quando o deploy da documentação da primeira release tiver criado a branch `gh-pages`, execute
+`bash bin/poe_exec.sh enable_pages` uma vez: enquanto essa branch não existir, `init` não mexe no Pages.
 
 <!-- slug: public-api -->
-## Public API
+## API pública
 
-The public surface is whatever the package `__init__.py` lists in `__all__`; everything
-under `_internal/` is private. That surface is the writers: the document models live in
-`_internal/config/schemas/` and a writer takes plain data (or a built model). The
-`check-public-all-not-internal` gate fails if `__all__` ever exports a name defined there.
+A superfície pública é o que o `__init__.py` do pacote lista em `__all__`; tudo em `_internal/`
+é privado. Essa superfície são os writers: os modelos de documento ficam em
+`_internal/config/schemas/`, e um writer recebe dados simples (ou um modelo já montado). O gate
+`check-public-all-not-internal` falha se `__all__` exportar um nome definido ali.
 
 <!-- slug: publishing -->
-## Publishing
+## Publicação
 
-Releases go out from the release workflows under `.github/workflows/`; the git tag is the
-version.
+As releases saem dos workflows de release em `.github/workflows/`; a tag do git é a versão.
 
-Versions follow semantic versioning since 1.0.0. The 1.x guarantee covers the names in
-`layouts_cvm.__all__` and the way each writer's `export` is called; everything under
-`layouts_cvm._internal` is private. [docs/api/reference.md](docs/api/reference.md) has the full
-statement.
+As versões seguem o versionamento semântico desde a 1.0.0. A garantia da 1.x cobre os nomes em
+`layouts_cvm.__all__` e a forma de chamar o `export` de cada writer; tudo em
+`layouts_cvm._internal` é privado. O texto completo está em
+[docs/api/reference.md](docs/api/reference.md).
 
-The path from 0.x to 1.0.0, and the release gate that guards it, is in
+O caminho da 0.x até a 1.0.0, e o gate de release que o protege, está em
 [docs/releasing-1-0-0.md](docs/releasing-1-0-0.md).
 
 <!-- slug: contributing -->
-## Contributing
+## Contribuindo
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the branch, commit and review rules.
+Veja [CONTRIBUTING.md](CONTRIBUTING.md) (em inglês) para as regras de branch, commit e revisão.
 
 <!-- slug: license -->
-## License
+## Licença
 
-This project is licensed under MIT; see [LICENSE](LICENSE).
+Este projeto é licenciado sob a MIT; veja [LICENSE](LICENSE).
 
 <!-- slug: authors -->
-## Authors
+## Autores
 
 - Guilherme Rodrigues — [GitHub](https://github.com/guilhermegor) | [LinkedIn](https://www.linkedin.com/in/guilhermegor/)
 
 <!-- slug: useful-links -->
-## Useful Links
+## Links úteis
 
-- [GitHub Repository](https://github.com/guilhermegor/layouts-cvm)
-- [Issue Tracker](https://github.com/guilhermegor/layouts-cvm/issues)
-- [Documentation](https://guilhermegor.github.io/layouts-cvm/)
+- [Repositório no GitHub](https://github.com/guilhermegor/layouts-cvm)
+- [Rastreador de issues](https://github.com/guilhermegor/layouts-cvm/issues)
+- [Documentação](https://guilhermegor.github.io/layouts-cvm/)
 
 ---
 
-<sub>Generated from the lib-minimal template via [BlueprintX](https://github.com/guilhermegor/blueprintx).
-Unofficial, community library. Not affiliated with or endorsed by the Comissão de Valores Mobiliários (CVM);
-the emblem is theirs and is not covered by this project's MIT license.</sub>
+<sub>Gerado a partir do template lib-minimal via [BlueprintX](https://github.com/guilhermegor/blueprintx).
+Biblioteca comunitária e não oficial, sem afiliação com a Comissão de Valores Mobiliários (CVM) nem endosso dela;
+o emblema pertence à CVM e não é coberto pela licença MIT deste projeto.</sub>
