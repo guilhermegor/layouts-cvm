@@ -6,7 +6,7 @@ uma mudança incompatível é um bump MINOR, e uma funcionalidade ou correção 
 fáceis de errar à mão: o backlog está concluído, e a documentação descreve o código que de fato é
 publicado.
 
-## O caminho
+## O caminho { #the-path }
 
 1. Abra a issue **Cut 1.0.0** a partir do modelo de issue. Ela é criada como `state:blocked`,
    bloqueada por todas as outras issues abertas.
@@ -16,7 +16,7 @@ publicado.
    versões suportadas da 1.x em `SECURITY.md` e, depois, o ensaio e a publicação.
 4. Depois da release, mude a política de versões documentada para o versionamento semântico completo.
 
-## O gate de release
+## O gate de release { #the-release-gate }
 
 O workflow de release executa `bin/check_release_gate.py` antes de publicar. Ele só se aplica quando
 o MAJOR pedido é pelo menos 1 e a última versão publicada é 0.x. Nesse caso, lista as issues abertas

@@ -6,7 +6,7 @@ memória de uma pessoa: um conhecimento que a equipe já pagou uma vez não deve
 
 > **Veja também:** [Uso](usage.md) · [Contribuindo](contributing.md) · [Histórico de versões](changelog.md).
 
-## Não é um ADR, nem um repositório de lições
+## Não é um ADR, nem um repositório de lições { #not-an-adr-and-not-a-lessons-store }
 
 Um **ADR** registra uma decisão tomada *antes* de algo dar errado. Um registro de incidente documenta
 uma decisão tomada *porque* algo já deu errado: gatilho diferente, público diferente. Se este projeto
@@ -16,7 +16,7 @@ Também não é uma cópia do repositório de "lições aprendidas" de uma ferra
 tipo de repositório responde "o que todo projeto gerado no futuro deve herdar"; esta página responde
 "o que mordeu *este* código, e o que fizemos a respeito". Público diferente, tempo de vida diferente.
 
-## Publicado de propósito: oculte dados antes de escrever
+## Publicado de propósito: oculte dados antes de escrever { #published-on-purpose-redact-before-you-write }
 
 Esta página vai para o site publicado da documentação, assim como [Uso](usage.md). Um incidente pode
 trazer detalhes de produção (um hostname, uma consulta, um sintoma visto por clientes) que não devem
@@ -25,7 +25,7 @@ postmortem externo omite detalhes internos. Se o site deste projeto for de fato 
 não puderem ficar sem esses dados, exclua `incidents.md` via `exclude_docs` no `mkdocs.yml` em vez de
 deixá-lo pela metade.
 
-## Formato
+## Formato { #format }
 
 Cinco campos, nesta ordem. Mantenha cada um em poucas frases: a entrada deixa de ser escrita no dia
 em que leva uma hora para ser preenchida.
@@ -39,12 +39,12 @@ em que leva uma hora para ser preenchida.
 
 ---
 
-## MODELO — substitua pelo primeiro incidente real deste projeto
+## MODELO — substitua pelo primeiro incidente real deste projeto { #template-replace-with-this-projects-first-real-incident }
 
 Apague esta seção quando tiver uma entrada própria. Ela fica aqui só para mostrar como é uma entrada
 preenchida: uma página vazia ensina a quem lê que não há nada para ler aqui.
 
-### 2026-08-16 — Reconfigurar o logger vazava um file handle a cada vez
+### 2026-08-16 — Reconfigurar o logger vazava um file handle a cada vez { #2026-08-16-reconfiguring-the-logger-leaked-a-file-handle-every-time }
 
 **Sintoma.** Objetos `logging.FileHandler` se acumulavam durante a vida do processo sempre que o
 logger era reconfigurado (por exemplo, ao passar para um novo arquivo de log datado). Inofensivo em

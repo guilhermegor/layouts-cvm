@@ -6,7 +6,7 @@ Exemplos de instalação e uso desta biblioteca.
 
 ---
 
-## Instalação
+## Instalação { #installation }
 
 ```bash
 pip install layouts-cvm
@@ -20,7 +20,7 @@ poetry add layouts-cvm
 
 ---
 
-## Uso básico
+## Uso básico { #basic-usage }
 
 Cada layout tem um writer. Ele recebe um dict simples, valida-o contra o layout e retorna o
 texto XML ou grava o arquivo de forma atômica. Nomes de campos, escalas e cardinalidades vêm do
@@ -53,7 +53,7 @@ InformeDiario().export(dict_payload, "informe_diario.xml")
 
 ---
 
-## Executando os testes
+## Executando os testes { #running-tests }
 
 ```bash
 poe unit_tests         # apenas testes unitários
@@ -63,7 +63,7 @@ poe test_cov           # testes unitários + relatório de cobertura + badge
 
 ---
 
-## Lint e formatação
+## Lint e formatação { #linting-and-formatting }
 
 ```bash
 poe lint          # ruff check + ruff format + codespell + pydocstyle
@@ -71,7 +71,7 @@ poe lint          # ruff check + ruff format + codespell + pydocstyle
 
 ---
 
-## Publicando no PyPI
+## Publicando no PyPI { #publishing-to-pypi }
 
 Dois workflows do GitHub Actions cuidam das releases (presentes quando o repositório tem um remote no GitHub):
 

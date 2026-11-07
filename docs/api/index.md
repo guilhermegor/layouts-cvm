@@ -4,13 +4,13 @@ A interface pública, agrupada pela própria divisão de primeiro nível do cód
 
 > **Veja também:** [Uso](../usage.md)
 
-## Páginas
+## Páginas { #pages }
 
 | Grupo | Conteúdo |
 |-------|----------|
 | [Referência](reference.md) | A superfície pública e a garantia de API da 1.x |
 
-## Fazendo esta seção crescer
+## Fazendo esta seção crescer { #growing-this-section }
 
 Isto é um **diretório, não uma página única**, de propósito. Uma referência de API cresce a cada
 unidade publicada, então um único `api.md` vira a maior página do repositório; dividi-lo depois é

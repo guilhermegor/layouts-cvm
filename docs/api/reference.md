@@ -6,7 +6,7 @@ Interface pública desta biblioteca.
 
 ---
 
-## A superfície pública
+## A superfície pública { #the-public-surface }
 
 A API pública é o que `layouts_cvm.__all__` lista: `__version__` e uma classe de writer por layout
 da CVM. As [páginas de layout](../cadastro_ativos.md) documentam os campos de cada writer.
@@ -34,7 +34,7 @@ Um documento inválido levanta `pydantic.ValidationError`.
 
 ---
 
-## A garantia da 1.x
+## A garantia da 1.x { #the-1x-guarantee }
 
 As versões seguem o [versionamento semântico](https://semver.org/) desde a 1.0.0. Dentro da 1.x:
 

@@ -8,7 +8,7 @@ basta: copie e ajuste. `tests/unit/test_docs_examples.py` executa todos os trech
 
 ---
 
-## Receita: gravar um arquivo de envio
+## Receita: gravar um arquivo de envio { #recipe-write-a-submission-file }
 
 Passe `output_path` para gravar o arquivo. O writer retorna `None`, e o arquivo sai em
 windows-1252, como a CVM espera.
@@ -39,7 +39,7 @@ InformeDiario().export(dict_payload, "informe_diario.xml")
 assert Path("informe_diario.xml").read_bytes().startswith(b"<?xml")
 ```
 
-## Receita: recusar um documento inválido antes que chegue à CVM
+## Receita: recusar um documento inválido antes que chegue à CVM { #recipe-refuse-a-bad-document-before-it-reaches-cvm }
 
 A validação roda antes de qualquer serialização, então um valor inválido levanta uma exceção e
 nenhum arquivo é gravado. Aqui, o cabeçalho cita um dia que não existe.

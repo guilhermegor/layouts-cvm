@@ -7,7 +7,7 @@ Tudo o que é preciso para desenvolver, testar e lançar esta biblioteca.
 
 ---
 
-## Preparando o ambiente de desenvolvimento
+## Preparando o ambiente de desenvolvimento { #setting-up-for-development }
 
 O `poe` é uma dependência de desenvolvimento, então só existe depois que o virtualenv existe. Faça o
 bootstrap primeiro pelo ponto de entrada em shell. Nesse primeiro bootstrap, use um shell comum (fora de `poetry run`, do `poe` ou de um venv ativado);
@@ -24,7 +24,7 @@ inclusive dev e docs) e `precommit` (instala os git hooks). O Poetry é instalad
 não existir. Executar `venv` de novo de dentro do virtualenv do projeto é seguro: ele faz o bootstrap
 a partir de um interpretador base e se recusa a apagar o `.venv` em que está rodando.
 
-## Testes e lint
+## Testes e lint { #tests-and-linting }
 
 ```bash
 poe unit_tests          # poetry run pytest tests/unit/
@@ -34,7 +34,7 @@ poe lint                # ruff + mypy + codespell + pydocstyle + gates de shell/
 
 O CI executa os mesmos gates em todo pull request; mantenha-os verdes localmente antes do push.
 
-## Registrando um novo writer
+## Registrando um novo writer { #registering-a-new-writer }
 
 Um writer aparece em quatro listas (três arquivos), e as quatro usam **uma só chave de ordenação: o nome do submódulo do writer**
 (`cda_v3` para `CdaV3`), em ordem ASCII simples. Insira sua entrada na posição ordenada, nunca no
@@ -53,7 +53,7 @@ alguma das listas está fora de ordem. Os schemas são importados do próprio m�
 
 Se um rebase conflitar em uma dessas listas, mantenha as linhas dos dois lados e reordene pela chave.
 
-## Verificando o pacote gerado
+## Verificando o pacote gerado { #verifying-the-built-package }
 
 Antes de abrir um PR de release, confirme que o wheel é gerado e importa de fato. Isso pega erros de
 empacotamento (um `__init__` ausente, um subpacote de `_internal/` fora do pacote) que testes na
@@ -63,7 +63,7 @@ empacotamento (um `__init__` ausente, um subpacote de `_internal/` fora do pacot
 poe install_dist_locally    # python -m build → instala → importa como smoke test → informa o wheel gerado
 ```
 
-## Publicando a documentação (versionada, via mike)
+## Publicando a documentação (versionada, via mike) { #publishing-the-documentation-versioned-via-mike }
 
 O site publicado é **versionado**: quem está preso a uma release antiga lê a documentação *daquela
 release*, não a do HEAD. O [mike](https://github.com/jimporter/mike) mantém a árvore de versões na
@@ -84,7 +84,7 @@ Observações:
 - **Pré-releases nunca movem `latest`**: uma versão com sufixo (`1.2.3rc1`) é gerada e publicada, mas
   o job de deploy da documentação é ignorado.
 
-### Configuração única do Pages
+### Configuração única do Pages { #one-time-pages-setup }
 
 O mike serve a partir da **branch `gh-pages`**, então o Pages precisa estar em *Deploy from a branch →
 gh-pages*. O `GITHUB_TOKEN` do workflow não consegue mudar isso (é um token de GitHub App sem direitos
@@ -104,7 +104,7 @@ e avisa para executá-lo de novo. Portanto: crie a primeira release e então exe
 uma vez. Alternativa manual: *Settings → Pages → Build and deployment → Source: Deploy from a branch →
 `gh-pages` / `/`*.
 
-## Orientação para agentes
+## Orientação para agentes { #agent-guidance }
 
 Orientações para agentes de código com IA ficam em `AGENTS.md`, que todo agente lê. Um `CLAUDE.md` ao
 lado dele é só um stub: importa `@AGENTS.md` e traz a linha `Edit AGENTS.md, not this file.
@@ -122,7 +122,7 @@ Claude Code (um hook, um slash command, uma skill). `bin/check_agents_md_pairs.p
 4. Preencha o modelo de PR por completo.
 5. Garanta que as verificações do CI (testes, lint, build da documentação) passem: elas são o gate de merge.
 
-## Lançando uma release
+## Lançando uma release { #releasing }
 
 As releases são **guiadas por tag e sem segredos** quando o projeto está ligado a um remote do GitHub:
 
@@ -147,7 +147,7 @@ As releases são **guiadas por tag e sem segredos** quando o projeto está ligad
   atualização escritas à mão ficam na GitHub Release, pois o que for escrito no changelog é apagado
   na regeneração.
 
-### Configuração do mantenedor: trusted publisher (uma vez, antes da primeira release)
+### Configuração do mantenedor: trusted publisher (uma vez, antes da primeira release) { #maintainer-setup-trusted-publisher-one-time-before-the-first-release }
 
 Registre um **trusted publisher** em **ambos**, [pypi.org](https://pypi.org) e
 [test.pypi.org](https://test.pypi.org). Cada campo precisa corresponder exatamente ao workflow, ou o
@@ -166,14 +166,14 @@ No primeiro upload, o projeto ainda não existe: registre um **pending publisher
 (não nas configurações de um projeto existente). Publicar de um laptop em vez do CI é o único caso
 que ainda exige um token de API; o OIDC só funciona a partir do GitHub Actions.
 
-### Servindo a documentação: primeira release
+### Servindo a documentação: primeira release { #serving-the-docs-first-release }
 
 A primeira execução de `release-pypi.yaml` cria a branch `gh-pages` com `mike deploy`. O `GITHUB_TOKEN`
 não consegue definir a origem do Pages (o endpoint exige direitos de admin no repositório), então o
 job `deploy_docs` mostra a solução no resumo do job. Depois, execute `poe enable_pages` uma vez como
 admin do repositório.
 
-### Escolhendo os destinos de publicação
+### Escolhendo os destinos de publicação { #choosing-publish-targets }
 
 O scaffold liga os workflows de release ao registro público oficial (PyPI) e a um registro de
 homologação (Test PyPI). Para publicar em uma origem **privada ou não oficial**, seja uma origem git
@@ -182,7 +182,7 @@ Packages, configure a origem do lado do consumidor em `pyproject.toml`, com uma 
 explícita contra dependency confusion (`priority = "explicit"` do `poetry`; `pip --index-url`, nunca
 `--extra-index-url`).
 
-## Identidade visual do site
+## Identidade visual do site { #branding-the-docs-site }
 
 O site usa o emblema da CVM em `docs/assets/cvm-logo.png`, uma cópia de `assets/cvm-logo.png` do
 README. Ele é usado como logo do cabeçalho e favicon (`theme.logo` / `theme.favicon` no `mkdocs.yml`)
@@ -198,7 +198,7 @@ idênticos. Para trocá-lo:
 3. Defina a cor do cabeçalho em `docs/stylesheets/brand.css` (`--md-primary-fg-color`, mais a variante
    `slate` do modo escuro) para combinar.
 
-## Proteção e segurança do repositório (uma vez, por script)
+## Proteção e segurança do repositório (uma vez, por script) { #repository-protection-security-one-time-scripted }
 
 `poe init` executa três utilitários que exigem admin. São **idempotentes e não bloqueantes**: sem
 `gh`, sem autenticação, sem remote no GitHub ou sem direitos de admin, eles avisam e pulam a etapa, de
@@ -211,7 +211,7 @@ sozinho depois:
 | `poe enable_repo_rules` | O ruleset de branch `pr-quality-gate` + as configurações de merge que o gate de PR precisa |
 | `poe enable_security` | Relato privado de vulnerabilidades, alertas do Dependabot, atualizações de segurança do Dependabot |
 
-### O ruleset `pr-quality-gate`
+### O ruleset `pr-quality-gate` { #the-pr-quality-gate-ruleset }
 
 Aplicado a `~DEFAULT_BRANCH` (essa ref sobrevive a uma renomeação de branch) e buscado **pelo nome**,
 para que uma nova execução atualize no lugar em vez de criar um duplicado:
@@ -230,7 +230,7 @@ caminho do merge; ruff, mypy e os gates `bin/check_*.py` já garantem a qualidad
 determinística) e *Restrict code coverage* (em prévia; o piso tem fonte única em `.coveragerc`
 `fail_under`).
 
-### Automático ou manual: a fronteira é configuração do repositório × plano da conta
+### Automático ou manual: a fronteira é configuração do repositório × plano da conta { #automatic-vs-manual-the-boundary-is-repo-config-vs-account-plan }
 
 **Nada aqui precisa de clique.** Toda configuração de *repositório* acima é feita por script. O que
 **não** dá para automatizar é o direito da sua *conta*: a regra `copilot_code_review` só dispara se o
@@ -245,7 +245,7 @@ verificados e para mantenedores de projetos populares de código aberto.
 > **Não** diagnostique isso com `gh api user/copilot_billing` → 404: esse endpoint é para gestão de
 > licenças de organização/empresa e retorna 404 para uma conta pessoal mesmo com o Copilot Free ativo.
 
-### Segurança
+### Segurança { #security }
 
 `SECURITY.md` na raiz do repositório é detectado automaticamente pelo GitHub (sem chamada de API) e
 muda *Security policy* para Enabled; `poe enable_security` liga o canal privado de relato
@@ -254,7 +254,7 @@ de versão são à parte: veja `.github/dependabot.yml`, que usa `versioning-str
 para atualizar o `poetry.lock` (mantendo o CI fiel ao que os consumidores instalam) sem nunca
 reescrever as faixas do seu `pyproject`.
 
-## Fluxo automatizado de PR (o gate de qualidade)
+## Fluxo automatizado de PR (o gate de qualidade) { #automated-pr-flow-the-quality-gate }
 
 Todo PR é classificado por `bin/pr_gate.py` (workflow `pr-gate.yaml`), que aplica labels, publica um
 comentário fixo com uma tabela de status por eixo e entrega as **classes seguras** ao auto-merge nativo
@@ -283,7 +283,7 @@ o merge até que toda verificação obrigatória do ruleset esteja verde, então
 
 Edite a tabela de risco (a constante `RISK_PATHS`) em `bin/pr_gate.py` conforme a estrutura real do seu projeto.
 
-### ⚠️ Depois de mudar a política do gate, reavalie os PRs abertos
+### ⚠️ Depois de mudar a política do gate, reavalie os PRs abertos { #after-changing-gate-policy-backfill-the-open-prs }
 
 O gate roda em eventos `pull_request`, então um PR que **já estava aberto** quando a política mudou
 (as regras de classificação e consentimento em `pr_gate.py`, ou `allow_auto_merge` /
@@ -296,7 +296,7 @@ gh workflow run pr-gate.yaml -f backfill=true   # reavalia todos os PRs abertos
 # em um PR do Dependabot, `gh pr comment <n> --body "@dependabot rebase"` também funciona
 ```
 
-### PRs com merge por bot e o reconciliador
+### PRs com merge por bot e o reconciliador { #bot-merged-prs-and-the-reconciler }
 
 Um PR com merge por **auto-merge nativo** (uma ação de bot) **não** fecha a issue ligada e **não**
 apaga a branch, mesmo com `delete_branch_on_merge` ligado: ações de bot são deliberadamente inertes
@@ -306,7 +306,7 @@ fato**: eventos agendados ficam isentos da supressão "no new workflow runs", qu
 caminho rápido de `pull_request: [closed]` em um merge por bot. A latência chega a um dia; esse é o
 custo aceito de não precisar de um personal access token.
 
-### O gate do registro de trabalho
+### O gate do registro de trabalho { #the-work-ledger-gate }
 
 `bin/check_backlog_ledger.py` (pre-commit + CI) falha em uma branch que toca `src/` ou caminhos de CI
 mas não adiciona um registro `.specs/backlog/<kebab>_YYYYMMDD_HHMMSS.md` com um checklist `- [ ]`,
