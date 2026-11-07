@@ -180,12 +180,15 @@ against dependency confusion (`poetry`'s `priority = "explicit"`; `pip --index-u
 
 ## Branding the docs site
 
-The site uses the CVM emblem at `docs/assets/cvm-logo.png`, the same file as the README's
+The site uses the CVM emblem at `docs/assets/cvm-logo.png`, a copy of the README's
 `assets/cvm-logo.png`. It is wired as the header logo and favicon (`theme.logo` /
-`theme.favicon` in `mkdocs.yml`) and as the landing image on `docs/index.md`. To change it:
+`theme.favicon` in `mkdocs.yml`) and as the landing image on `docs/index.md`. All four
+references must point to the same image, byte for byte: the `check-logo-sync` pre-commit
+hook (`bin/check_logo_sync.py`) fails unless the README image, the `docs/index.md` `<img>`,
+`theme.logo` and `theme.favicon` all exist and are identical. To change it:
 
-1. Replace `docs/assets/cvm-logo.png` (keep the filename, or update the two `mkdocs.yml`
-   paths and the `<img>` in `docs/index.md`).
+1. Replace `assets/cvm-logo.png` and copy it over `docs/assets/cvm-logo.png` (keep the
+   filename, or update the two `mkdocs.yml` paths and the `<img>` in `docs/index.md`).
 2. Tune size, position and border inline on the `<img>` — `width="200"` (scale),
    `align="right"` (position) and `style="border-radius: 15px;"` (rounded) — in `docs/index.md`.
 3. Set the header colour in `docs/stylesheets/brand.css` (`--md-primary-fg-color`, plus the

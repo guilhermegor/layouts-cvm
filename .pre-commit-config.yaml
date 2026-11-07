@@ -239,6 +239,13 @@ repos:
           - python
         pass_filenames: false
 
+      - id: check-logo-sync
+        name: README and docs logos are the same image
+        entry: bash bin/poetry_exec.sh run python bin/check_logo_sync.py
+        language: system
+        files: ^(README\.md|docs/index\.md|mkdocs\.yml|bin/check_logo_sync\.py)$|\.(png|jpe?g|svg|ico|webp)$
+        pass_filenames: false
+
       - id: check-dtypes
         name: numeric dtype policy check (no binary floats)
         entry: bash bin/poetry_exec.sh run python bin/check_dtypes.py
