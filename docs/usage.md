@@ -1,18 +1,18 @@
-# **Usage**
+# **Uso**
 
-Examples for installing and using this library.
+Exemplos de instalação e uso desta biblioteca.
 
-> **See also:** [API Reference](api/index.md)
+> **Veja também:** [Referência da API](api/index.md)
 
 ---
 
-## Installation
+## Instalação { #installation }
 
 ```bash
 pip install layouts-cvm
 ```
 
-Or with Poetry:
+Ou com o Poetry:
 
 ```bash
 poetry add layouts-cvm
@@ -20,11 +20,11 @@ poetry add layouts-cvm
 
 ---
 
-## Basic usage
+## Uso básico { #basic-usage }
 
-Each layout has one writer. It takes a plain dict, validates it against the layout, and
-returns the XML text or writes it atomically. The field names, scales and cardinalities
-come from the [CVM catalog](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadroesXML.asp), not from this page.
+Cada layout tem um writer. Ele recebe um dict simples, valida-o contra o layout e retorna o
+texto XML ou grava o arquivo de forma atômica. Nomes de campos, escalas e cardinalidades vêm do
+[catálogo da CVM](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadroesXML.asp), não desta página.
 
 ```python
 from layouts_cvm import InformeDiario
@@ -53,17 +53,17 @@ InformeDiario().export(dict_payload, "informe_diario.xml")
 
 ---
 
-## Running tests
+## Executando os testes { #running-tests }
 
 ```bash
-poe unit_tests         # unit tests only
-poe integration_tests  # integration tests only
-poe test_cov           # unit tests + coverage report + badge
+poe unit_tests         # apenas testes unitários
+poe integration_tests  # apenas testes de integração
+poe test_cov           # testes unitários + relatório de cobertura + badge
 ```
 
 ---
 
-## Linting and formatting
+## Lint e formatação { #linting-and-formatting }
 
 ```bash
 poe lint          # ruff check + ruff format + codespell + pydocstyle
@@ -71,21 +71,21 @@ poe lint          # ruff check + ruff format + codespell + pydocstyle
 
 ---
 
-## Publishing to PyPI
+## Publicando no PyPI { #publishing-to-pypi }
 
-Two GitHub Actions workflows handle releases (present when the repo has a GitHub remote):
+Dois workflows do GitHub Actions cuidam das releases (presentes quando o repositório tem um remote no GitHub):
 
-- **`release-test-pypi.yaml`** — publish to [Test PyPI](https://test.pypi.org) first.
-- **`release-pypi.yaml`** — publish to [PyPI](https://pypi.org) and cut a GitHub release.
+- **`release-test-pypi.yaml`** — publica primeiro no [Test PyPI](https://test.pypi.org).
+- **`release-pypi.yaml`** — publica no [PyPI](https://pypi.org) e cria uma GitHub Release.
 
-Trigger either from the **Actions** tab (`workflow_dispatch`) with the version to release.
-Both gate on the new version being greater than the latest already published, build with
-Poetry, and publish through OIDC trusted publishing, so no token secrets are needed.
+Dispare qualquer um deles pela aba **Actions** (`workflow_dispatch`), informando a versão.
+Ambos exigem que a nova versão seja maior que a última publicada, fazem o build com o Poetry e
+publicam por OIDC trusted publishing, portanto nenhum token secreto é necessário.
 
-Configure once, on each index (pypi.org and test.pypi.org), a pending publisher:
+Configure uma vez, em cada índice (pypi.org e test.pypi.org), um pending publisher:
 
-- PyPI: workflow `release-pypi.yaml`, environment `release-pypi`.
-- Test PyPI: workflow `release-test-pypi.yaml`, environment `release-test-pypi`.
+- PyPI: workflow `release-pypi.yaml`, ambiente `release-pypi`.
+- Test PyPI: workflow `release-test-pypi.yaml`, ambiente `release-test-pypi`.
 
-After the first `release-pypi.yaml` run creates the `gh-pages` branch, run `poe enable_pages`
-once to serve the docs.
+Depois que a primeira execução de `release-pypi.yaml` criar a branch `gh-pages`, execute
+`poe enable_pages` uma vez para servir a documentação.

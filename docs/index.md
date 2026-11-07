@@ -1,32 +1,32 @@
 # **layouts-cvm** <img src="assets/cvm-logo.png" align="right" width="200" style="border-radius: 15px;" alt="layouts-cvm">
 
-Build, validate and serialise the files a fund sends to CVM, in CVM's own file layouts.
+Monte, valide e serialize os arquivos que um fundo envia à CVM, nos layouts da própria CVM.
 
-!!! note "Source of truth"
-    Field names, decimal scales and cardinalities come from the official
-    [CVM catalog of XML standards](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadroesXML.asp), not from this documentation. Submission only:
-    building files to send to CVM.
+!!! note "Fonte da verdade"
+    Nomes de campos, escalas decimais e cardinalidades vêm do
+    [catálogo oficial de padrões XML da CVM](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadroesXML.asp), não desta documentação. Apenas envio:
+    montar arquivos para enviar à CVM.
 
 ---
 
-## Contents
+## Conteúdo { #contents }
 
-| Section | Description |
+| Seção | Descrição |
 |---------|-------------|
-| [Usage](usage.md) | Installation, imports, and usage examples |
-| [Layouts](cadastro_ativos.md) | One page per CVM file layout |
-| [API Reference](api/index.md) | The public interface and the 1.x API guarantee |
+| [Uso](usage.md) | Instalação, imports e exemplos de uso |
+| [Layouts](cadastro_ativos.md) | Uma página por layout de arquivo da CVM |
+| [Referência da API](api/index.md) | A interface pública e a garantia de API da 1.x |
 
 ---
 
-## Quick start
+## Início rápido { #quick-start }
 
 ```bash
-bash bin/venv.sh   # bootstrap the venv (poe lives inside it, so bootstrap is shell)
-poe unit_tests    # run the test suite
-poe docs_serve   # serve this documentation at http://0.0.0.0:8000
+bash bin/venv.sh   # cria o venv (o poe fica dentro dele, então o bootstrap é em shell)
+poe unit_tests    # executa a suíte de testes
+poe docs_serve   # serve esta documentação em http://0.0.0.0:8000
 ```
 
 ---
 
-Generated from the **lib-minimal** template via [BlueprintX](https://github.com/guilhermegor/BlueprintX).
+Gerado a partir do template **lib-minimal** via [BlueprintX](https://github.com/guilhermegor/BlueprintX).

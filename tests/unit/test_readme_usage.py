@@ -8,7 +8,7 @@ import pytest
 
 _PATH_ROOT = Path(__file__).parents[2]
 _RE_PYTHON_BLOCK = re.compile(r"```python\n(.*?)```", re.DOTALL)
-_LIST_DOCS = [("README.md", "### Usage"), ("docs/usage.md", "## Basic usage")]
+_LIST_DOCS = [("README.md", "### Uso"), ("docs/usage.md", "## Uso básico")]
 
 
 def _read_usage_block(path_doc: Path, str_heading: str) -> str:
