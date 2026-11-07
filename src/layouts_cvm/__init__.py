@@ -40,7 +40,6 @@ from layouts_cvm.inr_mensal import InrMensal
 from layouts_cvm.lamina import Lamina
 from layouts_cvm.lamina_v1 import LaminaV1
 from layouts_cvm.lamina_v2 import LaminaV2
-from layouts_cvm.main import main
 from layouts_cvm.perfil_mensal import PerfilMensal
 from layouts_cvm.perfil_mensal_739 import PerfilMensal739
 from layouts_cvm.perfil_mensal_original import PerfilMensalOriginal
@@ -55,7 +54,6 @@ except PackageNotFoundError:  # pragma: no cover - source tree without an instal
 
 __all__ = [
     "__version__",
-    "main",
     "CadastroAtivos",
     "Cda",
     "CdaV2",
