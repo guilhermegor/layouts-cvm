@@ -126,6 +126,8 @@ command, a skill) below that line. `bin/check_agents_md_pairs.py` enforces the p
 
 Releases are **tag-driven and secret-free** when the project is connected to a GitHub remote:
 
+- Versions follow **semantic versioning** since 1.0.0: a breaking change is a MAJOR, a feature a
+  MINOR, a fix a PATCH. The [API reference](api/reference.md) says what counts as breaking.
 - The version is the **git tag** (via `poetry-dynamic-versioning`); `pyproject.toml` holds a
   `0.0.0` placeholder. Do not hand-edit it. Trigger a release from the Actions tab
   (`Release to PyPI` / `Release to Test PyPI`, `workflow_dispatch` with the version), or by pushing
@@ -141,7 +143,8 @@ Releases are **tag-driven and secret-free** when the project is connected to a G
   and publishes via **OIDC trusted publishing** (`pypa/gh-action-pypi-publish`) — no token secrets
   are needed.
 - The changelog is regenerated from tags at release/build time (`poe changelog` locally); CI never
-  commits `CHANGELOG.md` back to the protected default branch.
+  commits `CHANGELOG.md` back to the protected default branch. Hand-written upgrade notes go in the
+  GitHub Release, since anything written into the changelog is regenerated away.
 
 ### Maintainer setup — trusted publisher (one time, before the first release)
 

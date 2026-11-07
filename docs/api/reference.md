@@ -2,43 +2,50 @@
 
 Public interface for this library.
 
-> **See also:** [Usage](../usage.md)
+> **See also:** [Usage](../usage.md) · [Examples](../examples.md)
 
 ---
 
-## Module: `main`
+## The public surface
 
-Entry point module. Extend this with your library's public functions.
-
-### `main() -> None`
-
-Runs the library entry point. Replace the body with your top-level logic.
+The public API is what `layouts_cvm.__all__` lists: `__version__`, and one writer class per CVM
+layout. The [layout pages](../cadastro_ativos.md) document each writer's fields.
 
 ```python
-from <package_name>.main import main
-
-main()
+from layouts_cvm import InformeDiario, __version__
 ```
+
+Everything under `layouts_cvm._internal` is private, the document models included. It ships in the
+wheel so that imports resolve, and it can change in any release.
+
+### `Writer().export(doc, output_path=None)`
+
+| Argument | Meaning |
+|----------|---------|
+| `doc` | A mapping with the layout's fields. It is validated before anything is serialised. |
+| `output_path` | Where to write the file. When omitted, the text is returned instead. |
+
+It returns the file's text as `str`, or `None` once it has written to `output_path`. XML layouts
+are windows-1252; `Cofi4010` and `Cofi4016` write ASCII fixed-width `.cvm` records. `DemonstrativoFar.export`
+also takes the keyword-only `require_all_movements`, off by default; when on, an incomplete fund
+raises `ValueError`.
+
+An invalid document raises `pydantic.ValidationError`.
 
 ---
 
-## Adding new modules
+## The 1.x guarantee
 
-Place new modules under `src/<package_name>/`. Export public symbols from `src/<package_name>/__init__.py` so callers can do:
+Versions follow [semantic versioning](https://semver.org/) since 1.0.0. Within 1.x:
 
-```python
-from <package_name> import my_function
-```
+- A name in `__all__` is not removed or renamed, and a call to `export` that works keeps
+  working. New optional keyword-only arguments can be added.
+- A new version of a CVM layout ships as a new writer, and the older writer stays.
+- Each writer stays bound to the layout version it writes today. A name without a version
+  suffix is not an alias for "the latest": `Lamina` stays Lâmina V3 and `PerfilMensal` stays
+  Perfil Mensal V4.
+- A document a writer accepts is not refused later, unless CVM's own rules require it. That case is
+  called out in the release notes.
+- The exception types above do not change. The wording of error messages can.
 
-Follow the one-class-per-file convention: utility functions with no shared state belong at module level, not wrapped in a class.
-
----
-
-## Conventions
-
-| Convention | Rule |
-|------------|------|
-| Type hints | Required on all public functions, including `-> None` return types |
-| Docstrings | NumPy style; explain *why*, not *what* |
-| Variable names | Type-prefixed (`str_`, `list_`, `cls_`, `dict_`, …) |
-| Testing | `unittest`; one assertion per test; name as `test_<unit>_<scenario>_<expected>` |
+A change that breaks any of these is a 2.0.
