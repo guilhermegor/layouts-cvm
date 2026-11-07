@@ -10,10 +10,8 @@ entries as they come up in issues.
 ## How do I install it?
 
 ```bash
-pip install <project_name>
+pip install layouts-cvm
 ```
-
-Replace with the real distribution name and any extras (e.g. `pip install "<project_name>[web]"`).
 
 ## How do I add or update a dependency?
 

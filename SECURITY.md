@@ -46,8 +46,8 @@ Consumers pinned to an older line should upgrade to pick up a fix.
 
 | Version | Supported |
 |---------|-----------|
-| latest  | ✅        |
-| older   | ❌        |
+| 1.x     | ✅        |
+| 0.x     | ❌        |
 
 ## Scope
 
