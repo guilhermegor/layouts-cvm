@@ -190,6 +190,11 @@ under `_internal/` is private. That surface is the writers: the document models 
 Releases go out from the release workflows under `.github/workflows/`; the git tag is the
 version.
 
+Versions follow semantic versioning since 1.0.0. The 1.x guarantee covers the names in
+`layouts_cvm.__all__` and the `export` signature of each writer; everything under
+`layouts_cvm._internal` is private. [docs/api/reference.md](docs/api/reference.md) has the full
+statement.
+
 The path from 0.x to 1.0.0, and the release gate that guards it, is in
 [docs/releasing-1-0-0.md](docs/releasing-1-0-0.md).
 

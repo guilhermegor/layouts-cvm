@@ -15,7 +15,7 @@ Build, validate and serialise the files a fund sends to CVM, in CVM's own file l
 |---------|-------------|
 | [Usage](usage.md) | Installation, imports, and usage examples |
 | [Layouts](cadastro_ativos.md) | One page per CVM file layout |
-| [API Reference](api/index.md) | Module-level functions and public interface |
+| [API Reference](api/index.md) | The public interface and the 1.x API guarantee |
 
 ---
 

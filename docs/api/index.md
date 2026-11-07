@@ -8,7 +8,7 @@ The public interface, grouped by the code's own top-level split.
 
 | Group | Contents |
 |-------|----------|
-| [Reference](reference.md) | The public surface shipped on day one |
+| [Reference](reference.md) | The public surface and the 1.x API guarantee |
 
 ## Growing this section
 
