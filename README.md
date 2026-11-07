@@ -191,7 +191,7 @@ Releases go out from the release workflows under `.github/workflows/`; the git t
 version.
 
 Versions follow semantic versioning since 1.0.0. The 1.x guarantee covers the names in
-`layouts_cvm.__all__` and the `export` signature of each writer; everything under
+`layouts_cvm.__all__` and the way each writer's `export` is called; everything under
 `layouts_cvm._internal` is private. [docs/api/reference.md](docs/api/reference.md) has the full
 statement.
 

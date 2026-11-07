@@ -1,4 +1,4 @@
-"""Every Python example in README.md and docs/examples.md must actually run."""
+"""Every Python example in README.md, docs/usage.md and docs/examples.md must actually run."""
 
 from pathlib import Path
 import re
@@ -7,7 +7,7 @@ import pytest
 
 
 _PATH_ROOT = Path(__file__).parents[2]
-_TUPLE_PAGES = ("README.md", "docs/examples.md")
+_TUPLE_PAGES = ("README.md", "docs/usage.md", "docs/examples.md")
 _RE_PYTHON_BLOCK = re.compile(r"```python\n(.*?)```", re.DOTALL)
 _LIST_BLOCKS = [
     (str_page, str_code)

@@ -38,7 +38,8 @@ An invalid document raises `pydantic.ValidationError`.
 
 Versions follow [semantic versioning](https://semver.org/) since 1.0.0. Within 1.x:
 
-- A name in `__all__` is not removed or renamed, and `export` keeps its signature.
+- A name in `__all__` is not removed or renamed, and a call to `export` that works keeps
+  working. New optional keyword-only arguments can be added.
 - A new version of a CVM layout ships as a new writer, and the older writer stays.
 - A document a writer accepts is not refused later, unless CVM's own rules require it. That case is
   called out in the release notes.
