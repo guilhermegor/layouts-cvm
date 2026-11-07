@@ -57,14 +57,23 @@ def test_gate_flags_a_readme_image_mismatch(path_repo: Path) -> None:
     """A README image that differs from the docs image is reported."""
     (path_repo / "assets" / "cvm-logo.png").write_bytes(b"other")
 
-    assert "README.md" in _load_gate().check_logos(path_repo)[0]
+    assert _load_gate().check_logos(path_repo) == [
+        "logo files differ, they must be byte-identical: "
+        "README.md | docs/index.md, mkdocs.yml theme.favicon, mkdocs.yml theme.logo"
+    ]
 
 
-def test_gate_flags_a_docs_image_mismatch(path_repo: Path) -> None:
-    """A docs image that differs from the README image is reported."""
-    (path_repo / "docs" / "assets" / "cvm-logo.png").write_bytes(b"other")
+def test_gate_names_the_odd_file_out(path_repo: Path) -> None:
+    """A favicon that differs from the other three is the only label set apart."""
+    (path_repo / "docs" / "assets" / "icon.png").write_bytes(b"other")
+    (path_repo / "mkdocs.yml").write_text(
+        "theme:\n  logo: assets/cvm-logo.png\n  favicon: assets/icon.png\n"
+    )
 
-    assert "mkdocs.yml theme.logo" in _load_gate().check_logos(path_repo)[0]
+    assert _load_gate().check_logos(path_repo) == [
+        "logo files differ, they must be byte-identical: "
+        "README.md, docs/index.md, mkdocs.yml theme.logo | mkdocs.yml theme.favicon"
+    ]
 
 
 def test_gate_flags_a_missing_file(path_repo: Path) -> None:

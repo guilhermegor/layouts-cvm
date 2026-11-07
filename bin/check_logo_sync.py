@@ -72,9 +72,13 @@ def check_logos(path_root: pathlib.Path) -> list[str]:
             list_problems.append(f"{str_label}: logo file missing ({path_ref or 'no reference'})")
         else:
             dict_bytes[str_label] = path_ref.read_bytes()
-    if len(set(dict_bytes.values())) > 1:
+    dict_groups: dict[bytes, list[str]] = {}
+    for str_label, bytes_content in sorted(dict_bytes.items()):
+        dict_groups.setdefault(bytes_content, []).append(str_label)
+    if len(dict_groups) > 1:
         list_problems.append(
-            "logo files differ, they must be byte-identical: " + ", ".join(sorted(dict_bytes))
+            "logo files differ, they must be byte-identical: "
+            + " | ".join(", ".join(list_labels) for list_labels in dict_groups.values())
         )
     return list_problems
 
