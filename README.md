@@ -40,7 +40,7 @@ Monte, valide e serialize os arquivos que um fundo envia à CVM, nos layouts da 
 
 - Modelos Pydantic para cada layout XML da CVM listado abaixo, validados antes de qualquer serialização.
 - Um writer por layout (`export(doc, output_path=None)`), que produz XML em windows-1252 (a exceção é `Cofi4016`: registros `.cvm` em ASCII de largura fixa).
-- Saída idêntica byte a byte à dos writers originais do `filings-cvm`, garantida por um teste de golden file.
+- Saída idêntica byte a byte à dos writers originais do `opendata-cvm` (antes `filings-cvm`), garantida por um teste de golden file.
 - Dependências de execução: `pydantic` e `beartype`. Sem acesso à rede.
 
 | Layout | Writer | Modelo do documento (privado) | Especificação |
@@ -157,7 +157,7 @@ layouts-cvm/
 ├── tests/
 │   ├── unit/
 │   ├── integration/
-│   └── golden/     fixture de paridade byte a byte com os writers originais do filings-cvm
+│   └── golden/     fixture de paridade byte a byte com os writers originais do opendata-cvm
 ├── pyproject.toml
 └── poe_tasks.toml  pontos de entrada do executor de tarefas
 ```
