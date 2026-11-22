@@ -13,3 +13,5 @@ paths require strict to be off.
 - [x] Create the ruleset with strict=false
 - [x] Make the ruleset and classic-branch-protection verifies require strict=false
 - [x] Update the failure and success messages to match
+
+Completed — kept as a record.
